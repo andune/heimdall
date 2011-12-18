@@ -1,0 +1,11 @@
+name: Heimdall
+main: org.morganm.heimdall.Heimdall
+version: 0.1
+author: morganm
+softdepend: [LogBlock]
+commands:
+  heimdall:
+    aliases: [heim]
+    description: Admin control functions for Heimdall
+    permission: heimdall.admin
+    usage: /<command> reload - reload the config file
