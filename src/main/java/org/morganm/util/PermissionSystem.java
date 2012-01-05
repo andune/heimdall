@@ -1,18 +1,21 @@
 /**
  * 
  */
-package org.morganm.heimdall.util;
+package org.morganm.util;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permissible;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
@@ -27,6 +30,7 @@ import com.sk89q.wepif.PermissionsResolverManager;
  *
  */
 public class PermissionSystem {
+	// class version: 6
 	public static final int SUPERPERMS = 0x00;		// default
 	public static final int VAULT = 0x01;
 	public static final int WEPIF = 0x02;
@@ -34,6 +38,8 @@ public class PermissionSystem {
 	public static final int PEX = 0x08;
 	public static final int OPS = 0x10;
 	
+    private static final String GROUP_PREFIX = "group.";
+
 	private static PermissionSystem instance;
 	
 	private final JavaPlugin plugin;
@@ -243,13 +249,68 @@ public class PermissionSystem {
     		group = perm2Handler.getGroup(world, playerName);
     		break;
     	
-    	// superperms and OPS have no group support
     	case SUPERPERMS:
+    	{
+    		Player player = plugin.getServer().getPlayer(playerName);
+    		group = getSuperpermsGroup(player);
+    	}
+            
+        // OPS has no group support
     	case OPS:
     		break;
     	}
     	
     	return group;
+    }
+	
+	/** Superperms has no group support, but we fake it (this is slow and stupid since
+	  * it has to iterate through ALL permissions a player has).  But if you're
+	  * attached to superperms and not using a nice plugin like bPerms and Vault
+	  * then this is as good as it gets)
+	  * 
+	  * @param player
+	  * @return the group name or null
+	  */
+	private String getSuperpermsGroup(Player player) {
+		if( player == null )
+			return null;
+		
+		String group = null;
+		
+		// this code shamelessly adapted from WorldEdit's WEPIF support for superperms
+        Permissible perms = getPermissible(player);
+        if (perms != null) {
+            for (PermissionAttachmentInfo permAttach : perms.getEffectivePermissions()) {
+                String perm = permAttach.getPermission();
+                if (!(perm.startsWith(GROUP_PREFIX) && permAttach.getValue())) {
+                    continue;
+                }
+                
+                // we just grab the first "group.XXX" permission we can find
+                group = perm.substring(GROUP_PREFIX.length(), perm.length());
+                break;
+            }
+        }
+        
+        return group;
+	}
+
+	/** This code shamelessly stolen from WEPIF in order to support a fake "group"
+	 * notion for Superperms.
+	 * 
+	 * @param offline
+	 * @return
+	 */
+    private Permissible getPermissible(OfflinePlayer offline) {
+        if (offline == null) return null;
+        Permissible perm = null;
+        if (offline instanceof Permissible) {
+            perm = (Permissible) offline;
+        } else {
+            Player player = offline.getPlayer();
+            if (player != null) perm = player;
+        }
+        return perm;
     }
 
     private boolean setupPerm2() {
@@ -277,6 +338,21 @@ public class PermissionSystem {
     private boolean setupWEPIFPermissions() {
     	try {
 	    	Plugin worldEdit = plugin.getServer().getPluginManager().getPlugin("WorldEdit");
+	    	String version = null;
+	    	int versionNumber = 0;
+	    	
+	    	try {
+		    	version = worldEdit.getDescription().getVersion();
+		    	int index = version.indexOf('-');
+		    	versionNumber = Integer.parseInt(version.substring(0, index));
+	    	}
+	    	catch(Exception e) {}	// catch any NumberFormatException or anything else
+	    	
+	    	if( versionNumber < 606 ) {
+	    		log.info(logPrefix + "You are currently running version "+version+" of WorldEdit. WEPIF was changed in #606, please update to latest WorldEdit. (skipping WEPIF for permissions)");
+	    		return false;
+	    	}
+
 	    	if( worldEdit != null ) {
 	    		wepifPerms = PermissionsResolverManager.getInstance();
 //	    		wepifPerms.initialize(plugin);

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.morganm.heimdall.util;
+package org.morganm.util;
 
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
