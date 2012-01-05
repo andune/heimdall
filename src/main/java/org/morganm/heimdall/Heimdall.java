@@ -60,7 +60,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		playerState.load();
 		
 		eventManager = new EventManager(this);
-		processEngine = new MainProcessEngine();
+		processEngine = new MainProcessEngine(this);
 		actionEngine = new SimpleLogActionEngine(this);
 		eventHandler = new HeimdallEventHandler(this,  processEngine, actionEngine, playerState);
 		eventManager.registerHandler(Event.Type.BLOCK_CHANGE, eventHandler);
