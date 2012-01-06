@@ -5,7 +5,6 @@ package org.morganm.heimdall.listener;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.LogManager;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -14,10 +13,11 @@ import org.getspout.spoutapi.event.inventory.InventoryCloseEvent;
 import org.getspout.spoutapi.event.inventory.InventoryCraftEvent;
 import org.getspout.spoutapi.event.inventory.InventoryListener;
 import org.getspout.spoutapi.event.inventory.InventoryOpenEvent;
+import org.morganm.heimdall.event.EventCircularBuffer;
+import org.morganm.heimdall.event.InventoryChangeEvent;
+import org.morganm.heimdall.event.InventoryChangeEvent.InventoryEventType;
 import org.morganm.util.General;
 import org.morganm.util.JavaPluginExtensions;
-
-import com.mysql.jdbc.log.Log;
 
 /** Code originally copied from @Diddiz's LogBlock plugin.
  * 
@@ -25,15 +25,20 @@ import com.mysql.jdbc.log.Log;
  *
  */
 public class SpoutChestAccessListener extends InventoryListener {
+	private final static int ERROR_FLOOD_PREVENTION_LIMIT = 3;
+
+	@SuppressWarnings("unused")
 	private final JavaPluginExtensions plugin;
 	private final General util;
-	private BlockHistoryManager blockHistoryManager;
 	private final Map<Player, ItemStack[]> containers = new HashMap<Player, ItemStack[]>();
+	private final EventCircularBuffer<InventoryChangeEvent> buffer;
+	private int errorFloodPreventionCount = 0;
 
 	public SpoutChestAccessListener(final JavaPluginExtensions plugin) {
 		this.plugin = plugin;
-		this.blockHistoryManager = BlockHistoryFactory.getBlockHistoryManager(plugin);
 		this.util = General.getInstance();
+		
+		this.buffer = new EventCircularBuffer<InventoryChangeEvent>(InventoryChangeEvent.class, 1000, false);
 	}
 
 	/** When an inventory is closed, check to see if we had a "before" snapshot recorded
@@ -51,26 +56,22 @@ public class SpoutChestAccessListener extends InventoryListener {
 
 		final ItemStack[] before = containers.get(player);
 		if (before != null) {
-			BlockHistory bh = blockHistoryManager.getBlockHistory(l);
-			String blockOwner = null;
-			if( bh != null )
-				blockOwner = bh.getOwner();
-			String ownerString = null;
-			
-			if( player.getName().equals(blockOwner) )
-				ownerString = "owner="+blockOwner;
-			else
-				ownerString = "owner="+blockOwner+" ** NOT BLOCK OWNER **";
-
 			final ItemStack[] after = util.compressInventory(event.getInventory().getContents());
 			final ItemStack[] diff = util.compareInventories(before, after);
-			for (final ItemStack item : diff) {
-				if( item.getAmount() < 0 )
-					log.logMessage("item "+item+" removed from container at {"+util.shortLocationString(l)+"}, "+ownerString);
-				else
-					log.logMessage("item "+item+" added to container at {"+util.shortLocationString(l)+"}, "+ownerString);
-			}
 			containers.remove(player);
+			
+			InventoryChangeEvent ice = getNextInventoryChangeEvent();
+			if( ice != null ) {
+				ice.playerName = player.getName();
+				ice.world = l.getWorld();
+				ice.x = l.getBlockX();
+				ice.y = l.getBlockY();
+				ice.z = l.getBlockZ();
+				ice.location = l;
+				ice.type = InventoryEventType.CONTAINER_ACCESS;
+				
+				ice.diff = diff;
+			}
 		}
 	}
 
@@ -86,7 +87,7 @@ public class SpoutChestAccessListener extends InventoryListener {
 			containers.put(event.getPlayer(), util.compressInventory(event.getInventory().getContents()));
 	}
 	
-	/** Log crafting events as well.
+	/** Capture crafting events as well.
 	 * 
 	 * @author morganm
 	 */
@@ -95,17 +96,41 @@ public class SpoutChestAccessListener extends InventoryListener {
 		final Location l = event.getLocation();
 		if(!event.isCancelled() && l != null) {
 			final Player player = event.getPlayer();
-			if( !trackerManager.isTracked(player) )
-				return;
 			
 			ItemStack[] contents = event.getInventory().getContents();
 			if( contents != null ) {
-				final Log log = logManager.getLog(player);
-				for(ItemStack item : contents) {
-					if( item != null )
-						log.logMessage("crafted item "+item+" at location {"+util.shortLocationString(l)+"}");
+				InventoryChangeEvent ice = getNextInventoryChangeEvent();
+				if( ice != null ) {
+					ice.playerName = player.getName();
+					ice.world = l.getWorld();
+					ice.x = l.getBlockX();
+					ice.y = l.getBlockY();
+					ice.z = l.getBlockZ();
+					ice.location = l;
+					ice.type = InventoryEventType.CRAFTED;
+					
+					ice.diff = contents;
 				}
 			}
 		}
+	}
+	
+	private InventoryChangeEvent getNextInventoryChangeEvent() {
+		InventoryChangeEvent ice = null;
+		try {
+			ice = buffer.getNextObject();
+			errorFloodPreventionCount = 0;
+		} catch (InstantiationException e) {
+			errorFloodPreventionCount++;
+			if( errorFloodPreventionCount < ERROR_FLOOD_PREVENTION_LIMIT )
+				e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			errorFloodPreventionCount++;
+			if( errorFloodPreventionCount < ERROR_FLOOD_PREVENTION_LIMIT )
+				e.printStackTrace();
+		}
+		
+		ice.cleared = false;	// change clear flag since we are going to use this object
+		return ice;
 	}
 }

@@ -1,0 +1,11 @@
+v0.2 - January 6, 2012
+* Inventory events (using Spout)
+* Command framework
+* Refactoring of engine frameworks to be more robust
+* addition of a simple notifying engine
+* inclusion and refactoring of BlockHistory classes from ActivityTracker
+
+v0.1 - January 4, 2012
+* Initial event processing framework
+* Skeleton grief and logging engine
+* Basic block events written and working

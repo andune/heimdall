@@ -1,54 +1,48 @@
 /**
  * 
  */
-package org.morganm.heimdall.event;
+package org.morganm.util;
 
-import org.morganm.util.CircularBuffer;
+import java.lang.reflect.Array;
 
 
-/** Circular buffer that only allows objects that implement the Event interface.
+/** Circular buffer that holds objects. The intent is that this can be used to
+ * hold same-class event types and the objects themselves are then just re-used (they
+ * are never deleted).
  * 
  * @author morganm
  *
  */
-public class EventCircularBuffer<E extends Event> extends CircularBuffer<E> {
-	/*
-	private final E[] events;
+public class CircularBuffer<E> {
+	private final E[] objects;
 	private final boolean nullOnPop;
 	private final int bufferSize;
-	private final Class<E> eventClass;
+	private final Class<E> objectClass;
 	
 	private int start = 0;
     private int end = 0;
-    */
 	
-    /** Create an event CircularBuffer of the given size
+    /** Create a CircularBuffer of the given size
      * 
      * @param bufferSize the number of elements the buffer should hold
      * @param nullOnPop if true, when pop is called, the array element will be nulled. This allows GC to cleanup
      * the object (once all other references are gone) by not holding onto the reference indefinitely.
      */
-	public EventCircularBuffer(Class<E> eventClass, int bufferSize, boolean nullOnPop) {
-		super(eventClass, bufferSize, nullOnPop);
-	}
-	/*
 	@SuppressWarnings("unchecked")
-	public EventCircularBuffer(Class<E> eventClass, int bufferSize, boolean nullOnPop) {
-		this.eventClass = eventClass;
+	public CircularBuffer(Class<E> objectClass, int bufferSize, boolean nullOnPop) {
+		this.objectClass = objectClass;
 		this.bufferSize = bufferSize;
 		this.nullOnPop = nullOnPop;
-		this.events = (E[]) Array.newInstance(eventClass, bufferSize);
+		this.objects = (E[]) Array.newInstance(this.objectClass, bufferSize);
 //		this.events = new E[bufferSize];
 	}
-	*/
 
-	/** Pop an event out of the buffer.
+	/** Pop an object out of the buffer.
 	 * This actually just moves circular buffer
 	 * pointers, since we are not nulling out the underlying object.
 	 * 
 	 * @return
 	 */
-	/*
 	public E pop() {
 		// empty buffer
 		if( start == end )
@@ -59,13 +53,12 @@ public class EventCircularBuffer<E extends Event> extends CircularBuffer<E> {
 				start = 0;
 		}
 		
-		E event = events[start];
+		E event = objects[start];
 		if( nullOnPop )
-			events[start] = null;
+			objects[start] = null;
 		
 		return event;
 	}
-	*/
 	
 	/** Used to get the next object in the buffer, if any. The purpose here is if nullOnPop is false,
 	 * the objects in the buffer will just be continually re-used rather than allocating new objects
@@ -76,14 +69,6 @@ public class EventCircularBuffer<E extends Event> extends CircularBuffer<E> {
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
-	public E getNextObject() throws InstantiationException, IllegalAccessException {
-		E event = super.getNextObject();
-		// make sure the event has been cleared
-		if( !event.isCleared() )
-			event.clear();
-		return event;
-	}
-	/*
 	public E getNextObject() throws InstantiationException, IllegalAccessException {
 		if( ++end >= bufferSize )
 			end = 0;
@@ -98,12 +83,11 @@ public class EventCircularBuffer<E extends Event> extends CircularBuffer<E> {
 			// TODO: consider logging or throwing error here, this means we just wrapped a full buffer
 		}
 
-		if( events[end] == null )
-			events[end] = eventClass.newInstance();
+		if( objects[end] == null )
+			objects[end] = objectClass.newInstance();
 
-		return events[end];
+		return objects[end];
 	}
-	*/
 
 	/** If this circular buffer is being used in "nullOnPop" mode (meaning objects are not being
 	 * re-used), then you probably want to use this method to push new event references into the
@@ -112,7 +96,6 @@ public class EventCircularBuffer<E extends Event> extends CircularBuffer<E> {
 	 * 
 	 * @param event
 	 */
-	/*
 	public void push(E event) {
 		if( ++end >= bufferSize )
 			end = 0;
@@ -127,7 +110,6 @@ public class EventCircularBuffer<E extends Event> extends CircularBuffer<E> {
 			// TODO: consider logging or throwing error here, this means we just wrapped a full buffer
 		}
 
-		events[end] = event;
+		objects[end] = event;
 	}
-	*/
 }

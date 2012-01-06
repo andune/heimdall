@@ -19,6 +19,7 @@ import org.morganm.util.Debug;
 public class EngineLog {
 	private File logFile;
 	private BufferedWriter writer;
+	private boolean isInitialized = false;
 	
 	public EngineLog(File logFile) {
 		if( logFile == null )
@@ -26,8 +27,11 @@ public class EngineLog {
 		this.logFile = logFile;
 	}
 
-	public void log(String msg) throws IOException {
+	public void log(final String msg) throws IOException {
 		Debug.getInstance().debug("log(): msg=",msg);
+		if( !isInitialized )
+			init();
+		
 		try {
 			writer.write(msg);
 			writer.newLine();
@@ -41,6 +45,17 @@ public class EngineLog {
 			init();
 			writer.write(msg);
 		}
+	}
+	
+	/** Log a message, but if there is an error, just ignore the error.
+	 * 
+	 * @param msg
+	 */
+	public void logIgnoreError(final String msg) {
+		try {
+			this.log(msg);
+		}
+		catch(IOException e) {}
 	}
 	
 	public void flush() throws IOException {
@@ -58,5 +73,7 @@ public class EngineLog {
 //		writer = new FileWriter(logFile);
 		
 		Debug.getInstance().debug("EngineLog created for file ",logFile);
+		
+		isInitialized=true;
 	}
 }

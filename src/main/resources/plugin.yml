@@ -1,6 +1,6 @@
 name: Heimdall
 main: org.morganm.heimdall.Heimdall
-version: 0.1
+version: 0.2
 author: morganm
 softdepend: [LogBlock]
 commands:
@@ -9,3 +9,9 @@ commands:
     description: Admin control functions for Heimdall
     permission: heimdall.admin
     usage: /<command> reload - reload the config file
+    executor: org.morganm.heimdall.commands.Heimdall
+  hdi:
+    description: Ignore Heimdall alerts for a given player
+    permission: heimdall.admin
+    usage: /<command> player - ignore all alerts related to player
+    executor: org.morganm.heimdall.commands.AdminNotifyIgnore

@@ -19,4 +19,5 @@ public interface JavaPluginExtensions extends Plugin {
 	public String getLogPrefix();
 	public JarUtils getJarUtils();
 	public File getFile();
+	public ClassLoader getClassLoader();
 }

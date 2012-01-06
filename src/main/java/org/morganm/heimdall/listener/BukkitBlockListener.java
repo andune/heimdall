@@ -141,6 +141,7 @@ public class BukkitBlockListener extends BlockListener {
 				e.printStackTrace();
 		}
 		
+		bce.cleared = false;	// change clear flag since we are going to use this object
 		return bce;
 	}
 }

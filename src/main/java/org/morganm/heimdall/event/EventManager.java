@@ -5,9 +5,13 @@ package org.morganm.heimdall.event;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import org.bukkit.plugin.Plugin;
+import org.morganm.heimdall.event.Event.Type;
 import org.morganm.util.JavaPluginExtensions;
 
 /** Class to manage events. Events are added as they happen and are processed asynchronously
@@ -38,31 +42,73 @@ public class EventManager implements Runnable {
 	 * owner in a database, or adding information based on knowledge of previous
 	 * events, etc.  The enriched event is then passed on to the handlers.
 	 */
-	private Map<Event.Type, Set<EventHandler>> eventEnrichers;
-	private Map<Event.Type, Set<EventHandler>> eventHandlers;
+	private Map<Event.Type, Map<Plugin, Set<EventHandler>>> eventEnrichers;
+	private Map<Event.Type, Map<Plugin, Set<EventHandler>>> eventHandlers;
 	
 	public EventManager(final JavaPluginExtensions plugin) {
 		this.plugin = plugin;
 		this.eventBuffer = new EventCircularBuffer<Event>(Event.class, CIRCULAR_BUFFER_SIZE, true);
-		this.eventHandlers = new HashMap<Event.Type, Set<EventHandler>>();
-		this.eventEnrichers = new HashMap<Event.Type, Set<EventHandler>>();
+		this.eventHandlers = new HashMap<Event.Type, Map<Plugin, Set<EventHandler>>>();
+		this.eventEnrichers = new HashMap<Event.Type, Map<Plugin, Set<EventHandler>>>();
+		
+		plugin.getServer().getScheduler().scheduleAsyncRepeatingTask(plugin, this, 100, 100);
 	}
 	
-	public void registerHandler(Event.Type type, EventHandler handler) {
-		Set<EventHandler> list = eventHandlers.get(type);
+	public void registerHandler(final Plugin plugin, final Event.Type type, final EventHandler handler) {
+		Map<Plugin, Set<EventHandler>> map = eventHandlers.get(type);
+		if( map == null ) {
+			map = new HashMap<Plugin, Set<EventHandler>>();
+			eventHandlers.put(type, map);
+		}
+		Set<EventHandler> list = map.get(plugin);
 		if( list == null ) {
 			list = new HashSet<EventHandler>();
-			eventHandlers.put(type, list);
+			map.put(plugin, list);
 		}
 		
 		list.add(handler);
 	}
 	
+	public void registerEnricher(final Plugin plugin, final Event.Type type, final EventHandler enricher) {
+		Map<Plugin, Set<EventHandler>> map = eventEnrichers.get(type);
+		if( map == null ) {
+			map = new HashMap<Plugin, Set<EventHandler>>();
+			eventHandlers.put(type, map);
+		}
+		Set<EventHandler> list = map.get(plugin);
+		if( list == null ) {
+			list = new HashSet<EventHandler>();
+			map.put(plugin, list);
+		}
+		
+		list.add(enricher);
+	}
+	
+	public void unregisterAllPluginHandlers(final Plugin plugin) {
+		// loop through the double-keyed map looking for any matches to this plugin and remove them
+		for (Entry<Type, Map<Plugin, Set<EventHandler>>> entry : eventHandlers.entrySet()) {
+			for (Iterator<Plugin> i = entry.getValue().keySet().iterator(); i.hasNext();) {
+				if( plugin.equals(i.next()) )
+					i.remove();
+			}
+		}
+	}
+	public void unregisterAllPluginEnrichers(final Plugin plugin) {
+		// loop through the double-keyed map looking for any matches to this plugin and remove them
+		for (Entry<Type, Map<Plugin, Set<EventHandler>>> entry : eventEnrichers.entrySet()) {
+			for (Iterator<Plugin> i = entry.getValue().keySet().iterator(); i.hasNext();) {
+				if( plugin.equals(i.next()) )
+					i.remove();
+			}
+		}
+	}
+	/*
 	public void unregisterHandler(Event.Type type, EventHandler handler) {
 		Set<EventHandler> list = eventHandlers.get(type);
 		if( list != null )
 			list.remove(handler);
 	}
+	*/
 	
 	public void pushEvent(Event e) {
 		eventBuffer.push(e);
@@ -79,20 +125,35 @@ public class EventManager implements Runnable {
 			while( (event = eventBuffer.pop()) != null ) {
 				Event.Type type = event.getType();
 				
-				Set<EventHandler> enrichers = eventEnrichers.get(type);
-				if( enrichers != null ) {
-					for(EventHandler handler : enrichers) {
-						event.accept(handler);
+				// first process any event enrichers
+				Map<Plugin, Set<EventHandler>> enrichersMap = eventEnrichers.get(type);
+				if( enrichersMap != null ) {
+					for(Entry<Plugin, Set<EventHandler>> entry : enrichersMap.entrySet()) {
+						Set<EventHandler> enrichers = enrichersMap.get(entry.getKey());
+						if( enrichers != null ) {
+							for(EventHandler handler : enrichers) {
+								event.accept(handler);					// visitor pattern
+							}
+						}
 					}
 				}
 				
-				Set<EventHandler> handlers = eventHandlers.get(type);
-				if( handlers != null ) {
-					for(EventHandler handler : handlers) {
-						event.accept(handler);
+				// now process the event handlers
+				Map<Plugin, Set<EventHandler>> handlersMap = eventHandlers.get(type);
+				if( handlersMap != null ) {
+					for(Entry<Plugin, Set<EventHandler>> entry : handlersMap.entrySet()) {
+						Set<EventHandler> handlers = handlersMap.get(entry.getKey());
+						if( handlers != null ) {
+							for(EventHandler handler : handlers) {
+								event.accept(handler);					// visitor pattern
+							}
+						}
 					}
 				}
-			}
+				
+				// once we are done processing the event, clear out the object
+				event.clear();
+			} // end while
 		}
 		finally {
 			running = false;
