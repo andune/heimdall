@@ -3,9 +3,12 @@
  */
 package org.morganm.heimdall.player;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.morganm.util.JavaPluginExtensions;
 
 /** Class for tracking and storing PlayerState objects.
@@ -14,13 +17,18 @@ import org.morganm.util.JavaPluginExtensions;
  *
  */
 public class PlayerStateManager {
-	@SuppressWarnings("unused")
 	private final JavaPluginExtensions plugin;
+	private final Logger log;
+	private final String logPrefix;
 	private final Map<String, PlayerState> playerStateMap;
+	private File friendDataFile = new File("plugins/Heimdall/friends.yml");
+	private YamlConfiguration friendData;
 	
 	public PlayerStateManager(final JavaPluginExtensions plugin) {
 		this.plugin = plugin;
 		this.playerStateMap = new HashMap<String, PlayerState>(20);
+		this.log = this.plugin.getLogger();
+		this.logPrefix = this.plugin.getLogPrefix();
 	}
 	
 	/** Get the PlayerState object for a player.
@@ -29,14 +37,44 @@ public class PlayerStateManager {
 	 * @return the PlayerState object, guaranteed to be non-null
 	 */
 	public PlayerState getPlayerState(final String playerName) {
+		if( friendData == null )
+			loadFriends();
+		
+		if( playerName == null )
+			throw new NullPointerException("playerName is null");
+
 		PlayerState ps = playerStateMap.get(playerName);
 		if( ps == null ) {
-			ps = new PlayerStateImpl(playerName, 0);
+			ps = loadPlayerState(playerName);
 			playerStateMap.put(playerName, ps);
 		}
 		return ps;
 	}
 	
-	public void load() {}
-	public void save() {}
+	private PlayerState loadPlayerState(final String playerName) {
+		PlayerState ps = new PlayerStateImpl(plugin, playerName, this);
+		try {
+			ps.load();
+		}
+		catch(Exception e) {
+			log.warning(logPrefix+"error loading PlayerState for player "+playerName+", error: "+e.getMessage());
+			e.printStackTrace();
+		}
+		return ps;
+	}
+	
+	private void loadFriends() {
+//		friendData = YamlConfiguration.loadConfiguration(friendDataFile);
+//		friendData.getKeys(false);
+	}
+	private void saveFriends() {
+		
+	}
+	public void save() throws Exception {
+		saveFriends();
+
+		for(PlayerState ps : playerStateMap.values()) {
+			ps.save();
+		}
+	}
 }

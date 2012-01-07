@@ -1,6 +1,6 @@
 name: Heimdall
 main: org.morganm.heimdall.Heimdall
-version: 0.2
+version: 0.3
 author: morganm
 softdepend: [LogBlock]
 commands:
@@ -15,3 +15,8 @@ commands:
     permission: heimdall.admin
     usage: /<command> player - ignore all alerts related to player
     executor: org.morganm.heimdall.commands.AdminNotifyIgnore
+  hgl:
+    description: Show last 5 grief log entries for a given player
+    permission: heimdall.admin
+    usage: /<command> player - show grief log for player
+    executor: org.morganm.heimdall.commands.GriefLog

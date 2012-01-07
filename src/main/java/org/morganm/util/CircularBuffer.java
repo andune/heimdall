@@ -100,7 +100,7 @@ public class CircularBuffer<E> {
 		if( ++end >= bufferSize )
 			end = 0;
 		
-		// if the buffer is full, increment the start (essentially loosing that object)
+		// if the buffer is full, increment the start (essentially losing that object)
 		// TODO: allow buffer overflow
 		if( end == start ) {
 			synchronized (this) {

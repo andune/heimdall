@@ -4,6 +4,7 @@
 package org.morganm.heimdall.event;
 
 import org.bukkit.Location;
+import org.morganm.heimdall.event.handlers.EventHandler;
 
 /** General event interface that all Heimdall Event types will implement.
  * 
@@ -39,6 +40,12 @@ public interface Event {
 	 * @return
 	 */
 	public String getPlayerName();
+
+	/** Return the time that the event took place.
+	 * 
+	 * @return
+	 */
+	public long getTime();
 	
 	/** For events that have a location.
 	 * 

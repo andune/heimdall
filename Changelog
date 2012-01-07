@@ -1,3 +1,8 @@
+v0.3 - January 6, 2012
+* Added ability to log grief actions per player into a log per player
+* Added initial ability for mod/admin to lookup grief actions from the log
+* More refactoring of engine and event components
+
 v0.2 - January 6, 2012
 * Inventory events (using Spout)
 * Command framework

@@ -1,7 +1,10 @@
 /**
  * 
  */
-package org.morganm.heimdall.event;
+package org.morganm.heimdall.event.handlers;
+
+import org.morganm.heimdall.event.BlockChangeEvent;
+import org.morganm.heimdall.event.InventoryChangeEvent;
 
 
 /**

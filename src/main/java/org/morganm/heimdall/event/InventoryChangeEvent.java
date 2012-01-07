@@ -6,6 +6,7 @@ package org.morganm.heimdall.event;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
+import org.morganm.heimdall.event.handlers.EventHandler;
 
 /**
  * @author morganm
@@ -44,6 +45,8 @@ public class InventoryChangeEvent implements Event {
 	
 	@Override
 	public String getPlayerName() { return playerName; }
+	@Override
+	public long getTime() { return time; }
 	
 	@Override
 	public void clear() {

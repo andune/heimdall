@@ -60,11 +60,11 @@ public class SimpleLogActionEngine implements Engine {
 	}
 	
 	private void logEvent(final Event event, final float griefValue) {
-		Debug.getInstance().debug("processGriefValue(): playerName=",event.getPlayerName(),", griefvalue=",griefValue);
+		Debug.getInstance().debug("SimpleLogActionEngine:processGriefValue(): playerName=",event.getPlayerName(),", griefvalue=",griefValue);
 		if( log != null ) {
 			try {
 				PlayerState ps = playerStateManager.getPlayerState(event.getPlayerName());
-				log.log(event.getPlayerName()+" accumulated grief points "+griefValue+", total grief now is "+ps.getGriefPoints());
+				log.log(event.getPlayerName()+" event grief points "+griefValue+", total grief now is "+ps.getGriefPoints());
 				
 				if( !flushScheduled ) {
 					flushScheduled = true;

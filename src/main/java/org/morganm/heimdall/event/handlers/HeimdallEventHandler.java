@@ -8,10 +8,10 @@ import java.util.List;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.morganm.heimdall.engine.Engine;
 import org.morganm.heimdall.event.BlockChangeEvent;
-import org.morganm.heimdall.event.EventHandler;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 
-/**
+/**  NOT USED
+ * 
  * @author morganm
  *
  */

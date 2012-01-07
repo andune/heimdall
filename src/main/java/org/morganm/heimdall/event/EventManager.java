@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.bukkit.plugin.Plugin;
 import org.morganm.heimdall.event.Event.Type;
+import org.morganm.heimdall.event.handlers.EventHandler;
 import org.morganm.util.JavaPluginExtensions;
 
 /** Class to manage events. Events are added as they happen and are processed asynchronously
@@ -73,7 +74,7 @@ public class EventManager implements Runnable {
 		Map<Plugin, Set<EventHandler>> map = eventEnrichers.get(type);
 		if( map == null ) {
 			map = new HashMap<Plugin, Set<EventHandler>>();
-			eventHandlers.put(type, map);
+			eventEnrichers.put(type, map);
 		}
 		Set<EventHandler> list = map.get(plugin);
 		if( list == null ) {

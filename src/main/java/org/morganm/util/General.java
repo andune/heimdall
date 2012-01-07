@@ -6,6 +6,7 @@ package org.morganm.util;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
@@ -27,7 +28,7 @@ public class General {
 		return instance;
 	}
 	
-	public String shortLocationString(Location l) {
+	public String shortLocationString(final Location l) {
 		if( l == null )
 			return "null";
 		else {
@@ -39,6 +40,34 @@ public class General {
 				worldName = "(world deleted)";
 			return worldName+","+l.getBlockX()+","+l.getBlockY()+","+l.getBlockZ();
 		}
+	}
+	
+	/** Read a string that was written by "shortLocationString" and turn it into
+	 * a location object (if possible). Can return null.
+	 * 
+	 * @param locatinString
+	 * @return
+	 */
+	public Location readShortLocationString(final String locationString) {
+		Location location = null;
+		if( locationString != null ) {
+			String[] pieces = locationString.split(",");
+			
+			// make sure all the elements are there and it's not a deleted world 
+			if( pieces.length == 4 && !pieces[0].equals("(world deleted)") ) {
+				World w = Bukkit.getWorld(pieces[0]);
+				int x = 0; int y = 0; int z = 0;
+				try {
+					x = Integer.parseInt(pieces[1]);
+					y = Integer.parseInt(pieces[2]);
+					z = Integer.parseInt(pieces[3]);
+				} catch(NumberFormatException e) {}
+				
+				location = new Location(w, x, y, z);
+			}
+		}
+		
+		return location;
 	}
 	
 	/** Code borrowed from @Diddiz's LogBlock

@@ -1,16 +1,16 @@
 /**
  * 
  */
-package org.morganm.heimdall.event.enrichers;
+package org.morganm.heimdall.event.handlers;
 
 import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.Plugin;
 import org.morganm.heimdall.blockhistory.BlockHistory;
 import org.morganm.heimdall.blockhistory.BlockHistoryManager;
 import org.morganm.heimdall.event.BlockChangeEvent;
-import org.morganm.heimdall.event.EventHandler;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent.InventoryEventType;
+import org.morganm.util.Debug;
 
 /** Class which enriches an event with block history information.
  * 
@@ -29,6 +29,7 @@ public class BlockHistoryEnricher extends EventHandler {
 	
 	@Override
 	public void processEvent(BlockChangeEvent bc) {
+		Debug.getInstance().debug("BlockHistoryEnricher:processEvent() bc=",bc);
 		if( bc.bukkitEventType == Type.BLOCK_BREAK ) {
 			BlockHistory bh = blockHistoryManager.getBlockHistory(bc.getLocation());
 			

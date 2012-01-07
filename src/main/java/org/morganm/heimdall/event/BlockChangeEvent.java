@@ -6,6 +6,7 @@ package org.morganm.heimdall.event;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.morganm.heimdall.event.handlers.EventHandler;
 
 /**
  * @author morganm
@@ -48,6 +49,8 @@ public class BlockChangeEvent implements Event {
 
 	@Override
 	public String getPlayerName() { return playerName; }
+	@Override
+	public long getTime() { return time; }
 	
 	@Override
 	public void clear() {
@@ -98,5 +101,24 @@ public class BlockChangeEvent implements Event {
 	@Override
 	public void accept(EventHandler visitor) {
 		visitor.processEvent(this);
+	}
+	
+	public String toString() {
+		return "BlockChangeEvent:["
+				+"bukkitEventType="+bukkitEventType
+				+",playerName="+playerName
+				+",time="+time
+				+",world="+world
+				+",x="+x
+				+",y="+y
+				+",z="+z
+				+",location="+location
+				+",type="+type
+				+",data="+data
+				+",signData="+signData
+				+",blockOwner="+blockOwner
+				+",ownerTypeId="+ownerTypeId
+				+",griefValue="+griefValue
+				+"]";
 	}
 }

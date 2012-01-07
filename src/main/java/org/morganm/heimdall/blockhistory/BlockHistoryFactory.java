@@ -17,6 +17,9 @@ public class BlockHistoryFactory {
 		if( p != null )
 			return new BlockHistoryLogBlock(plugin, cache);
 		
+		if( plugin.getConfig().getBoolean("blockHistoryTest", false) )
+			return new BlockHistoryTest(plugin, cache);
+		
 		return null;
 	}
 	

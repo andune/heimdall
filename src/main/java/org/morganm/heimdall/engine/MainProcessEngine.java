@@ -40,6 +40,7 @@ public class MainProcessEngine implements Engine {
 		this.isLogging = this.config.getBoolean("engine.main.writeEngineLog", false);
 		if( this.isLogging ) {
 			File logFile = new File(this.config.getString("engine.main.logfile"));
+			Debug.getInstance().debug("Main engine opening engine logfile ",logFile);
 			log = new EngineLog(logFile);
 		}
 		else
@@ -58,6 +59,7 @@ public class MainProcessEngine implements Engine {
 			*/
 			event.griefValue = getBlockValue(typeId);	// testing;
 			
+			Debug.getInstance().debug("MainProcessEngine:processBlockChange event.griefValue = ",event.griefValue);
 			if( isLogging && log != null )
 				log.logIgnoreError("assessing grief value of "+event.griefValue+" to player "+event.playerName);
 		}
@@ -68,7 +70,7 @@ public class MainProcessEngine implements Engine {
 		}
 		
 		if( event.griefValue != 0 )
-			playerStateManager.getPlayerState(event.playerName).incrementGriefPoints(event.griefValue);
+			playerStateManager.getPlayerState(event.playerName).incrementGriefPoints(event.griefValue, event.blockOwner);
 	}
 	
 	@Override
@@ -83,7 +85,7 @@ public class MainProcessEngine implements Engine {
 		}
 		
 		if( event.griefValue != 0 )
-			playerStateManager.getPlayerState(event.playerName).incrementGriefPoints(event.griefValue);
+			playerStateManager.getPlayerState(event.playerName).incrementGriefPoints(event.griefValue, event.blockOwner);
 	}
 
 	@Override

@@ -4,7 +4,7 @@
 package org.morganm.heimdall;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,13 +16,14 @@ import org.morganm.heimdall.blockhistory.BlockHistoryFactory;
 import org.morganm.heimdall.blockhistory.BlockHistoryManager;
 import org.morganm.heimdall.command.CommandMapper;
 import org.morganm.heimdall.engine.Engine;
+import org.morganm.heimdall.engine.GriefLogEngine;
 import org.morganm.heimdall.engine.MainProcessEngine;
 import org.morganm.heimdall.engine.NotifyEngine;
 import org.morganm.heimdall.engine.SimpleLogActionEngine;
 import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.EventManager;
-import org.morganm.heimdall.event.enrichers.BlockHistoryEnricher;
-import org.morganm.heimdall.event.handlers.HeimdallEventHandler;
+import org.morganm.heimdall.event.handlers.BlockHistoryEnricher;
+import org.morganm.heimdall.event.handlers.EngineWrapper;
 import org.morganm.heimdall.listener.BukkitBlockListener;
 import org.morganm.heimdall.player.PlayerStateManager;
 import org.morganm.util.Debug;
@@ -65,17 +66,40 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		new CommandMapper(this).mapCommands();		// map our command objects
 		
 		// initialize various objects needed to get things going
-		blockHistoryManager = BlockHistoryFactory.getBlockHistoryManager(this);
 		playerStateManager = new PlayerStateManager(this);
-		playerStateManager.load();
-		griefEngine = new MainProcessEngine(this, playerStateManager);
 		eventManager = new EventManager(this);
 		
 		// register enricher to add block history information to events
-		if( blockHistoryManager != null )
-			eventManager.registerEnricher(this, Event.Type.BLOCK_CHANGE,
-					new BlockHistoryEnricher(this, blockHistoryManager));
+		blockHistoryManager = BlockHistoryFactory.getBlockHistoryManager(this);
+		if( blockHistoryManager != null ) {
+			BlockHistoryEnricher bhe = new BlockHistoryEnricher(this, blockHistoryManager);
+			eventManager.registerEnricher(this, Event.Type.BLOCK_CHANGE, bhe);
+			eventManager.registerEnricher(this, Event.Type.INVENTORY_CHANGE, bhe);
+			Debug.getInstance().debug("BlockHistoryEnricher ",bhe," has been registered");
+		}
 		
+		// TODO: at some point the engine definition will be driven out of a config
+		// and this hard coded stuff cleaned up.
+		
+		// main grief engine, runs as an enricher (adds grief information to event)
+		griefEngine = new MainProcessEngine(this, playerStateManager);
+		EngineWrapper wrapper = new EngineWrapper(griefEngine);
+		eventManager.registerEnricher(this, Event.Type.BLOCK_CHANGE, wrapper);
+		eventManager.registerEnricher(this, Event.Type.INVENTORY_CHANGE, wrapper);
+		
+		wrapper = new EngineWrapper(new SimpleLogActionEngine(this, playerStateManager));
+		eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
+		eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
+		
+		wrapper = new EngineWrapper(new NotifyEngine(this, playerStateManager));
+		eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
+		eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
+		
+		wrapper = new EngineWrapper(new GriefLogEngine(this, playerStateManager));
+		eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
+		eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
+		
+		/* old code
 		final ArrayList<Engine> actionEngines = new ArrayList<Engine>();
 		actionEngines.add(new SimpleLogActionEngine(this, playerStateManager));
 		notifyEngine = new NotifyEngine(this, playerStateManager);
@@ -84,6 +108,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		// main handler for passing events to anti-grief engine
 		eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE,
 				new HeimdallEventHandler(this,  griefEngine, actionEngines));
+		*/
 		
 		PluginManager pm = getServer().getPluginManager();
 		
@@ -97,6 +122,13 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	
 	@Override
 	public void onDisable() {
+		try {
+			playerStateManager.save();
+		}
+		catch(Exception e) {
+			log.severe(logPrefix+"error saving playerStateManager: "+e.getMessage());
+		}
+
 		eventManager.unregisterAllPluginEnrichers(this);
 		eventManager.unregisterAllPluginHandlers(this);
 		getServer().getScheduler().cancelTasks(this);
@@ -123,6 +155,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 
 	public NotifyEngine getNotifyEngine() { return notifyEngine; }
 	public BlockHistoryManager getBlockHistoryManager() { return blockHistoryManager; }
+	public PlayerStateManager getPlayerStateManager() { return playerStateManager; }
 	
 	@Override
 	public PermissionSystem getPermissionSystem() { return perm; }
