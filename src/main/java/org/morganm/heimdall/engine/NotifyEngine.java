@@ -46,42 +46,35 @@ public class NotifyEngine implements Engine {
 //		Debug.getInstance().debug("config.getInt(\"blockpoints.4\") = ",config.getInt("blockpoints.4"));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.morganm.heimdall.engine.Engine#processBlockChange(org.morganm.heimdall.event.BlockChangeEvent)
-	 */
 	@Override
 	public void processBlockChange(BlockChangeEvent event) {
-		Float lastNotifyValue = lastNotifyValues.get(event.playerName);
+		processEvent(event, " (owner=",event.blockOwner,", Material=",event.type,")");
+	}
+
+	@Override
+	public void processInventoryChange(InventoryChangeEvent event) {
+		processEvent(event, " (owner=",event.blockOwner,")");
+	}
+
+	@Override
+	public void processChatMessage(String message) {
+		// TODO Auto-generated method stub
+	}
+	
+	private void processEvent(Event event, Object...arg) {
+		Float lastNotifyValue = lastNotifyValues.get(event.getPlayerName());
 		if( lastNotifyValue == null )
 			lastNotifyValue = Float.valueOf(0);
-		float newValue = playerStateManager.getPlayerState(event.playerName).getGriefPoints();
+		float newValue = playerStateManager.getPlayerState(event.getPlayerName()).getGriefPoints();
 		
 		// if the number has gone up by at least a whole number, time to notify
 		if( Math.ceil(newValue) > Math.ceil(lastNotifyValue) ) {
-			doNotify(event, newValue);
+			doNotify(event, newValue, arg);
 		}
 		
 		// we update no matter what, because if the value went down, we want to capture
 		// the new value so that any future griefing will be notified on as well
-		lastNotifyValues.put(event.playerName, newValue);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.morganm.heimdall.engine.Engine#processInventoryChange(org.morganm.heimdall.event.InventoryChangeEvent)
-	 */
-	@Override
-	public void processInventoryChange(InventoryChangeEvent event) {
-		// TODO Auto-generated method stub
-
-	}
-
-	/* (non-Javadoc)
-	 * @see org.morganm.heimdall.engine.Engine#processChatMessage(java.lang.String)
-	 */
-	@Override
-	public void processChatMessage(String message) {
-		// TODO Auto-generated method stub
-
+		lastNotifyValues.put(event.getPlayerName(), newValue);
 	}
 	
 	/** Called when an admin wants to ignore notifications from a given player.
@@ -108,16 +101,24 @@ public class NotifyEngine implements Engine {
 			ignores.remove(playerIgnored);
 	}
 
-	private void doNotify(final Event event, final float griefPoints) {
-		List<Player> notifyTargets = getOnlineNotifyTargets();
-		for(Player p : notifyTargets) {
-			Set<String> ignores = notifyIgnores.get(p.getName());
-			
-			// notify if no ignores are set or if the player is not in the ignore list
-			if( ignores == null || !ignores.contains(event.getPlayerName()) ) {
-				p.sendMessage("Player "+event.getPlayerName()+" has accumulated "
-						+griefPoints+" total grief points. Latest action "+event.getEventTypeString()
-						+" at location {"+General.getInstance().shortLocationString(event.getLocation())+"}");
+	private void doNotify(final Event event, final float griefPoints, final Object...arg) {
+		final List<Player> notifyTargets = getOnlineNotifyTargets();
+		if( notifyTargets != null && notifyTargets.size() > 0 ) {
+			final StringBuilder sb = new StringBuilder();
+			for(int i=0; i < arg.length; i++) {
+				sb.append(arg[i]);
+			}
+			final String additionalData = sb.toString();
+			for(Player p : notifyTargets) {
+				Set<String> ignores = notifyIgnores.get(p.getName());
+				
+				// notify if no ignores are set or if the player is not in the ignore list
+				if( ignores == null || !ignores.contains(event.getPlayerName()) ) {
+					p.sendMessage("Player "+event.getPlayerName()+" has accumulated "
+							+griefPoints+" total grief points. Latest action "+event.getEventTypeString()
+							+" at location {"+General.getInstance().shortLocationString(event.getLocation())+"}"
+							+additionalData);
+				}
 			}
 		}
 	}

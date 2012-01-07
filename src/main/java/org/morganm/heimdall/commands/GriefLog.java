@@ -61,6 +61,7 @@ public class GriefLog extends BaseCommand {
 
 				sender.sendMessage(sb.toString());
 			}
+			sender.sendMessage("Total grief points: "+ps.getGriefPoints());
 		}
 		else
 			sender.sendMessage("No grief log found for player "+args[0]);

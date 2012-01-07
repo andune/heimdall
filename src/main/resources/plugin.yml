@@ -7,16 +7,44 @@ commands:
   heimdall:
     aliases: [heim]
     description: Admin control functions for Heimdall
-    permission: heimdall.admin
+    permission: heimdall.admin.reload
     usage: /<command> reload - reload the config file
     executor: org.morganm.heimdall.commands.Heimdall
   hdi:
     description: Ignore Heimdall alerts for a given player
-    permission: heimdall.admin
+    permission: heimdall.admin.ignore
     usage: /<command> player - ignore all alerts related to player
     executor: org.morganm.heimdall.commands.AdminNotifyIgnore
-  hgl:
+  hdgl:
     description: Show last 5 grief log entries for a given player
-    permission: heimdall.admin
+    permission: heimdall.admin.list
     usage: /<command> player - show grief log for player
     executor: org.morganm.heimdall.commands.GriefLog
+  hdgt:
+    aliases: [griefteleport]
+    description: Teleport to last grief action
+    permission: heimdall.admin.teleport
+    usage: |
+           /<command> - send to most recent grief action
+           /<command> player - send to most recent grief action by player
+    executor: org.morganm.heimdall.commands.GriefTeleport
+permissions:
+    heimdall.admin.*:
+        description: Gives access to all Heimdall admin commands
+        children:
+            heimdall.admin.reload: true
+            heimdall.admin.ignore: true
+            heimdall.admin.list: true
+            heimdall.admin.teleport: true
+    heimdall.admin.reload:
+        description: Allows use of the "/heimdall reload" command
+        default: op
+    heimdall.admin.ignore:
+        description: Allows use of the /hdi command
+        default: op
+    heimdall.admin.list:
+        description: Allows use of the /hdl command
+        default: op
+    heimdall.admin.teleport:
+        description: Allows use of the /hdt command
+        default: op

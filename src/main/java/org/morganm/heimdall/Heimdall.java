@@ -4,7 +4,6 @@
 package org.morganm.heimdall;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +16,7 @@ import org.morganm.heimdall.blockhistory.BlockHistoryManager;
 import org.morganm.heimdall.command.CommandMapper;
 import org.morganm.heimdall.engine.Engine;
 import org.morganm.heimdall.engine.GriefLogEngine;
+import org.morganm.heimdall.engine.LastGriefTrackingEngine;
 import org.morganm.heimdall.engine.MainProcessEngine;
 import org.morganm.heimdall.engine.NotifyEngine;
 import org.morganm.heimdall.engine.SimpleLogActionEngine;
@@ -25,6 +25,7 @@ import org.morganm.heimdall.event.EventManager;
 import org.morganm.heimdall.event.handlers.BlockHistoryEnricher;
 import org.morganm.heimdall.event.handlers.EngineWrapper;
 import org.morganm.heimdall.listener.BukkitBlockListener;
+import org.morganm.heimdall.listener.SpoutChestAccessListener;
 import org.morganm.heimdall.player.PlayerStateManager;
 import org.morganm.util.Debug;
 import org.morganm.util.JarUtils;
@@ -50,6 +51,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	private PlayerStateManager playerStateManager;
 	private Engine griefEngine;
 	private NotifyEngine notifyEngine;
+	private LastGriefTrackingEngine lastGriefTrackingEngine;
 	private BlockHistoryManager blockHistoryManager;
 	
 	@Override
@@ -91,7 +93,8 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
 		eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
 		
-		wrapper = new EngineWrapper(new NotifyEngine(this, playerStateManager));
+		notifyEngine = new NotifyEngine(this, playerStateManager);
+		wrapper = new EngineWrapper(notifyEngine);
 		eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
 		eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
 		
@@ -99,6 +102,11 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
 		eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
 		
+		lastGriefTrackingEngine = new LastGriefTrackingEngine(this);
+		wrapper = new EngineWrapper(lastGriefTrackingEngine);
+		eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
+		eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
+
 		/* old code
 		final ArrayList<Engine> actionEngines = new ArrayList<Engine>();
 		actionEngines.add(new SimpleLogActionEngine(this, playerStateManager));
@@ -116,6 +124,11 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Monitor, this);
 		pm.registerEvent(Type.BLOCK_PLACE, blockListener, Priority.Monitor, this);
 		pm.registerEvent(Type.SIGN_CHANGE, blockListener, Priority.Monitor, this);
+		
+		if (pm.isPluginEnabled("Spout")) {
+			pm.registerEvent(Type.CUSTOM_EVENT, new SpoutChestAccessListener(this, eventManager), Priority.Monitor, this);
+			log.info(logPrefix+ "Using Spout API to log chest access");
+		}
 		
 		log.info(logPrefix + "version "+version+", build "+buildNumber+" is enabled");
 	}
@@ -154,6 +167,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	}
 
 	public NotifyEngine getNotifyEngine() { return notifyEngine; }
+	public LastGriefTrackingEngine getLastGriefTrackingEngine() { return lastGriefTrackingEngine; }
 	public BlockHistoryManager getBlockHistoryManager() { return blockHistoryManager; }
 	public PlayerStateManager getPlayerStateManager() { return playerStateManager; }
 	

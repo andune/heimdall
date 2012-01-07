@@ -14,6 +14,7 @@ import org.getspout.spoutapi.event.inventory.InventoryCraftEvent;
 import org.getspout.spoutapi.event.inventory.InventoryListener;
 import org.getspout.spoutapi.event.inventory.InventoryOpenEvent;
 import org.morganm.heimdall.event.EventCircularBuffer;
+import org.morganm.heimdall.event.EventManager;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent.InventoryEventType;
 import org.morganm.util.General;
@@ -29,13 +30,15 @@ public class SpoutChestAccessListener extends InventoryListener {
 
 	@SuppressWarnings("unused")
 	private final JavaPluginExtensions plugin;
+	private final EventManager eventManager;
 	private final General util;
 	private final Map<Player, ItemStack[]> containers = new HashMap<Player, ItemStack[]>();
 	private final EventCircularBuffer<InventoryChangeEvent> buffer;
 	private int errorFloodPreventionCount = 0;
 
-	public SpoutChestAccessListener(final JavaPluginExtensions plugin) {
+	public SpoutChestAccessListener(final JavaPluginExtensions plugin, final EventManager eventManager) {
 		this.plugin = plugin;
+		this.eventManager = eventManager;
 		this.util = General.getInstance();
 		
 		this.buffer = new EventCircularBuffer<InventoryChangeEvent>(InventoryChangeEvent.class, 1000, false);
@@ -71,6 +74,8 @@ public class SpoutChestAccessListener extends InventoryListener {
 				ice.type = InventoryEventType.CONTAINER_ACCESS;
 				
 				ice.diff = diff;
+				
+				eventManager.pushEvent(ice);
 			}
 		}
 	}

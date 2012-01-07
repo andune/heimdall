@@ -5,19 +5,31 @@ package org.morganm.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
-
-import de.diddiz.util.BukkitUtils.ItemStackComparator;
 
 /**
  * @author morganm
  *
  */
 public class General {
+	private static BlockFace[] directions = new BlockFace[] {
+		BlockFace.UP,
+		BlockFace.NORTH,
+		BlockFace.WEST,
+		BlockFace.SOUTH,
+		BlockFace.EAST,
+		BlockFace.DOWN
+	};
 	private static General instance;
 	
 	private General() {}
@@ -26,6 +38,66 @@ public class General {
 		if( instance == null )
 			instance = new General();
 		return instance;
+	}
+	
+	/** Recursively look for 2 vertical safe air spots nearest the given location.
+	 * 
+	 *  TODO: ensure safety by also checking for lava underneath
+	 * 
+	 * @param base
+	 */
+	private Location findSafeLocation(final HashSet<Location> alreadyTraversed, final int level, final Location location) {
+		Block base = location.getBlock();
+		Block up = base.getRelative(BlockFace.UP);
+		
+		if( base.getTypeId() == 0 && up.getTypeId() == 0 )
+			return location;
+		else {
+			// first try all the closest blocks before recursing further
+			for(int i=0; i < directions.length; i++) {
+				Block tryBlock = base.getRelative(directions[i]);
+				Location tryLocation = tryBlock.getLocation();
+				if( alreadyTraversed.contains(tryLocation) )
+					continue;
+				alreadyTraversed.add(tryLocation);
+				up = tryBlock.getRelative(BlockFace.UP);
+				
+				if( tryBlock.getTypeId() == 0 && up.getTypeId() == 0 )
+					return location;
+			}
+			
+			// we only recurse so far before we give up
+			if( level > 10 )
+				return null;
+			
+			// if we're here, none of them were safe, now recurse
+			for(int i=0; i < directions.length; i++) {
+				Location recurseLocation = base.getRelative(directions[i]).getLocation();
+				if( alreadyTraversed.contains(recurseLocation) )
+					continue;
+				Location result = findSafeLocation(alreadyTraversed, level+1, recurseLocation);
+				if( result != null )
+					return result;
+			}
+		}
+		
+		return null;
+	}
+	
+	/** Safely teleport a player to a location. Should avoid them being stuck in blocks,
+	 * teleported over lava, etc.  (not fully implemented)
+	 * 
+	 * @param p
+	 * @param l
+	 */
+	public void safeTeleport(final Player p, final Location l, final TeleportCause cause) {
+		Location target = findSafeLocation(new HashSet<Location>(10), 0, l);
+
+		// if we didn't find a safe location, then just teleport them to the original location
+		if( target == null )
+			target = l;
+		
+		p.teleport(target, cause);
 	}
 	
 	public String shortLocationString(final Location l) {
@@ -146,5 +218,28 @@ public class General {
 	 */
 	public static byte rawData(ItemStack item) {
 		return item.getType() != null ? item.getData() != null ? item.getData().getData() : 0 : 0;
+	}
+	
+	/** Code borrowed from @Diddiz's LogBlock 
+	 * 
+	 * @param item
+	 * @return
+	 */
+	public static class ItemStackComparator implements Comparator<ItemStack>
+	{
+		@Override
+		public int compare(ItemStack a, ItemStack b) {
+			final int aType = a.getTypeId(), bType = b.getTypeId();
+			if (aType < bType)
+				return -1;
+			if (aType > bType)
+				return 1;
+			final byte aData = rawData(a), bData = rawData(b);
+			if (aData < bData)
+				return -1;
+			if (aData > bData)
+				return 1;
+			return 0;
+		}
 	}
 }

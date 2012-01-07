@@ -33,14 +33,14 @@ public class MainProcessEngine implements Engine {
 		
 		String configFile = this.plugin.getConfig().getString("engine.main.configfile");
 		File file = new File(configFile);
-//		Debug.getInstance().debug("loading file ",file);
+//		debug.debug("loading file ",file);
 		this.config = YamlConfiguration.loadConfiguration(file);
-//		Debug.getInstance().debug("config.getInt(\"blockpoints.4\") = ",config.getInt("blockpoints.4"));
+//		debug.debug("config.getInt(\"blockpoints.4\") = ",config.getInt("blockpoints.4"));
 		
 		this.isLogging = this.config.getBoolean("engine.main.writeEngineLog", false);
 		if( this.isLogging ) {
 			File logFile = new File(this.config.getString("engine.main.logfile"));
-			Debug.getInstance().debug("Main engine opening engine logfile ",logFile);
+			debug.debug("Main engine opening engine logfile ",logFile);
 			log = new EngineLog(logFile);
 		}
 		else
@@ -51,15 +51,13 @@ public class MainProcessEngine implements Engine {
 	public void processBlockChange(BlockChangeEvent event) {
 		if( event.bukkitEventType == org.bukkit.event.Event.Type.BLOCK_BREAK ) {
 			int typeId = event.type.getId();
-			/*
-			if( bc.blockOwner != null && !bc.playerName.equals(bc.blockOwner) && (bc.ownerTypeId == 0 || typeId == bc.ownerTypeId) ) {
-				debug.debug("block grief penalty: owner and player don't match, owner=",bc.blockOwner,", player=",bc.playerName);
-				value = getBlockValue(typeId);
+			if( event.blockOwner != null && !event.playerName.equals(event.blockOwner) && (event.ownerTypeId == 0 || typeId == event.ownerTypeId) ) {
+				debug.debug("block grief penalty: owner and player don't match, owner=",event.blockOwner,", player=",event.playerName);
+				event.griefValue = getBlockValue(typeId);
 			}
-			*/
-			event.griefValue = getBlockValue(typeId);	// testing;
+//			event.griefValue = getBlockValue(typeId);	// testing;
 			
-			Debug.getInstance().debug("MainProcessEngine:processBlockChange event.griefValue = ",event.griefValue);
+			debug.debug("MainProcessEngine:processBlockChange event.griefValue = ",event.griefValue);
 			if( isLogging && log != null )
 				log.logIgnoreError("assessing grief value of "+event.griefValue+" to player "+event.playerName);
 		}
@@ -75,11 +73,13 @@ public class MainProcessEngine implements Engine {
 	
 	@Override
 	public void processInventoryChange(InventoryChangeEvent event) {
+		debug.debug("MainProcessEngine:processInventoryChange event.type = ",event.type);
 		if( event.type == InventoryEventType.CONTAINER_ACCESS ) {
 			if( event.blockOwner != null && !event.playerName.equals(event.blockOwner) ) {
-				debug.debug("inventory grief penalty: owner and player don't match, owner=",event.blockOwner,", player=",event.playerName);
+				debug.debug("MainProcessEngine:processInventoryChange inventory grief penalty: owner and player don't match, owner=",event.blockOwner,", player=",event.playerName);
 				for(int i=0; i < event.diff.length; i++) {
 					event.griefValue += getInventoryValue(event.diff[i]);
+					debug.debug("MainProcessEngine:processInventoryChange event grief value = ",event.griefValue);
 				}
 			}
 		}
@@ -94,10 +94,12 @@ public class MainProcessEngine implements Engine {
 	}
 	
 	public float getBlockValue(int id) {
-		return config.getInt("blockpoints."+id, 1);
+		return (float) config.getDouble("blockpoints."+id, 1);
 	}
 
 	public float getInventoryValue(ItemStack is) {
-		return config.getInt("inventorypoints."+is.getTypeId(), 1) * is.getAmount();
+		// multiply by - amount, since a negative amount is items taken, which should accumulate
+		// positive grief value
+		return (float) config.getDouble("inventorypoints."+is.getTypeId(), 1) * (- is.getAmount());
 	}
 }

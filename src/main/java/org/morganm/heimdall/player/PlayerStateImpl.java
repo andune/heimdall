@@ -7,10 +7,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.morganm.heimdall.log.GriefLog;
+import org.morganm.util.Debug;
 import org.morganm.util.JavaPluginExtensions;
 
 /**
@@ -21,6 +24,11 @@ public class PlayerStateImpl implements PlayerState {
 	private final transient JavaPluginExtensions plugin;  
 	private final String name;
 	private float griefPoints=0;
+	/* We track pointsByOwner so that if a player friends another player (after they've accumulated
+	 * some grief as a result of breaking others players blocks, for example), we can subtract the
+	 * points from the player that are owned by the new friend.
+	 * 
+	 */
 	private Map<String, Float> pointsByOwner;
 	
 	private final transient File dataFile;
@@ -42,8 +50,13 @@ public class PlayerStateImpl implements PlayerState {
 	public float incrementGriefPoints(final float f, final String owner) {
 		griefPoints += f;
 		
+		Debug.getInstance().debug("incrementGriefPoints(player = "+name+") points="+f+", owner="+owner);
+		
 		// track owner points, if owner was given
 		if( owner != null ) {
+			if( pointsByOwner == null )
+				pointsByOwner = new HashMap<String, Float>();
+			
 			Float ownerPoints = pointsByOwner.get(owner);
 			if( ownerPoints == null )
 				ownerPoints = Float.valueOf(f);
@@ -99,12 +112,14 @@ public class PlayerStateImpl implements PlayerState {
 			dataStore = new YamlConfiguration();
 		
 		dataStore.set("griefPoints", griefPoints);
-		dataStore.set("pointsByOwner", pointsByOwner);
+		
+		for(Map.Entry<String, Float> entry : pointsByOwner.entrySet()) {
+			dataStore.set("pointsByOwner."+entry.getKey(), entry.getValue());
+		}
 
 		dataStore.save(dataFile);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void load() throws IOException, InvalidConfigurationException {
 		// if there's no data file, do nothing
 		if( !dataFile.exists() )
@@ -116,9 +131,17 @@ public class PlayerStateImpl implements PlayerState {
 			dataStore.load(dataFile);
 		
 		griefPoints = (float) dataStore.getDouble("griefPoints");
-		pointsByOwner = (Map<String, Float>) dataStore.get("pointsByOwner");
 		
 		if( pointsByOwner == null )
 			pointsByOwner = new HashMap<String, Float>();
+		ConfigurationSection section = dataStore.getConfigurationSection("pointsByOwner");
+		if( section != null ) {
+			Set<String> owners = section.getKeys(false);
+			if( owners != null ) {
+				for(String owner : owners) {
+					pointsByOwner.put(owner, Float.valueOf((float) section.getDouble(owner)));
+				}
+			}
+		}
 	}
 }

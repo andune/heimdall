@@ -122,9 +122,9 @@ public class GriefLog {
 			return null;
 		
 		String[] parts = entryString.split("\\|");
-		if( Debug.getInstance().isDebug() ) {
+		if( Debug.getInstance().isDevDebug() ) {
 			for(int i=0; i < parts.length; i++) {
-				Debug.getInstance().debug("i=",i,", parts[i]=",parts[i]);
+				Debug.getInstance().devDebug("i=",i,", parts[i]=",parts[i]);
 			}
 		}
 		try {
