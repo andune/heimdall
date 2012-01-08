@@ -6,6 +6,7 @@ package org.morganm.heimdall.player;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,6 +16,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.morganm.heimdall.log.GriefLog;
 import org.morganm.util.Debug;
 import org.morganm.util.JavaPluginExtensions;
+import org.morganm.util.PermissionSystem;
 
 /**
  * @author morganm
@@ -22,6 +24,7 @@ import org.morganm.util.JavaPluginExtensions;
  */
 public class PlayerStateImpl implements PlayerState {
 	private final transient JavaPluginExtensions plugin;  
+	private final transient PermissionSystem permSystem;  
 	private final String name;
 	private float griefPoints=0;
 	/* We track pointsByOwner so that if a player friends another player (after they've accumulated
@@ -38,6 +41,7 @@ public class PlayerStateImpl implements PlayerState {
 	
 	public PlayerStateImpl(final JavaPluginExtensions plugin, final String name, final PlayerStateManager playerStateManager) {
 		this.plugin = plugin;
+		this.permSystem = this.plugin.getPermissionSystem();
 		this.name = name;
 		this.playerStateManager = playerStateManager;
 		this.dataFile = new File("plugins/Heimdall/playerData/"+name+".yml");
@@ -75,7 +79,14 @@ public class PlayerStateImpl implements PlayerState {
 
 	@Override
 	public boolean isExemptFromChecks() {
-		// TODO: something intelligent later
+		List<String> exemptPerms = plugin.getConfig().getStringList("exemptPermissions");
+		if( exemptPerms != null ) {
+			for(String perm : exemptPerms) {
+				if( permSystem.has(name, perm) )
+					return true;
+			}
+		}
+		
 		return false;
 	}
 

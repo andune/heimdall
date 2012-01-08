@@ -3,6 +3,8 @@
  */
 package org.morganm.heimdall.event;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,8 +13,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.bukkit.plugin.Plugin;
+import org.morganm.heimdall.engine.EngineLog;
 import org.morganm.heimdall.event.Event.Type;
 import org.morganm.heimdall.event.handlers.EventHandler;
+import org.morganm.util.Debug;
 import org.morganm.util.JavaPluginExtensions;
 
 /** Class to manage events. Events are added as they happen and are processed asynchronously
@@ -111,8 +115,12 @@ public class EventManager implements Runnable {
 	}
 	*/
 	
+	private EngineLog eventDebugLog = new EngineLog(new File("plugins/Heimdall/eventDebug.log"));
+	private HashMap<Event, Integer> eventDebugMap = new HashMap<Event, Integer>(1000);
+	private int lastProcessedEvent=0;
 	public void pushEvent(Event e) {
 		eventBuffer.push(e);
+		eventDebugMap.put(e, EventDebug.incrementEventNumber());
 	}
 	
 	public void run() {
@@ -124,6 +132,20 @@ public class EventManager implements Runnable {
 		try {
 			Event event = null;
 			while( (event = eventBuffer.pop()) != null ) {
+				// DEBUGGING
+				Integer eventNumber = eventDebugMap.remove(event);
+				if( eventNumber != lastProcessedEvent ) {
+					lastProcessedEvent = eventNumber;
+					try {
+						eventDebugLog.log("got eventNumber "+eventNumber+" when lastProcessEvent="+lastProcessedEvent);
+					}catch(IOException e) {}
+				}
+				else {
+					Debug.getInstance().devDebug("eventManager event counts align: ",lastProcessedEvent);
+					lastProcessedEvent++;
+				}
+				// DEBUGGING
+				
 				Event.Type type = event.getType();
 				
 				// first process any event enrichers

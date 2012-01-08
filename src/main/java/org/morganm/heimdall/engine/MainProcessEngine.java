@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent.InventoryEventType;
+import org.morganm.heimdall.player.PlayerState;
 import org.morganm.heimdall.player.PlayerStateManager;
 import org.morganm.util.Debug;
 import org.morganm.util.JavaPluginExtensions;
@@ -49,6 +50,10 @@ public class MainProcessEngine implements Engine {
 
 	@Override
 	public void processBlockChange(BlockChangeEvent event) {
+		PlayerState ps = playerStateManager.getPlayerState(event.playerName);
+		if( ps.isExemptFromChecks() )
+			return;
+		
 		if( event.bukkitEventType == org.bukkit.event.Event.Type.BLOCK_BREAK ) {
 			int typeId = event.type.getId();
 			if( event.blockOwner != null && !event.playerName.equals(event.blockOwner) && (event.ownerTypeId == 0 || typeId == event.ownerTypeId) ) {
@@ -73,6 +78,10 @@ public class MainProcessEngine implements Engine {
 	
 	@Override
 	public void processInventoryChange(InventoryChangeEvent event) {
+		PlayerState ps = playerStateManager.getPlayerState(event.playerName);
+		if( ps.isExemptFromChecks() )
+			return;
+
 		debug.debug("MainProcessEngine:processInventoryChange event.type = ",event.type);
 		if( event.type == InventoryEventType.CONTAINER_ACCESS ) {
 			if( event.blockOwner != null && !event.playerName.equals(event.blockOwner) ) {

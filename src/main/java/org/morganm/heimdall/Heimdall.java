@@ -74,7 +74,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		// register enricher to add block history information to events
 		blockHistoryManager = BlockHistoryFactory.getBlockHistoryManager(this);
 		if( blockHistoryManager != null ) {
-			BlockHistoryEnricher bhe = new BlockHistoryEnricher(this, blockHistoryManager);
+			BlockHistoryEnricher bhe = new BlockHistoryEnricher(this, blockHistoryManager, playerStateManager);
 			eventManager.registerEnricher(this, Event.Type.BLOCK_CHANGE, bhe);
 			eventManager.registerEnricher(this, Event.Type.INVENTORY_CHANGE, bhe);
 			Debug.getInstance().debug("BlockHistoryEnricher ",bhe," has been registered");
@@ -135,6 +135,8 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	
 	@Override
 	public void onDisable() {
+		getServer().getScheduler().cancelTasks(this);
+
 		try {
 			playerStateManager.save();
 		}
@@ -144,7 +146,6 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 
 		eventManager.unregisterAllPluginEnrichers(this);
 		eventManager.unregisterAllPluginHandlers(this);
-		getServer().getScheduler().cancelTasks(this);
 		log.info(logPrefix + "version "+version+", build "+buildNumber+" is disabled");
 	}
 

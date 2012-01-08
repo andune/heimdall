@@ -11,7 +11,6 @@ import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.player.PlayerState;
 import org.morganm.heimdall.player.PlayerStateManager;
-import org.morganm.util.Debug;
 import org.morganm.util.JavaPluginExtensions;
 
 /** Simple engine to log griefer actions.
@@ -31,7 +30,7 @@ public class SimpleLogActionEngine implements Engine {
 	public SimpleLogActionEngine(final JavaPluginExtensions plugin, final PlayerStateManager playerStateManager) {
 		this.plugin = plugin;
 		this.playerStateManager = playerStateManager;
-
+		
 		// TODO: drive file location from config file
 		this.log = new EngineLog(new File("plugins/Heimdall/logs/simpleLogActionEngine.log"));
 		try {
@@ -60,10 +59,16 @@ public class SimpleLogActionEngine implements Engine {
 	}
 	
 	private void logEvent(final Event event, final float griefValue) {
-		Debug.getInstance().debug("SimpleLogActionEngine:processGriefValue(): playerName=",event.getPlayerName(),", griefvalue=",griefValue);
+//		Debug.getInstance().debug("SimpleLogActionEngine:processGriefValue(): playerName=",event.getPlayerName(),", griefvalue=",griefValue);
+		if( griefValue == 0 )
+			return;
+
+		PlayerState ps = playerStateManager.getPlayerState(event.getPlayerName());
+		if( ps.isExemptFromChecks() )
+			return;
+
 		if( log != null ) {
 			try {
-				PlayerState ps = playerStateManager.getPlayerState(event.getPlayerName());
 				log.log(event.getPlayerName()+" event grief points "+griefValue+", total grief now is "+ps.getGriefPoints());
 				
 				if( !flushScheduled ) {
