@@ -11,11 +11,12 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.EventCircularBuffer;
 import org.morganm.heimdall.event.EventManager;
-import org.morganm.util.Debug;
+import org.morganm.heimdall.player.PlayerTracker;
+import org.morganm.heimdall.util.Debug;
 
 /**
  * @author morganm
@@ -25,23 +26,24 @@ public class BukkitBlockListener extends BlockListener {
 	private final static int ERROR_FLOOD_PREVENTION_LIMIT = 3;
 	
 	@SuppressWarnings("unused")
-	private final JavaPlugin plugin;
+	private final Heimdall plugin;
 	private final EventManager eventManager;
 	private final EventCircularBuffer<BlockChangeEvent> buffer;
 	private final Debug debug;
-	private int errorFloodPreventionCount = 0;
+	private final PlayerTracker tracker;
 	
-	public BukkitBlockListener(final JavaPlugin plugin, final EventManager eventManager) {
+	public BukkitBlockListener(final Heimdall plugin, final EventManager eventManager) {
 		this.plugin = plugin;
 		this.eventManager = eventManager;
 		this.debug = Debug.getInstance();
+		this.tracker = plugin.getPlayerStateManager().getPlayerTracker();
 		
-		buffer = new EventCircularBuffer<BlockChangeEvent>(BlockChangeEvent.class, 1000, false);
+		buffer = new EventCircularBuffer<BlockChangeEvent>(BlockChangeEvent.class, 1000, false, true);
 	}
 	
 	@Override
 	public void onBlockBreak(BlockBreakEvent event) {
-		if( event.isCancelled() )
+		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
 			return;
 		
 		Block b = event.getBlock();
@@ -65,7 +67,7 @@ public class BukkitBlockListener extends BlockListener {
 	
 	@Override
 	public void onBlockPlace(BlockPlaceEvent event) {
-		if( event.isCancelled() )
+		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
 			return;
 		
 		Block b = event.getBlock();
@@ -90,7 +92,7 @@ public class BukkitBlockListener extends BlockListener {
 	
 	@Override
 	public void onSignChange(SignChangeEvent event) {
-		if( event.isCancelled() )
+		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
 			return;
 		
 		Block b = event.getBlock();
@@ -126,6 +128,7 @@ public class BukkitBlockListener extends BlockListener {
 		}
 	}
 	
+	private int errorFloodPreventionCount = 0;
 	private BlockChangeEvent getNextBlockChangeEvent() {
 		BlockChangeEvent bce = null;
 		try {

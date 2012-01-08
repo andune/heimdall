@@ -14,8 +14,8 @@ import org.morganm.heimdall.log.GriefEntry.Type;
 import org.morganm.heimdall.log.GriefLog;
 import org.morganm.heimdall.player.PlayerState;
 import org.morganm.heimdall.player.PlayerStateManager;
-import org.morganm.util.Debug;
-import org.morganm.util.JavaPluginExtensions;
+import org.morganm.heimdall.util.Debug;
+import org.morganm.heimdall.util.JavaPluginExtensions;
 
 /**
  * @author morganm
@@ -39,7 +39,7 @@ public class GriefLogEngine implements Engine {
 	 */
 	@Override
 	public void processBlockChange(BlockChangeEvent event) {
-		Debug.getInstance().debug("griefLogEngine: processing event: "+event);
+		Debug.getInstance().debug("griefLogEngine: processing event: ",event);
 		// do nothing if no grief value or blockOwner
 		if( event.griefValue == 0 || event.blockOwner == null )
 			return;
@@ -54,7 +54,7 @@ public class GriefLogEngine implements Engine {
 	 */
 	@Override
 	public void processInventoryChange(InventoryChangeEvent event) {
-		Debug.getInstance().debug("griefLogEngine: processing event: "+event);
+		Debug.getInstance().debug("griefLogEngine: processing event: ",event);
 		// do nothing if no grief value or blockOwner
 		if( event.griefValue == 0 || event.blockOwner == null )
 			return;

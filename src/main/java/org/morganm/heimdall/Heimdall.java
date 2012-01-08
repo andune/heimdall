@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.PluginManager;
@@ -25,12 +26,14 @@ import org.morganm.heimdall.event.EventManager;
 import org.morganm.heimdall.event.handlers.BlockHistoryEnricher;
 import org.morganm.heimdall.event.handlers.EngineWrapper;
 import org.morganm.heimdall.listener.BukkitBlockListener;
+import org.morganm.heimdall.listener.BukkitPlayerListener;
 import org.morganm.heimdall.listener.SpoutChestAccessListener;
 import org.morganm.heimdall.player.PlayerStateManager;
-import org.morganm.util.Debug;
-import org.morganm.util.JarUtils;
-import org.morganm.util.JavaPluginExtensions;
-import org.morganm.util.PermissionSystem;
+import org.morganm.heimdall.player.PlayerTracker;
+import org.morganm.heimdall.util.Debug;
+import org.morganm.heimdall.util.JarUtils;
+import org.morganm.heimdall.util.JavaPluginExtensions;
+import org.morganm.heimdall.util.PermissionSystem;
 
 /**
  * @author morganm
@@ -48,6 +51,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	private JarUtils jarUtil;
 	private EventManager eventManager;
 	private BukkitBlockListener blockListener;	// block listener to push block breaks into buffer
+	private BukkitPlayerListener playerListener;
 	private PlayerStateManager playerStateManager;
 	private Engine griefEngine;
 	private NotifyEngine notifyEngine;
@@ -61,6 +65,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		buildNumber = jarUtil.getBuildNumber();
 
 		loadConfig();
+		Debug.getInstance().debug("onEnable() starting, config loaded");
 		
 		perm = new PermissionSystem(this, log, logPrefix);
 		perm.setupPermissions();
@@ -130,11 +135,23 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 			log.info(logPrefix+ "Using Spout API to log chest access");
 		}
 		
+		playerListener = new BukkitPlayerListener(this);
+		pm.registerEvent(Type.PLAYER_QUIT, playerListener, Priority.Monitor, this);
+		pm.registerEvent(Type.PLAYER_JOIN, playerListener, Priority.Monitor, this);
+		pm.registerEvent(Type.PLAYER_KICK, playerListener, Priority.Monitor, this);
+		
+		Player[] players = getServer().getOnlinePlayers();
+		Debug.getInstance().debug("Running all ",players.length," online players through PlayerTracker login");
+		for(int i=0; i < players.length; i++)
+			playerStateManager.getPlayerTracker().playerLogin(players[i].getName());
+		
 		log.info(logPrefix + "version "+version+", build "+buildNumber+" is enabled");
-	}
+		Debug.getInstance().debug("onEnable() finished");
+}
 	
 	@Override
 	public void onDisable() {
+		Debug.getInstance().debug("onDisable() starting");
 		getServer().getScheduler().cancelTasks(this);
 
 		try {
@@ -147,6 +164,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		eventManager.unregisterAllPluginEnrichers(this);
 		eventManager.unregisterAllPluginHandlers(this);
 		log.info(logPrefix + "version "+version+", build "+buildNumber+" is disabled");
+		Debug.getInstance().debug("onDisable() finished");
 	}
 
 	public void loadConfig() {
@@ -162,7 +180,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		else
 			super.reloadConfig();
 		
-		Debug.getInstance().init(log, logPrefix, false);
+		Debug.getInstance().init(log, logPrefix, "plugins/Heimdall/debug.log", false);
 		Debug.getInstance().setDebug(getConfig().getBoolean("devDebug", false), Level.FINEST);
 		Debug.getInstance().setDebug(getConfig().getBoolean("debug", false));
 	}

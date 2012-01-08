@@ -3,7 +3,7 @@
  */
 package org.morganm.heimdall.event;
 
-import org.morganm.util.CircularBuffer;
+import org.morganm.heimdall.util.CircularBuffer;
 
 
 /** Circular buffer that only allows objects that implement the Event interface.
@@ -30,6 +30,9 @@ public class EventCircularBuffer<E extends Event> extends CircularBuffer<E> {
      */
 	public EventCircularBuffer(Class<E> eventClass, int bufferSize, boolean nullOnPop) {
 		super(eventClass, bufferSize, nullOnPop);
+	}
+	public EventCircularBuffer(Class<E> eventClass, int bufferSize, boolean nullOnPop, boolean bufferWrap) {
+		super(eventClass, bufferSize, nullOnPop, bufferWrap);
 	}
 	/*
 	@SuppressWarnings("unchecked")

@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.morganm.heimdall.command.BaseCommand;
-import org.morganm.util.General;
+import org.morganm.heimdall.util.General;
 
 /**
  * @author morganm

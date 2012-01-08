@@ -1,11 +1,17 @@
 /**
  * 
  */
-package org.morganm.util;
+package org.morganm.heimdall.util;
 
+import java.io.IOException;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 /**
@@ -13,29 +19,73 @@ import java.util.logging.Logger;
  *
  */
 public class Debug {
+	// class version: 6
 	private static Debug instance = null;
 	
-	private Logger log;
+	private Logger pluginLog;
 	private String logPrefix;
+	private Logger debugLog;
+	private boolean useConsoleLogger = true;
 	private boolean debug = false;
 	private Level oldConsoleLevel = null;
 	private Level oldLogLevel = null;
 	
 	public void init(Logger log, String logPrefix, boolean isDebug) {
-		this.log = log;
-		this.logPrefix = logPrefix; 
+		this.pluginLog = log;
+		this.logPrefix = logPrefix;
+		this.debugLog = log;
+		this.useConsoleLogger = true;
 		setDebug(isDebug);
+	}
+	public void init(Logger log, String logPrefix, String logFileName, boolean isDebug) {
+		this.pluginLog = log;
+		this.logPrefix = logPrefix;
+		this.useConsoleLogger = false;
+		
+		setDebugFile(log.getName()+".debug", logFileName);
+		setDebug(isDebug);
+	}
+	
+	private void setDebugFile(String loggerName, String fileName) {
+		try {
+			debugLog = Logger.getLogger(loggerName);
+			
+			// remove any existing handlers, this avoids multiple handlers
+			// being added on plugin reload
+			Handler[] handlers = debugLog.getHandlers();
+			for(int i=0; i < handlers.length; i++) {
+				handlers[i].close();
+				debugLog.removeHandler(handlers[i]);
+			}
+			
+			FileHandler handler = new FileHandler(fileName, true);
+			DebugFormatter formatter = new DebugFormatter();
+			handler.setFormatter(formatter);
+			
+			debugLog.addHandler(handler);
+		}
+		catch(IOException e) {
+			String warning = "Error in setDebugFile: "+e.getMessage();
+			if( pluginLog != null )
+				pluginLog.warning(logPrefix+warning);
+			else
+				System.out.println(warning);
+		}
 	}
 	
 //	private void enableFileLogger() {
 //		log.getName();
 //	}
 	
+	public void resetConsoleToINFO() {
+		setConsoleLevel(Level.INFO);
+	}
+	
 	private void setConsoleLevel(Level level) {
 		if( level == null )
 			return;
 		
-		Handler handler = getConsoleHandler(log);
+		Handler handler = getConsoleHandler(pluginLog);
 		if( handler != null ) {
 			oldConsoleLevel = handler.getLevel();
 			handler.setLevel(level);
@@ -59,7 +109,7 @@ public class Debug {
 	}
 	public void setDebug(boolean isDebug, Level level) {
 		// do nothing if we haven't been initialized with a valid logger yet
-		if( log == null )
+		if( pluginLog == null )
 			return;
 		// do nothing if flag hasn't changed
 		if( this.debug == isDebug )
@@ -68,19 +118,26 @@ public class Debug {
 		this.debug = isDebug;
 		
 		if( isDebug ) {
-			oldLogLevel = log.getLevel();
-			log.setLevel(level);
-			setConsoleLevel(level);
-			debug("DEBUGGING ENABLED");
+			oldLogLevel = debugLog.getLevel();
+			debugLog.setLevel(level);
+			pluginLog.info(logPrefix + "DEBUGGING ENABLED");
+			if( useConsoleLogger ) {
+				setConsoleLevel(level);
+				pluginLog.info(logPrefix + "(CONSOLE DEBUG LOGGING ENABLED)");
+			}
 		}
 		else {
-			debug("DEBUGGING DISABLED");
-			setConsoleLevel(oldConsoleLevel);
-			log.setLevel(oldLogLevel);
+			debugLog.setLevel(oldLogLevel);
+			pluginLog.info(logPrefix + "DEBUGGING DISABLED");
+			
+			if( useConsoleLogger ) {
+				setConsoleLevel(oldConsoleLevel);
+				pluginLog.info(logPrefix + "(CONSOLE DEBUG LOGGING DISABLED)");
+			}
 		}
 	}
 	public boolean isDebug() { return debug; }
-	public boolean isDevDebug() { return debug && log.isLoggable(Level.FINEST); }
+	public boolean isDevDebug() { return debug && debugLog.isLoggable(Level.FINEST); }
 	
 	public static Debug getInstance() {
 		if( instance == null ) {
@@ -125,18 +182,35 @@ public class Debug {
 				sb.append(args[i]);
 			}
 			
-			log.fine(sb.toString());
+			debugLog.fine(sb.toString());
 		}
 	}
 	
 	public void devDebug(Object...args) {
-		if( debug && log.isLoggable(Level.FINEST) ) {
+		if( debug && debugLog.isLoggable(Level.FINEST) ) {
 			StringBuilder sb = new StringBuilder(logPrefix);
 			for(int i=0; i<args.length;i++) {
 				sb.append(args[i]);
 			}
 
-			log.finest(sb.toString());
+			debugLog.finest(sb.toString());
 		}
+	}
+	
+	private class DebugFormatter extends Formatter {
+		private final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM);
+		private final String newLine = System.getProperty("line.separator");
+		
+		@Override
+		public String format(LogRecord record) {
+			StringBuilder sb = new StringBuilder(200);
+			sb.append("[");
+			sb.append(dateFormat.format(new Date(record.getMillis())));
+			sb.append("] ");
+			sb.append(record.getMessage());
+			sb.append(newLine);
+			return sb.toString();
+		}
+		
 	}
 }

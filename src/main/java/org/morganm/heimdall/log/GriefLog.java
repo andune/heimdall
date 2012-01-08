@@ -14,9 +14,9 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
-import org.morganm.util.Debug;
-import org.morganm.util.General;
-import org.morganm.util.JavaPluginExtensions;
+import org.morganm.heimdall.util.Debug;
+import org.morganm.heimdall.util.General;
+import org.morganm.heimdall.util.JavaPluginExtensions;
 
 /**
  * @author morganm

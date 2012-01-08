@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.morganm.util;
+package org.morganm.heimdall.util;
 
 import java.util.ArrayList;
 import java.util.List;

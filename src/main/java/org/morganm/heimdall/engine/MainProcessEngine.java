@@ -12,8 +12,8 @@ import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent.InventoryEventType;
 import org.morganm.heimdall.player.PlayerState;
 import org.morganm.heimdall.player.PlayerStateManager;
-import org.morganm.util.Debug;
-import org.morganm.util.JavaPluginExtensions;
+import org.morganm.heimdall.util.Debug;
+import org.morganm.heimdall.util.JavaPluginExtensions;
 
 /**
  * @author morganm

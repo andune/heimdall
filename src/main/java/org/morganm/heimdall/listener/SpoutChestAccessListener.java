@@ -13,12 +13,13 @@ import org.getspout.spoutapi.event.inventory.InventoryCloseEvent;
 import org.getspout.spoutapi.event.inventory.InventoryCraftEvent;
 import org.getspout.spoutapi.event.inventory.InventoryListener;
 import org.getspout.spoutapi.event.inventory.InventoryOpenEvent;
+import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.EventCircularBuffer;
 import org.morganm.heimdall.event.EventManager;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent.InventoryEventType;
-import org.morganm.util.General;
-import org.morganm.util.JavaPluginExtensions;
+import org.morganm.heimdall.player.PlayerTracker;
+import org.morganm.heimdall.util.General;
 
 /** Code originally copied from @Diddiz's LogBlock plugin.
  * 
@@ -29,19 +30,20 @@ public class SpoutChestAccessListener extends InventoryListener {
 	private final static int ERROR_FLOOD_PREVENTION_LIMIT = 3;
 
 	@SuppressWarnings("unused")
-	private final JavaPluginExtensions plugin;
+	private final Heimdall plugin;
 	private final EventManager eventManager;
 	private final General util;
 	private final Map<Player, ItemStack[]> containers = new HashMap<Player, ItemStack[]>();
 	private final EventCircularBuffer<InventoryChangeEvent> buffer;
-	private int errorFloodPreventionCount = 0;
+	private final PlayerTracker tracker;
 
-	public SpoutChestAccessListener(final JavaPluginExtensions plugin, final EventManager eventManager) {
+	public SpoutChestAccessListener(final Heimdall plugin, final EventManager eventManager) {
 		this.plugin = plugin;
 		this.eventManager = eventManager;
 		this.util = General.getInstance();
+		this.tracker = plugin.getPlayerStateManager().getPlayerTracker();
 		
-		this.buffer = new EventCircularBuffer<InventoryChangeEvent>(InventoryChangeEvent.class, 1000, false);
+		this.buffer = new EventCircularBuffer<InventoryChangeEvent>(InventoryChangeEvent.class, 1000, false, true);
 	}
 
 	/** When an inventory is closed, check to see if we had a "before" snapshot recorded
@@ -51,8 +53,10 @@ public class SpoutChestAccessListener extends InventoryListener {
 	 */
 	@Override
 	public void onInventoryClose(InventoryCloseEvent event) {
+		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
+			return;
 		final Location l = event.getLocation();
-		if (event.isCancelled() || l == null)
+		if( l == null )
 			return;
 
 		final Player player = event.getPlayer();
@@ -87,8 +91,10 @@ public class SpoutChestAccessListener extends InventoryListener {
 	 */
 	@Override
 	public void onInventoryOpen(InventoryOpenEvent event) {
+		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
+			return;
 		// blockid 58 == crafting table, so this code ignores those. -morganm
-		if (!event.isCancelled() && event.getLocation() != null && event.getLocation().getBlock().getTypeId() != 58)
+		if (event.getLocation() != null && event.getLocation().getBlock().getTypeId() != 58)
 			containers.put(event.getPlayer(), util.compressInventory(event.getInventory().getContents()));
 	}
 	
@@ -98,8 +104,11 @@ public class SpoutChestAccessListener extends InventoryListener {
 	 */
 	@Override
 	public void onInventoryCraft(InventoryCraftEvent event) {
+		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
+			return;
+
 		final Location l = event.getLocation();
-		if(!event.isCancelled() && l != null) {
+		if(l != null) {
 			final Player player = event.getPlayer();
 			
 			ItemStack[] contents = event.getInventory().getContents();
@@ -120,6 +129,7 @@ public class SpoutChestAccessListener extends InventoryListener {
 		}
 	}
 	
+	private int errorFloodPreventionCount = 0;
 	private InventoryChangeEvent getNextInventoryChangeEvent() {
 		InventoryChangeEvent ice = null;
 		try {

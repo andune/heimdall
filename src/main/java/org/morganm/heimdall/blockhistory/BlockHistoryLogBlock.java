@@ -5,7 +5,7 @@ package org.morganm.heimdall.blockhistory;
 
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
-import org.morganm.util.Debug;
+import org.morganm.heimdall.util.Debug;
 
 import de.diddiz.LogBlock.LogBlock;
 import de.diddiz.LogBlock.QueryParams;

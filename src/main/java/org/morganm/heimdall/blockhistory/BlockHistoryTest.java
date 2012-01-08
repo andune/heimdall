@@ -5,7 +5,7 @@ package org.morganm.heimdall.blockhistory;
 
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
-import org.morganm.util.Debug;
+import org.morganm.heimdall.util.Debug;
 
 /** Test class, to test griefers by returning another owner for all blocks, also
  * can be used to test the block history cache.

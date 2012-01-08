@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.morganm.util;
+package org.morganm.heimdall.util;
 
 import java.lang.reflect.Array;
 
@@ -17,6 +17,10 @@ public class CircularBuffer<E> {
 	private final E[] objects;
 	private final boolean nullOnPop;
 	private final int bufferSize;
+	/* If bufferWrap is true, it means this buffer will never be popped from.
+	 * 
+	 */
+	private boolean bufferWrap;
 	private final Class<E> objectClass;
 	
 	private int start = 0;
@@ -36,6 +40,10 @@ public class CircularBuffer<E> {
 		this.objects = (E[]) Array.newInstance(this.objectClass, bufferSize);
 //		this.events = new E[bufferSize];
 	}
+	public CircularBuffer(Class<E> objectClass, int bufferSize, boolean nullOnPop, boolean bufferWrap) {
+		this(objectClass, bufferSize, nullOnPop);
+		this.bufferWrap = true;
+	}
 
 	/** Pop an object out of the buffer.
 	 * This actually just moves circular buffer
@@ -44,8 +52,8 @@ public class CircularBuffer<E> {
 	 * @return
 	 */
 	public E pop() {
-		// empty buffer
-		if( start == end )
+		// empty buffer. We also don't allow pop if bufferWrap is true.
+		if( start == end || bufferWrap )
 			return null;
 		
 		synchronized (this) {
@@ -73,9 +81,9 @@ public class CircularBuffer<E> {
 		if( ++end >= bufferSize )
 			end = 0;
 		
-		// if the buffer is full, increment the start (essentially loosing that object)
+		// if the buffer is full, increment the start (essentially losing that object)
 		// TODO: allow buffer overflow
-		if( end == start ) {
+		if( !bufferWrap && end == start ) {
 			synchronized (this) {
 				if( ++start >= bufferSize )
 					start = 0;
@@ -102,7 +110,7 @@ public class CircularBuffer<E> {
 		
 		// if the buffer is full, increment the start (essentially losing that object)
 		// TODO: allow buffer overflow
-		if( end == start ) {
+		if( !bufferWrap &&  end == start ) {
 			synchronized (this) {
 				if( ++start >= bufferSize )
 					start = 0;

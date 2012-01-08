@@ -14,9 +14,9 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.morganm.heimdall.log.GriefLog;
-import org.morganm.util.Debug;
-import org.morganm.util.JavaPluginExtensions;
-import org.morganm.util.PermissionSystem;
+import org.morganm.heimdall.util.Debug;
+import org.morganm.heimdall.util.JavaPluginExtensions;
+import org.morganm.heimdall.util.PermissionSystem;
 
 /**
  * @author morganm

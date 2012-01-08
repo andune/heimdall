@@ -16,8 +16,8 @@ import org.bukkit.plugin.Plugin;
 import org.morganm.heimdall.engine.EngineLog;
 import org.morganm.heimdall.event.Event.Type;
 import org.morganm.heimdall.event.handlers.EventHandler;
-import org.morganm.util.Debug;
-import org.morganm.util.JavaPluginExtensions;
+import org.morganm.heimdall.util.Debug;
+import org.morganm.heimdall.util.JavaPluginExtensions;
 
 /** Class to manage events. Events are added as they happen and are processed asynchronously
  * by an event processing engine.
@@ -141,7 +141,11 @@ public class EventManager implements Runnable {
 					}catch(IOException e) {}
 				}
 				else {
-					Debug.getInstance().devDebug("eventManager event counts align: ",lastProcessedEvent);
+					if( (lastProcessedEvent % 10) == 0 )
+						try {
+							eventDebugLog.log("lastProcessedEvent = "+lastProcessedEvent);
+						}catch(IOException e) {}
+//					Debug.getInstance().devDebug("eventManager event counts align: ",lastProcessedEvent);
 					lastProcessedEvent++;
 				}
 				// DEBUGGING

@@ -8,7 +8,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import org.morganm.util.Debug;
+import org.morganm.heimdall.util.Debug;
 
 /** Class that implements logging for an engine, so it can spit out details about
  * what it is doing to a log file.

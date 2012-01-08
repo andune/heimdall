@@ -9,7 +9,7 @@ import org.bukkit.Location;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.InventoryChangeEvent;
-import org.morganm.util.JavaPluginExtensions;
+import org.morganm.heimdall.util.JavaPluginExtensions;
 
 /** Engine that keeps track of the most recent grief event per-player.
  * 

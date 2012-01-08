@@ -11,7 +11,7 @@ import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.player.PlayerState;
 import org.morganm.heimdall.player.PlayerStateManager;
-import org.morganm.util.JavaPluginExtensions;
+import org.morganm.heimdall.util.JavaPluginExtensions;
 
 /** Simple engine to log griefer actions.
  * 

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.morganm.util.JavaPluginExtensions;
+import org.morganm.heimdall.util.JavaPluginExtensions;
 
 /** Class for tracking and storing PlayerState objects.
  * 
@@ -23,13 +23,17 @@ public class PlayerStateManager {
 	private final Map<String, PlayerState> playerStateMap;
 	private File friendDataFile = new File("plugins/Heimdall/friends.yml");
 	private YamlConfiguration friendData;
+	private final PlayerTracker playerTracker;
 	
 	public PlayerStateManager(final JavaPluginExtensions plugin) {
 		this.plugin = plugin;
 		this.playerStateMap = new HashMap<String, PlayerState>(20);
 		this.log = this.plugin.getLogger();
 		this.logPrefix = this.plugin.getLogPrefix();
+		this.playerTracker = new PlayerTracker(this);
 	}
+	
+	public PlayerTracker getPlayerTracker() { return playerTracker; }
 	
 	/** Get the PlayerState object for a player.
 	 * 
