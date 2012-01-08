@@ -13,6 +13,7 @@ import org.morganm.heimdall.command.BaseCommand;
 import org.morganm.heimdall.log.GriefEntry;
 import org.morganm.heimdall.player.PlayerState;
 import org.morganm.heimdall.player.PlayerStateManager;
+import org.morganm.heimdall.util.General;
 
 /**
  * @author morganm
@@ -50,7 +51,9 @@ public class GriefLog extends BaseCommand {
 				sb.append(dateFormat.format(new Date(entries[i].getTime())));
 				sb.append("] ");
 				sb.append(entries[i].getActivity().toString());
-				sb.append(": gp=");
+				sb.append(": l=");
+				sb.append(General.getInstance().shortLocationString(entries[i].getLocation()));
+				sb.append(", gp=");
 				sb.append(entries[i].getGriefPoints());
 				sb.append(", tgp=");
 				sb.append(entries[i].getTotalGriefPoints());

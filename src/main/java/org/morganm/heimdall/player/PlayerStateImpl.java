@@ -13,9 +13,9 @@ import java.util.Set;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.log.GriefLog;
 import org.morganm.heimdall.util.Debug;
-import org.morganm.heimdall.util.JavaPluginExtensions;
 import org.morganm.heimdall.util.PermissionSystem;
 
 /**
@@ -23,7 +23,7 @@ import org.morganm.heimdall.util.PermissionSystem;
  *
  */
 public class PlayerStateImpl implements PlayerState {
-	private final transient JavaPluginExtensions plugin;  
+	private final transient Heimdall plugin;  
 	private final transient PermissionSystem permSystem;  
 	private final String name;
 	private float griefPoints=0;
@@ -39,7 +39,7 @@ public class PlayerStateImpl implements PlayerState {
 	private transient GriefLog griefLog;
 	private transient YamlConfiguration dataStore;
 	
-	public PlayerStateImpl(final JavaPluginExtensions plugin, final String name, final PlayerStateManager playerStateManager) {
+	public PlayerStateImpl(final Heimdall plugin, final String name, final PlayerStateManager playerStateManager) {
 		this.plugin = plugin;
 		this.permSystem = this.plugin.getPermissionSystem();
 		this.name = name;
@@ -119,13 +119,19 @@ public class PlayerStateImpl implements PlayerState {
 				path.mkdirs();
 		}
 		
+		// don't do anything if nothing to record
+		if( griefPoints == 0 && pointsByOwner == null )
+			return;
+		
 		if( dataStore == null )
 			dataStore = new YamlConfiguration();
 		
 		dataStore.set("griefPoints", griefPoints);
 		
-		for(Map.Entry<String, Float> entry : pointsByOwner.entrySet()) {
-			dataStore.set("pointsByOwner."+entry.getKey(), entry.getValue());
+		if( pointsByOwner != null ) {
+			for(Map.Entry<String, Float> entry : pointsByOwner.entrySet()) {
+				dataStore.set("pointsByOwner."+entry.getKey(), entry.getValue());
+			}
 		}
 
 		dataStore.save(dataFile);

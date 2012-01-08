@@ -26,6 +26,7 @@ public class Heimdall extends BaseCommand {
 		
 		if( "debug".equals(args[0]) && args.length > 1 ) {
 			if( "on".equals(args[1]) ) {
+				Debug.getInstance().resetConsoleToINFO();
 				Debug.getInstance().setDebug(true);
 				sender.sendMessage("Debugging enabled");
 				return true;
@@ -37,6 +38,25 @@ public class Heimdall extends BaseCommand {
 				return true;
 			}
 		}
+		else if( "tracker".equals(args[0]) && args.length > 1 ) {
+			if( "reset".equals(args[1]) ) {
+				plugin.getPlayerStateManager().getPlayerTracker().reset();
+				sender.sendMessage("Player tracker reset");
+				return true;
+			}
+		}
+		else if( "saveall".equals(args[0]) ) {
+			try {
+				plugin.getPlayerStateManager().save();
+				sender.sendMessage("Forced save-all");
+			}
+			catch(Exception e) {
+				sender.sendMessage("Error with save-all: "+e.getMessage());
+				e.printStackTrace();
+			}
+			return true;
+		}
+		
 		// TODO Auto-generated method stub
 		return false;
 	}

@@ -5,6 +5,7 @@ package org.morganm.heimdall.event;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,11 +14,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.bukkit.plugin.Plugin;
+import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.engine.EngineLog;
 import org.morganm.heimdall.event.Event.Type;
 import org.morganm.heimdall.event.handlers.EventHandler;
-import org.morganm.heimdall.util.Debug;
-import org.morganm.heimdall.util.JavaPluginExtensions;
 
 /** Class to manage events. Events are added as they happen and are processed asynchronously
  * by an event processing engine.
@@ -34,9 +34,9 @@ import org.morganm.heimdall.util.JavaPluginExtensions;
 public class EventManager implements Runnable {
 	private final static int CIRCULAR_BUFFER_SIZE = 10000;
 	
-	@SuppressWarnings("unused")
-	private JavaPluginExtensions plugin;
+	private Heimdall plugin;
 	private boolean running = false;
+	private EngineLog eventDebugLog;
 	
 	// maybe implementation itself should use a circular buffer, backed by an ArrayList
 	// to handle any possible overflow?
@@ -50,13 +50,14 @@ public class EventManager implements Runnable {
 	private Map<Event.Type, Map<Plugin, Set<EventHandler>>> eventEnrichers;
 	private Map<Event.Type, Map<Plugin, Set<EventHandler>>> eventHandlers;
 	
-	public EventManager(final JavaPluginExtensions plugin) {
+	public EventManager(final Heimdall plugin) {
 		this.plugin = plugin;
 		this.eventBuffer = new EventCircularBuffer<Event>(Event.class, CIRCULAR_BUFFER_SIZE, true);
 		this.eventHandlers = new HashMap<Event.Type, Map<Plugin, Set<EventHandler>>>();
 		this.eventEnrichers = new HashMap<Event.Type, Map<Plugin, Set<EventHandler>>>();
 		
 		plugin.getServer().getScheduler().scheduleAsyncRepeatingTask(plugin, this, 100, 100);
+		eventDebugLog = new EngineLog(this.plugin, new File("plugins/Heimdall/eventDebug.log"));
 	}
 	
 	public void registerHandler(final Plugin plugin, final Event.Type type, final EventHandler handler) {
@@ -115,7 +116,6 @@ public class EventManager implements Runnable {
 	}
 	*/
 	
-	private EngineLog eventDebugLog = new EngineLog(new File("plugins/Heimdall/eventDebug.log"));
 	private HashMap<Event, Integer> eventDebugMap = new HashMap<Event, Integer>(1000);
 	private int lastProcessedEvent=0;
 	public void pushEvent(Event e) {
@@ -131,6 +131,10 @@ public class EventManager implements Runnable {
 		running = true;
 		try {
 			Event event = null;
+//			try {
+//				eventDebugLog.log("["+new Date()+"] starting while loop, size="+eventBuffer.size());
+//			}catch(Exception e) {}
+
 			while( (event = eventBuffer.pop()) != null ) {
 				// DEBUGGING
 				Integer eventNumber = eventDebugMap.remove(event);
@@ -143,7 +147,7 @@ public class EventManager implements Runnable {
 				else {
 					if( (lastProcessedEvent % 10) == 0 )
 						try {
-							eventDebugLog.log("lastProcessedEvent = "+lastProcessedEvent);
+							eventDebugLog.log("["+new Date()+"] lastProcessedEvent = "+lastProcessedEvent+", buffer size="+eventBuffer.size());
 						}catch(IOException e) {}
 //					Debug.getInstance().devDebug("eventManager event counts align: ",lastProcessedEvent);
 					lastProcessedEvent++;

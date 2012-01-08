@@ -7,27 +7,27 @@ import java.io.File;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent.InventoryEventType;
 import org.morganm.heimdall.player.PlayerState;
 import org.morganm.heimdall.player.PlayerStateManager;
 import org.morganm.heimdall.util.Debug;
-import org.morganm.heimdall.util.JavaPluginExtensions;
 
 /**
  * @author morganm
  *
  */
 public class MainProcessEngine implements Engine {
-	private final JavaPluginExtensions plugin;
+	private final Heimdall plugin;
 	private final PlayerStateManager playerStateManager;
 	private final Debug debug;
 	private final YamlConfiguration config;
 	private final EngineLog log;
 	private final boolean isLogging;
 	
-	public MainProcessEngine(final JavaPluginExtensions plugin, final PlayerStateManager playerStateManager) {
+	public MainProcessEngine(final Heimdall plugin, final PlayerStateManager playerStateManager) {
 		this.plugin = plugin;
 		this.playerStateManager = playerStateManager;
 		this.debug = Debug.getInstance();
@@ -42,7 +42,7 @@ public class MainProcessEngine implements Engine {
 		if( this.isLogging ) {
 			File logFile = new File(this.config.getString("engine.main.logfile"));
 			debug.debug("Main engine opening engine logfile ",logFile);
-			log = new EngineLog(logFile);
+			log = new EngineLog(plugin, logFile);
 		}
 		else
 			log = null;

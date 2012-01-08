@@ -46,6 +46,12 @@ public class Debug {
 		setDebug(isDebug);
 	}
 	
+	public void disable() {
+		setDebug(false, Level.INFO);
+		resetConsoleToINFO();
+		pluginLog.info(logPrefix + "DEBUGGING DISABLED");
+	}
+	
 	private void setDebugFile(String loggerName, String fileName) {
 		try {
 			debugLog = Logger.getLogger(loggerName);

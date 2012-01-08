@@ -44,6 +44,15 @@ public class CircularBuffer<E> {
 		this(objectClass, bufferSize, nullOnPop);
 		this.bufferWrap = true;
 	}
+	
+	public int size() {
+		if( end == start )
+			return 0;
+		else if( end > start )
+			return end - start;
+		else
+			return (bufferSize-start) + end;
+	}
 
 	/** Pop an object out of the buffer.
 	 * This actually just moves circular buffer

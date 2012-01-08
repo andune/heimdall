@@ -14,18 +14,18 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
+import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.util.Debug;
 import org.morganm.heimdall.util.General;
-import org.morganm.heimdall.util.JavaPluginExtensions;
 
 /**
  * @author morganm
  *
  */
-public class GriefLog {
+public class GriefLog implements LogInterface {
 	public static final String HEADER = "# activity|playerName|activityGriefPoints|totalGriefPoints|location|blockOwner|additionalData";
 
-	private final JavaPluginExtensions plugin;
+	private final Heimdall plugin;
 	private final Logger log;
 	private final String logPrefix;
 	private final File logFile;
@@ -34,11 +34,13 @@ public class GriefLog {
 	private boolean flushScheduled = false;
 	private final LogFlusher logFlusher = new LogFlusher();
 	
-	public GriefLog(final JavaPluginExtensions plugin, final File logFile) {
+	public GriefLog(final Heimdall plugin, final File logFile) {
 		this.plugin = plugin;
 		this.log = this.plugin.getLogger();
 		this.logPrefix = this.plugin.getLogPrefix();
 		this.logFile = logFile;
+		
+		this.plugin.addLogger(this);
 	}
 	
 	public void init() throws IOException {
@@ -55,9 +57,25 @@ public class GriefLog {
 		if( !fileExists )
 			writeHeader();
 	}
-	public void close() throws IOException {
-		if( writer != null )
-			writer.close();
+	public void close() {
+		if( writer != null ) {
+			try {
+				writer.close();
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	public void flush() {
+		if( writer != null ) {
+			try {
+				writer.flush();
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	private void writeHeader() throws IOException {

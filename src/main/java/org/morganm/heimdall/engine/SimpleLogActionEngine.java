@@ -5,13 +5,15 @@ package org.morganm.heimdall.engine;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.util.Date;
 
+import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.player.PlayerState;
 import org.morganm.heimdall.player.PlayerStateManager;
-import org.morganm.heimdall.util.JavaPluginExtensions;
 
 /** Simple engine to log griefer actions.
  * 
@@ -19,20 +21,21 @@ import org.morganm.heimdall.util.JavaPluginExtensions;
  *
  */
 public class SimpleLogActionEngine implements Engine {
+	private static final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM);
 //	private static long TIME_BETWEEN_FLUSH = 5000;	// 5 seconds
 	
-	private final JavaPluginExtensions plugin;
+	private final Heimdall plugin;
 	private EngineLog log;
 	private boolean flushScheduled = false;
 	private final LogFlusher logFlusher = new LogFlusher();
 	private final PlayerStateManager playerStateManager;
 	
-	public SimpleLogActionEngine(final JavaPluginExtensions plugin, final PlayerStateManager playerStateManager) {
+	public SimpleLogActionEngine(final Heimdall plugin, final PlayerStateManager playerStateManager) {
 		this.plugin = plugin;
 		this.playerStateManager = playerStateManager;
 		
 		// TODO: drive file location from config file
-		this.log = new EngineLog(new File("plugins/Heimdall/logs/simpleLogActionEngine.log"));
+		this.log = new EngineLog(plugin, new File("plugins/Heimdall/logs/simpleLogActionEngine.log"));
 		try {
 			log.init();
 		}
@@ -69,7 +72,16 @@ public class SimpleLogActionEngine implements Engine {
 
 		if( log != null ) {
 			try {
-				log.log(event.getPlayerName()+" event grief points "+griefValue+", total grief now is "+ps.getGriefPoints());
+				StringBuilder sb = new StringBuilder(160);
+				sb.append("[");
+				sb.append(dateFormat.format(new Date()));
+				sb.append("] ");
+				sb.append(event.getPlayerName());
+				sb.append(" event grief points ");
+				sb.append(griefValue);
+				sb.append(", total grief now is ");
+				sb.append(ps.getGriefPoints());
+				log.log(sb.toString());
 				
 				if( !flushScheduled ) {
 					flushScheduled = true;
@@ -84,9 +96,7 @@ public class SimpleLogActionEngine implements Engine {
 	
 	private class LogFlusher implements Runnable {
 		public void run() {
-			try { 
-				log.flush();
-			} catch(IOException e) {}
+			log.flush();
 			flushScheduled = false;
 		}
 	}

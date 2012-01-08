@@ -15,12 +15,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.player.PlayerStateManager;
 import org.morganm.heimdall.util.General;
-import org.morganm.heimdall.util.JavaPluginExtensions;
 import org.morganm.heimdall.util.PermissionSystem;
 
 /**
@@ -28,14 +28,15 @@ import org.morganm.heimdall.util.PermissionSystem;
  *
  */
 public class NotifyEngine implements Engine {
-	private final JavaPluginExtensions plugin; 
+	private final Heimdall plugin; 
 	private final PlayerStateManager playerStateManager;
 	private final PermissionSystem perms;
 	private final Map<String, Float> lastNotifyValues = new HashMap<String, Float>(20);
 	private final Map<String, Set<String>> notifyIgnores = new HashMap<String, Set<String>>();
 	private final FileConfiguration config;
+	private final EngineLog engineLog;
 	
-	public NotifyEngine(final JavaPluginExtensions plugin, final PlayerStateManager playerStateManager) {
+	public NotifyEngine(final Heimdall plugin, final PlayerStateManager playerStateManager) {
 		this.plugin = plugin;
 		this.playerStateManager = playerStateManager;
 		this.perms = plugin.getPermissionSystem();
@@ -44,6 +45,7 @@ public class NotifyEngine implements Engine {
 		File file = new File(configFile);
 		this.config = YamlConfiguration.loadConfiguration(file);
 //		Debug.getInstance().debug("config.getInt(\"blockpoints.4\") = ",config.getInt("blockpoints.4"));
+		engineLog = new EngineLog(plugin, new File("plugins/Heimdall/notify.log"));
 	}
 
 	@Override
@@ -118,6 +120,11 @@ public class NotifyEngine implements Engine {
 							+griefPoints+" total grief points. Latest action "+event.getEventTypeString()
 							+" at location {"+General.getInstance().shortLocationString(event.getLocation())+"}"
 							+additionalData);
+
+					try {
+						engineLog.log("Notified "+p.getName()+" of possible grief event by "+event.getPlayerName());
+					}
+					catch(Exception e) {}
 				}
 			}
 		}

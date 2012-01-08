@@ -5,6 +5,8 @@ package org.morganm.heimdall.player;
 
 import java.util.HashSet;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.morganm.heimdall.util.Debug;
 
 /** Class which keeps track of which players are being tracked by Heimdall.
@@ -20,6 +22,17 @@ public class PlayerTracker {
 	public PlayerTracker(final PlayerStateManager playerStateManager) {
 		this.playerStateManager = playerStateManager;
 		this.debug = Debug.getInstance();
+	}
+	
+	/** Clear trackedPlayers and re-check against currently online people.
+	 * 
+	 */
+	public void reset() {
+		trackedPlayers.clear();
+		Player[] players = Bukkit.getOnlinePlayers();
+		debug.debug("Tracker reset; running all ",players.length," online players through PlayerTracker login check");
+		for(int i=0; i < players.length; i++)
+			playerStateManager.getPlayerTracker().playerLogin(players[i].getName());
 	}
 	
 	public void playerLogin(final String playerName) {
