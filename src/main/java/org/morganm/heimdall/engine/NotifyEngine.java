@@ -57,6 +57,18 @@ public class NotifyEngine implements Engine {
 
 	@Override
 	public void processInventoryChange(InventoryChangeEvent event) {
+		StringBuilder sb = new StringBuilder(80);
+		sb.append("[Items: ");
+		int baseLength = sb.length();
+		for(int i=0; i < event.diff.length; i++) {
+			if( sb.length() > baseLength )
+				sb.append(",");
+			sb.append(event.diff[i].getType());
+			sb.append(":");
+			sb.append(event.diff[i].getAmount());
+		}
+		sb.append("]");
+
 		processEvent(event, " (owner=",event.blockOwner,")");
 	}
 
@@ -104,6 +116,10 @@ public class NotifyEngine implements Engine {
 		if( ignores != null )
 			ignores.remove(playerIgnored);
 	}
+	
+	public Set<String> getNotifyIgnoreList(final String adminPlayer) {
+		return notifyIgnores.get(adminPlayer);
+	}
 
 	private void doNotify(final Event event, final float griefPoints, final Object...arg) {
 		final List<Player> notifyTargets = getOnlineNotifyTargets();
@@ -113,13 +129,14 @@ public class NotifyEngine implements Engine {
 				sb.append(arg[i]);
 			}
 			final String additionalData = sb.toString();
-			
+
+			final String lowerCaseName = event.getPlayerName().toLowerCase();			
 			final StringBuilder targetsString = new StringBuilder(60);
 			for(Player p : notifyTargets) {
 				Set<String> ignores = notifyIgnores.get(p.getName());
 				
 				// notify if no ignores are set or if the player is not in the ignore list
-				if( ignores == null || !ignores.contains(event.getPlayerName()) ) {
+				if( ignores == null || !ignores.contains(lowerCaseName) ) {
 					p.sendMessage(ChatColor.RED+"[Heimdall]"+ChatColor.WHITE
 							+" Player "+event.getPlayerName()+" has accumulated "
 							+griefPoints+" total grief points. Latest action "+event.getEventTypeString()

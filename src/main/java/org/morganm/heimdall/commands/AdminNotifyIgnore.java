@@ -3,6 +3,8 @@
  */
 package org.morganm.heimdall.commands;
 
+import java.util.Set;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -18,6 +20,20 @@ public class AdminNotifyIgnore extends BaseCommand {
 	public boolean onCommand(CommandSender sender, Command command,
 			String label, String[] args) {
 		if( args.length < 1 ) {
+			Set<String> ignores = plugin.getNotifyEngine().getNotifyIgnoreList(sender.getName());
+			if( ignores != null ) {
+				StringBuilder sb = new StringBuilder(80);
+				for(String s : ignores) {
+					if( sb.length() > 0 )
+						sb.append(", ");
+					sb.append(s);
+				}
+				sender.sendMessage("Current ignore list: "+sb.toString());
+				
+				return true;
+			}
+			
+			// otherwise, just send usage and exit
 			sender.sendMessage(command.getUsage());
 			return true;
 		}
