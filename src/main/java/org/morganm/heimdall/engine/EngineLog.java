@@ -27,7 +27,7 @@ public class EngineLog implements LogInterface {
 	private final File logFile;
 	private BufferedWriter writer;
 	private boolean isInitialized = false;
-	private long lastCall=0;
+	private long lastFlush=0;
 	
 	public EngineLog(final Heimdall plugin, final File logFile) {
 		this.plugin = plugin;
@@ -42,24 +42,24 @@ public class EngineLog implements LogInterface {
 		if( writer != null ) {
 			try {
 				writer.close();
+				writer = null;
 			}
 			catch(IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
-
+	
 	public void log(final String msg) throws IOException {
 		Debug.getInstance().debug("log(): msg=",msg);
 		if( !isInitialized )
 			init();
 		
-		long currentTime = System.currentTimeMillis();
 		try {
 			writer.write(msg);
 			writer.newLine();
 			
-			if( (currentTime - lastCall) > TIME_BETWEEN_FLUSH )
+			if( (System.currentTimeMillis() - lastFlush) > TIME_BETWEEN_FLUSH )
 				flush();
 		}
 		// if we fail first try, close and re-open the file and try writing again
@@ -71,8 +71,6 @@ public class EngineLog implements LogInterface {
 			init();
 			writer.write(msg);
 		}
-
-		lastCall = currentTime; 
 	}
 	
 	/** Log a message, but if there is an error, just ignore the error.
@@ -92,6 +90,8 @@ public class EngineLog implements LogInterface {
 				writer.flush();
 			} catch(IOException e) { e.printStackTrace(); }
 		}
+
+		lastFlush = System.currentTimeMillis(); 
 	}
 	
 	public void init() throws IOException {

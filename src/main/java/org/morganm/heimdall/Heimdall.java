@@ -191,7 +191,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		else
 			super.reloadConfig();
 		
-		Debug.getInstance().init(log, logPrefix, "plugins/Heimdall/debug.log", false);
+		Debug.getInstance().init(log, logPrefix, "plugins/Heimdall/logs/debug.log", false);
 		Debug.getInstance().setDebug(getConfig().getBoolean("devDebug", false), Level.FINEST);
 		Debug.getInstance().setDebug(getConfig().getBoolean("debug", false));
 	}

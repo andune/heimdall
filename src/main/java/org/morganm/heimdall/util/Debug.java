@@ -3,6 +3,7 @@
  */
 package org.morganm.heimdall.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
@@ -44,6 +45,7 @@ public class Debug {
 		
 		setDebugFile(log.getName()+".debug", logFileName);
 		setDebug(isDebug);
+		debugLog.setUseParentHandlers(false);
 	}
 	
 	public void disable() {
@@ -62,6 +64,14 @@ public class Debug {
 			for(int i=0; i < handlers.length; i++) {
 				handlers[i].close();
 				debugLog.removeHandler(handlers[i]);
+			}
+			
+			// try to make any parent directories for the given logFile
+			File logFile = new File(fileName);
+			if( !logFile.exists() ) {
+				File path = new File(logFile.getParent());
+				if( !path.exists() )
+					path.mkdirs();
 			}
 			
 			FileHandler handler = new FileHandler(fileName, true);
@@ -85,6 +95,16 @@ public class Debug {
 	
 	public void resetConsoleToINFO() {
 		setConsoleLevel(Level.INFO);
+		getRootLogger(pluginLog).setLevel(Level.INFO);
+		debugLog.setUseParentHandlers(false);
+	}
+	
+	private Logger getRootLogger(final Logger log) {
+		Logger parent = log.getParent();
+		if( parent == null )
+			return log;
+		else
+			return getRootLogger(parent);
 	}
 	
 	private void setConsoleLevel(Level level) {

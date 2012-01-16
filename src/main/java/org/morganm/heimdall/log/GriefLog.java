@@ -23,6 +23,10 @@ import org.morganm.heimdall.util.General;
  *
  */
 public class GriefLog implements LogInterface {
+	// though this should be externally flushed for consistent performance, at the very
+	// least we will flush every TIME_BETWEEN_FLUSH seconds at each call.
+	private static final int TIME_BETWEEN_FLUSH = 10000;
+
 	public static final String HEADER = "# activity|playerName|activityGriefPoints|totalGriefPoints|location|blockOwner|additionalData";
 
 	private final Heimdall plugin;
@@ -31,8 +35,9 @@ public class GriefLog implements LogInterface {
 	private final File logFile;
 	private BufferedWriter writer;
 	private boolean isInitialized = false;
-	private boolean flushScheduled = false;
-	private final LogFlusher logFlusher = new LogFlusher();
+//	private boolean flushScheduled = false;
+//	private final LogFlusher logFlusher = new LogFlusher();
+	private long lastFlush=0;
 	
 	public GriefLog(final Heimdall plugin, final File logFile) {
 		this.plugin = plugin;
@@ -76,6 +81,7 @@ public class GriefLog implements LogInterface {
 				e.printStackTrace();
 			}
 		}
+		lastFlush = System.currentTimeMillis(); 
 	}
 	
 	private void writeHeader() throws IOException {
@@ -120,10 +126,13 @@ public class GriefLog implements LogInterface {
 		// recovered, then this is either going to work or not, no reason to retry again.
 		writer.newLine();
 
-		if( !flushScheduled ) {
-			flushScheduled = true;
-			plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, logFlusher, 100);
-		}
+		if( (System.currentTimeMillis() - lastFlush) > TIME_BETWEEN_FLUSH )
+			flush();
+		
+//		if( !flushScheduled ) {
+//			flushScheduled = true;
+//			plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, logFlusher, 100);
+//		}
 	}
 	
 	/** Read an string written by writeEntry() and return the GriefEntry object.
@@ -240,12 +249,12 @@ public class GriefLog implements LogInterface {
 	}
 
 
-	private class LogFlusher implements Runnable {
-		public void run() {
-			try { 
-				writer.flush();
-			} catch(IOException e) {}
-			flushScheduled = false;
-		}
-	}
+//	private class LogFlusher implements Runnable {
+//		public void run() {
+//			try { 
+//				writer.flush();
+//			} catch(IOException e) {}
+//			flushScheduled = false;
+//		}
+//	}
 }

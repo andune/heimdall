@@ -70,7 +70,7 @@ public class GriefLogEngine implements Engine {
 			sb.append(event.diff[i].getAmount());
 		}
 		
-		logEvent(event, Type.CHEST_STEAL, event.griefValue, event.blockOwner, sb.toString());
+		logEvent(event, Type.CHEST_ACCESS_NOT_OWNER, event.griefValue, event.blockOwner, sb.toString());
 	}
 
 	/* (non-Javadoc)

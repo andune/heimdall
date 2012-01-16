@@ -5,6 +5,7 @@ package org.morganm.heimdall.engine;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -45,7 +47,7 @@ public class NotifyEngine implements Engine {
 		File file = new File(configFile);
 		this.config = YamlConfiguration.loadConfiguration(file);
 //		Debug.getInstance().debug("config.getInt(\"blockpoints.4\") = ",config.getInt("blockpoints.4"));
-		engineLog = new EngineLog(plugin, new File("plugins/Heimdall/notify.log"));
+		engineLog = new EngineLog(plugin, new File("plugins/Heimdall/logs/notify.log"));
 	}
 
 	@Override
@@ -106,27 +108,38 @@ public class NotifyEngine implements Engine {
 	private void doNotify(final Event event, final float griefPoints, final Object...arg) {
 		final List<Player> notifyTargets = getOnlineNotifyTargets();
 		if( notifyTargets != null && notifyTargets.size() > 0 ) {
-			final StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder(60);
 			for(int i=0; i < arg.length; i++) {
 				sb.append(arg[i]);
 			}
 			final String additionalData = sb.toString();
+			
+			final StringBuilder targetsString = new StringBuilder(60);
 			for(Player p : notifyTargets) {
 				Set<String> ignores = notifyIgnores.get(p.getName());
 				
 				// notify if no ignores are set or if the player is not in the ignore list
 				if( ignores == null || !ignores.contains(event.getPlayerName()) ) {
-					p.sendMessage("Player "+event.getPlayerName()+" has accumulated "
+					p.sendMessage(ChatColor.RED+"[Heimdall]"+ChatColor.WHITE
+							+" Player "+event.getPlayerName()+" has accumulated "
 							+griefPoints+" total grief points. Latest action "+event.getEventTypeString()
 							+" at location {"+General.getInstance().shortLocationString(event.getLocation())+"}"
 							+additionalData);
 
-					try {
-						engineLog.log("Notified "+p.getName()+" of possible grief event by "+event.getPlayerName());
-					}
-					catch(Exception e) {}
+					if( targetsString.length() > 0 )
+						targetsString.append(",");
+					targetsString.append(p.getName());
 				}
 			}
+			
+			try {
+				engineLog.log("["+new Date()+"] Notified {"+targetsString.toString()
+						+"} of possible grief event by "+event.getPlayerName()
+						+": "+event.getEventTypeString()
+						+", loc={"+General.getInstance().shortLocationString(event.getLocation())
+						+"}, data="+additionalData);
+			}
+			catch(Exception e) {}
 		}
 	}
 	

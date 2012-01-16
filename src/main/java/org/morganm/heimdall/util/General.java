@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -21,7 +22,7 @@ import org.bukkit.inventory.ItemStack;
  * @author morganm
  *
  */
-public class General {
+public final class General {
 	private static BlockFace[] directions = new BlockFace[] {
 		BlockFace.UP,
 		BlockFace.NORTH,
@@ -46,7 +47,7 @@ public class General {
 	 * 
 	 * @param base
 	 */
-	private Location findSafeLocation(final HashSet<Location> alreadyTraversed, final int level, final Location location) {
+	private Location findSafeLocation(final Set<Location> alreadyTraversed, final int level, final Location location) {
 		Block base = location.getBlock();
 		Block up = base.getRelative(BlockFace.UP);
 		
@@ -57,8 +58,9 @@ public class General {
 			for(int i=0; i < directions.length; i++) {
 				Block tryBlock = base.getRelative(directions[i]);
 				Location tryLocation = tryBlock.getLocation();
-				if( alreadyTraversed.contains(tryLocation) )
+				if( alreadyTraversed.contains(tryLocation) ) {
 					continue;
+				}
 				alreadyTraversed.add(tryLocation);
 				up = tryBlock.getRelative(BlockFace.UP);
 				

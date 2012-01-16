@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
 <project name="Heimdall" default="dist" basedir=".">
+	<taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml">
+		<classpath path="/usr/share/ant/lib/sonar-ant-task-1.0.jar" />
+	</taskdef>
+
         <property file="${basedir}/build.local.properties" />
         <property file="${basedir}/build.properties" />
 
@@ -43,5 +47,37 @@
 			<fileset dir="${build.home}" />
 		</jar>
 	</target>
+
+  <target name="sonar">
+    <!-- The workDir directory is used by Sonar to store temporary files -->
+    <sonar:sonar workDir="sonar" key="org.morganm:heimdall" version="0.1-SNAPSHOT" xmlns:sonar="antlib:org.sonar.ant">
+ 
+      <!-- source directories (required) -->
+      <sources>
+        <path location="${src.home}" />
+      </sources>
+ 
+      <!-- list of properties (optional) 
+      <property key="sonar.projectName" value="this value overrides the name defined in Ant root node" />
+      <property key="sonar.dynamicAnalysis" value="false" />
+      --> 
+
+      <!-- test source directories (optional)
+      <tests>
+        <path location="..." />
+      </tests>
+      -->
+ 
+      <!-- binaries directories, which contain for example the compiled Java bytecode (optional) -->
+      <binaries>
+        <path location="${build.home}" />
+      </binaries>
+ 
+      <!-- path to libraries (optional). These libraries are for example used by the Java Findbugs plugin -->
+      <libraries>
+        <path location="${lib.home}" />
+      </libraries>
+    </sonar:sonar>
+  </target>
 
 </project>

@@ -70,6 +70,7 @@ public class SpoutChestAccessListener extends InventoryListener {
 			InventoryChangeEvent ice = getNextInventoryChangeEvent();
 			if( ice != null ) {
 				ice.playerName = player.getName();
+				ice.time = System.currentTimeMillis();
 				ice.world = l.getWorld();
 				ice.x = l.getBlockX();
 				ice.y = l.getBlockY();

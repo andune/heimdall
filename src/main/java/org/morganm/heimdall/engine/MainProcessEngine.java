@@ -56,7 +56,10 @@ public class MainProcessEngine implements Engine {
 		
 		if( event.bukkitEventType == org.bukkit.event.Event.Type.BLOCK_BREAK ) {
 			int typeId = event.type.getId();
-			if( event.blockOwner != null && !event.playerName.equals(event.blockOwner) && (event.ownerTypeId == 0 || typeId == event.ownerTypeId) ) {
+			if( event.blockOwner != null
+					&& !event.playerName.equals(event.blockOwner)
+					&& !"Enderman".equals(event.blockOwner)								// ignore Enderman-placed blocks
+					&& (event.ownerTypeId == 0 || typeId == event.ownerTypeId) ) {
 				debug.debug("block grief penalty: owner and player don't match, owner=",event.blockOwner,", player=",event.playerName);
 				event.griefValue = getBlockValue(typeId);
 			}

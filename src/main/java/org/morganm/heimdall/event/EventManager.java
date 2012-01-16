@@ -7,11 +7,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.bukkit.plugin.Plugin;
 import org.morganm.heimdall.Heimdall;
@@ -34,9 +35,11 @@ import org.morganm.heimdall.event.handlers.EventHandler;
 public class EventManager implements Runnable {
 	private final static int CIRCULAR_BUFFER_SIZE = 10000;
 	
-	private Heimdall plugin;
+	private final Heimdall plugin;
+	private final EngineLog eventDebugLog;
+	private final Logger log;
+	private final String logPrefix;
 	private boolean running = false;
-	private EngineLog eventDebugLog;
 	
 	// maybe implementation itself should use a circular buffer, backed by an ArrayList
 	// to handle any possible overflow?
@@ -55,9 +58,11 @@ public class EventManager implements Runnable {
 		this.eventBuffer = new EventCircularBuffer<Event>(Event.class, CIRCULAR_BUFFER_SIZE, true);
 		this.eventHandlers = new HashMap<Event.Type, Map<Plugin, Set<EventHandler>>>();
 		this.eventEnrichers = new HashMap<Event.Type, Map<Plugin, Set<EventHandler>>>();
+		this.log = this.plugin.getLogger();
+		this.logPrefix = this.plugin.getLogPrefix();
 		
 		plugin.getServer().getScheduler().scheduleAsyncRepeatingTask(plugin, this, 100, 100);
-		eventDebugLog = new EngineLog(this.plugin, new File("plugins/Heimdall/eventDebug.log"));
+		eventDebugLog = new EngineLog(this.plugin, new File("plugins/Heimdall/logs/eventDebug.log"));
 	}
 	
 	public void registerHandler(final Plugin plugin, final Event.Type type, final EventHandler handler) {
@@ -68,7 +73,7 @@ public class EventManager implements Runnable {
 		}
 		Set<EventHandler> list = map.get(plugin);
 		if( list == null ) {
-			list = new HashSet<EventHandler>();
+			list = new LinkedHashSet<EventHandler>();
 			map.put(plugin, list);
 		}
 		
@@ -83,7 +88,7 @@ public class EventManager implements Runnable {
 		}
 		Set<EventHandler> list = map.get(plugin);
 		if( list == null ) {
-			list = new HashSet<EventHandler>();
+			list = new LinkedHashSet<EventHandler>();
 			map.put(plugin, list);
 		}
 		
@@ -163,7 +168,13 @@ public class EventManager implements Runnable {
 						Set<EventHandler> enrichers = enrichersMap.get(entry.getKey());
 						if( enrichers != null ) {
 							for(EventHandler handler : enrichers) {
-								event.accept(handler);					// visitor pattern
+								try {
+									event.accept(handler);					// visitor pattern
+								}
+								catch(Throwable t) {
+									log.warning(logPrefix+" Caught exception processing event for enricher "+handler+", error: "+t.getMessage());
+									t.printStackTrace();
+								}
 							}
 						}
 					}
@@ -176,7 +187,13 @@ public class EventManager implements Runnable {
 						Set<EventHandler> handlers = handlersMap.get(entry.getKey());
 						if( handlers != null ) {
 							for(EventHandler handler : handlers) {
-								event.accept(handler);					// visitor pattern
+								try {
+									event.accept(handler);					// visitor pattern
+								}
+								catch(Throwable t) {
+									log.warning(logPrefix+" Caught exception processing event for handler "+handler+", error: "+t.getMessage());
+									t.printStackTrace();
+								}
 							}
 						}
 					}
