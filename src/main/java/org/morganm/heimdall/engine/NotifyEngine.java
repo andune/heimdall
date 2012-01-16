@@ -69,7 +69,7 @@ public class NotifyEngine implements Engine {
 		}
 		sb.append("]");
 
-		processEvent(event, " (owner=",event.blockOwner,")");
+		processEvent(event, " (owner=",event.blockOwner,") ", sb.toString());
 	}
 
 	@Override
