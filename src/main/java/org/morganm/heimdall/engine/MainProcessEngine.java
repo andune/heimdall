@@ -88,11 +88,15 @@ public class MainProcessEngine implements Engine {
 		debug.debug("MainProcessEngine:processInventoryChange event.type = ",event.type);
 		if( event.type == InventoryEventType.CONTAINER_ACCESS ) {
 			if( event.blockOwner != null && !event.playerName.equals(event.blockOwner) ) {
-				debug.debug("MainProcessEngine:processInventoryChange inventory grief penalty: owner and player don't match, owner=",event.blockOwner,", player=",event.playerName);
-				for(int i=0; i < event.diff.length; i++) {
-					event.griefValue += getInventoryValue(event.diff[i]);
-					debug.debug("MainProcessEngine:processInventoryChange event grief value = ",event.griefValue);
+				if( !event.isLwcPublic ) {
+					debug.debug("MainProcessEngine:processInventoryChange inventory grief penalty: owner and player don't match, owner=",event.blockOwner,", player=",event.playerName);
+					for(int i=0; i < event.diff.length; i++) {
+						event.griefValue += getInventoryValue(event.diff[i]);
+						debug.debug("MainProcessEngine:processInventoryChange event grief value = ",event.griefValue);
+					}
 				}
+				else
+					debug.debug("MainProcessEngine:processInventoryChange block is flagged as LWC public, no grief penalty");
 			}
 		}
 		

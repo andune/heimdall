@@ -38,7 +38,7 @@ public class Heimdall extends BaseCommand {
 				return true;
 			}
 		}
-		else if( "tracker".equals(args[0]) && args.length > 1 ) {
+		else if( args[0].startsWith("track") && args.length > 1 ) {
 			if( "reset".equals(args[1]) ) {
 				plugin.getPlayerStateManager().getPlayerTracker().reset();
 				sender.sendMessage("Player tracker reset");
@@ -56,9 +56,13 @@ public class Heimdall extends BaseCommand {
 			}
 			return true;
 		}
+		else if( "df".equals(args[0]) ) {		// dump friends
+			sender.sendMessage("Dumping friend map");
+			sender.sendMessage(plugin.getFriendTracker().dumpFriendsMap());
+			return true;
+		}
 		
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 }

@@ -4,6 +4,7 @@
 package org.morganm.heimdall;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -18,6 +19,7 @@ import org.morganm.heimdall.blockhistory.BlockHistoryFactory;
 import org.morganm.heimdall.blockhistory.BlockHistoryManager;
 import org.morganm.heimdall.command.CommandMapper;
 import org.morganm.heimdall.engine.Engine;
+import org.morganm.heimdall.engine.FriendEngine;
 import org.morganm.heimdall.engine.GriefLogEngine;
 import org.morganm.heimdall.engine.LastGriefTrackingEngine;
 import org.morganm.heimdall.engine.MainProcessEngine;
@@ -31,6 +33,7 @@ import org.morganm.heimdall.listener.BukkitBlockListener;
 import org.morganm.heimdall.listener.BukkitPlayerListener;
 import org.morganm.heimdall.listener.SpoutChestAccessListener;
 import org.morganm.heimdall.log.LogInterface;
+import org.morganm.heimdall.player.FriendTracker;
 import org.morganm.heimdall.player.PlayerStateManager;
 import org.morganm.heimdall.util.Debug;
 import org.morganm.heimdall.util.JarUtils;
@@ -57,8 +60,10 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	private PlayerStateManager playerStateManager;
 	private Engine griefEngine;
 	private NotifyEngine notifyEngine;
+	private FriendTracker friendTracker;
 	private LastGriefTrackingEngine lastGriefTrackingEngine;
 	private BlockHistoryManager blockHistoryManager;
+	private LWCBridge lwcBridge;
 	private final Set<LogInterface> logs = new HashSet<LogInterface>(5);
 	
 	@Override
@@ -79,6 +84,9 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		playerStateManager = new PlayerStateManager(this);
 		eventManager = new EventManager(this);
 		
+		lwcBridge = new LWCBridge(this);
+		friendTracker = new FriendTracker(this);
+		
 		// register enricher to add block history information to events
 		blockHistoryManager = BlockHistoryFactory.getBlockHistoryManager(this);
 		if( blockHistoryManager != null ) {
@@ -97,37 +105,24 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		eventManager.registerEnricher(this, Event.Type.BLOCK_CHANGE, wrapper);
 		eventManager.registerEnricher(this, Event.Type.INVENTORY_CHANGE, wrapper);
 		
-		wrapper = new EngineWrapper(new SimpleLogActionEngine(this, playerStateManager));
-		eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
-		eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
-		
 		notifyEngine = new NotifyEngine(this, playerStateManager);
-		wrapper = new EngineWrapper(notifyEngine);
-		eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
-		eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
-		
-		wrapper = new EngineWrapper(new GriefLogEngine(this, playerStateManager));
-		eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
-		eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
-		
 		lastGriefTrackingEngine = new LastGriefTrackingEngine(this);
-		wrapper = new EngineWrapper(lastGriefTrackingEngine);
-		eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
-		eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
+		
+		final ArrayList<Engine> handlers = new ArrayList<Engine>(8);
+		handlers.add(new FriendEngine(this));
+		handlers.add(new SimpleLogActionEngine(this, playerStateManager));
+		handlers.add(new GriefLogEngine(this, playerStateManager));
+		handlers.add(lastGriefTrackingEngine);
+		handlers.add(notifyEngine);
 
-		/* old code
-		final ArrayList<Engine> actionEngines = new ArrayList<Engine>();
-		actionEngines.add(new SimpleLogActionEngine(this, playerStateManager));
-		notifyEngine = new NotifyEngine(this, playerStateManager);
-		actionEngines.add(notifyEngine);
+		// wrap and add all handlers
+		for(Engine e : handlers) {
+			wrapper = new EngineWrapper(e);
+			eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
+			eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
+		}
 		
-		// main handler for passing events to anti-grief engine
-		eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE,
-				new HeimdallEventHandler(this,  griefEngine, actionEngines));
-		*/
-		
-		PluginManager pm = getServer().getPluginManager();
-		
+		final PluginManager pm = getServer().getPluginManager();
 		blockListener = new BukkitBlockListener(this, eventManager);
 		pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Monitor, this);
 		pm.registerEvent(Type.BLOCK_PLACE, blockListener, Priority.Monitor, this);
@@ -148,7 +143,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		getServer().getScheduler().scheduleAsyncRepeatingTask(this, new Runnable() {
 			public void run() { flushLogs(); }
 		}, 300, 300);	// every 15 seconds
-		
+
 		log.info(logPrefix + "version "+version+", build "+buildNumber+" is enabled");
 		Debug.getInstance().debug("onEnable() finished");
 }
@@ -208,7 +203,9 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 
 	public NotifyEngine getNotifyEngine() { return notifyEngine; }
 	public LastGriefTrackingEngine getLastGriefTrackingEngine() { return lastGriefTrackingEngine; }
+	public FriendTracker getFriendTracker() { return friendTracker; }
 	public BlockHistoryManager getBlockHistoryManager() { return blockHistoryManager; }
+	public LWCBridge getLWCBridge() { return lwcBridge; }
 	public PlayerStateManager getPlayerStateManager() { return playerStateManager; }
 	
 	@Override

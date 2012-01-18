@@ -31,6 +31,7 @@ public class InventoryChangeEvent implements Event {
 	
 	public InventoryEventType type;
 	
+	public boolean isLwcPublic = false;
 	public String blockOwner;	// enriched data: the name of the owner of the block
 	public float griefValue;	// grief value associated with this event, if any
 
@@ -59,6 +60,7 @@ public class InventoryChangeEvent implements Event {
 		location=null;
 		diff=null;
 		type = InventoryEventType.UNDEFINED;
+		isLwcPublic = false;
 		blockOwner = null;
 		griefValue = 0;
 		

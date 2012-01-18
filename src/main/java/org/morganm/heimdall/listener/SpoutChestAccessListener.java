@@ -14,6 +14,7 @@ import org.getspout.spoutapi.event.inventory.InventoryCraftEvent;
 import org.getspout.spoutapi.event.inventory.InventoryListener;
 import org.getspout.spoutapi.event.inventory.InventoryOpenEvent;
 import org.morganm.heimdall.Heimdall;
+import org.morganm.heimdall.LWCBridge;
 import org.morganm.heimdall.event.EventCircularBuffer;
 import org.morganm.heimdall.event.EventManager;
 import org.morganm.heimdall.event.InventoryChangeEvent;
@@ -29,9 +30,9 @@ import org.morganm.heimdall.util.General;
 public class SpoutChestAccessListener extends InventoryListener {
 	private final static int ERROR_FLOOD_PREVENTION_LIMIT = 3;
 
-	@SuppressWarnings("unused")
 	private final Heimdall plugin;
 	private final EventManager eventManager;
+	private final LWCBridge lwc;
 	private final General util;
 	private final Map<Player, ItemStack[]> containers = new HashMap<Player, ItemStack[]>();
 	private final EventCircularBuffer<InventoryChangeEvent> buffer;
@@ -40,6 +41,7 @@ public class SpoutChestAccessListener extends InventoryListener {
 	public SpoutChestAccessListener(final Heimdall plugin, final EventManager eventManager) {
 		this.plugin = plugin;
 		this.eventManager = eventManager;
+		this.lwc = this.plugin.getLWCBridge();
 		this.util = General.getInstance();
 		this.tracker = plugin.getPlayerStateManager().getPlayerTracker();
 		
@@ -79,6 +81,11 @@ public class SpoutChestAccessListener extends InventoryListener {
 				ice.type = InventoryEventType.CONTAINER_ACCESS;
 				
 				ice.diff = diff;
+				
+				if( lwc.isEnabled() && lwc.isPublic(l.getBlock()) )
+					ice.isLwcPublic = true;
+				else
+					ice.isLwcPublic = false;
 				
 				eventManager.pushEvent(ice);
 			}
