@@ -10,12 +10,10 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Type;
 import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.player.FriendTracker;
-import org.morganm.heimdall.util.CircularBuffer;
 import org.morganm.heimdall.util.Debug;
 
 /** Engine which watches events to establish friend relationships.
@@ -23,7 +21,7 @@ import org.morganm.heimdall.util.Debug;
  * @author morganm
  *
  */
-public class FriendEngine implements Engine {
+public class FriendEngine extends AbstractEngine {
 	private static final long SECONDS_60 = 60000;	// 60 seconds * 1000 milliseconds
 	
 	private final Heimdall plugin;
@@ -57,10 +55,6 @@ public class FriendEngine implements Engine {
 
 	@Override
 	public void processInventoryChange(InventoryChangeEvent event) {
-	}
-
-	@Override
-	public void processChatMessage(String message) {
 	}
 
 	/** Return players that are nearby the given player. Players are considered to be

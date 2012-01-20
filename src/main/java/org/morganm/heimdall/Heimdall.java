@@ -63,6 +63,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	private FriendTracker friendTracker;
 	private LastGriefTrackingEngine lastGriefTrackingEngine;
 	private BlockHistoryManager blockHistoryManager;
+	private BanTracker banTracker;
 	private LWCBridge lwcBridge;
 	private final Set<LogInterface> logs = new HashSet<LogInterface>(5);
 	
@@ -83,6 +84,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		// initialize various objects needed to get things going
 		playerStateManager = new PlayerStateManager(this);
 		eventManager = new EventManager(this);
+		banTracker = new BanTracker(this);
 		
 		lwcBridge = new LWCBridge(this);
 		friendTracker = new FriendTracker(this);
@@ -133,10 +135,11 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 			log.info(logPrefix+ "Using Spout API to log chest access");
 		}
 		
-		playerListener = new BukkitPlayerListener(this);
+		playerListener = new BukkitPlayerListener(this, eventManager);
 		pm.registerEvent(Type.PLAYER_QUIT, playerListener, Priority.Monitor, this);
 		pm.registerEvent(Type.PLAYER_JOIN, playerListener, Priority.Monitor, this);
 		pm.registerEvent(Type.PLAYER_KICK, playerListener, Priority.Monitor, this);
+		pm.registerEvent(Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Monitor, this);
 		
 		playerStateManager.getPlayerTracker().reset();
 		
@@ -204,6 +207,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	public NotifyEngine getNotifyEngine() { return notifyEngine; }
 	public LastGriefTrackingEngine getLastGriefTrackingEngine() { return lastGriefTrackingEngine; }
 	public FriendTracker getFriendTracker() { return friendTracker; }
+	public BanTracker getBanTracker() { return banTracker; }
 	public BlockHistoryManager getBlockHistoryManager() { return blockHistoryManager; }
 	public LWCBridge getLWCBridge() { return lwcBridge; }
 	public PlayerStateManager getPlayerStateManager() { return playerStateManager; }

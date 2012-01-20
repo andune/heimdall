@@ -9,8 +9,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
@@ -26,8 +28,10 @@ public class GriefLog implements LogInterface {
 	// though this should be externally flushed for consistent performance, at the very
 	// least we will flush every TIME_BETWEEN_FLUSH seconds at each call.
 	private static final int TIME_BETWEEN_FLUSH = 10000;
+	
+	private static final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 
-	public static final String HEADER = "# activity|playerName|activityGriefPoints|totalGriefPoints|location|blockOwner|additionalData";
+	private static final String HEADER = "# time|timestamp|activity|playerName|activityGriefPoints|totalGriefPoints|location|blockOwner|additionalData";
 
 	private final Heimdall plugin;
 	private final Logger log;
@@ -94,8 +98,9 @@ public class GriefLog implements LogInterface {
 			init();
 		
 		StringBuilder sb = new StringBuilder(20);
-		sb.append(entry.getActivity().toString());  sb.append("|");
+		sb.append(dateFormat.format(new Date(entry.getTime()))); sb.append("|");
 		sb.append(entry.getTime()); sb.append("|");
+		sb.append(entry.getActivity().toString());  sb.append("|");
 		sb.append(entry.getPlayerName()); sb.append("|");
 		sb.append(entry.getGriefPoints()); sb.append("|");
 		sb.append(entry.getTotalGriefPoints()); sb.append("|");
@@ -156,11 +161,12 @@ public class GriefLog implements LogInterface {
 		}
 		try {
 			int i=0;
+			i++;			// date/time string not used
+			long time = Long.valueOf(parts[i++]);
 			String activityString = parts[i++];
 			Debug.getInstance().debug("GriefLog:readEntry() activityString=",activityString);
 			GriefEntry.Type activity = GriefEntry.Type.valueOf(activityString);
 //			GriefEntry.Type activity = GriefEntry.Type.valueOf(GriefEntry.Type.class, parts[i++]);
-			long time = Long.valueOf(parts[i++]);
 			String playerName = parts[i++];
 			float griefPoints = Float.parseFloat(parts[i++]);
 			float totalGriefPoints = Float.parseFloat(parts[i++]);

@@ -19,7 +19,7 @@ import org.morganm.heimdall.util.Debug;
  * @author morganm
  *
  */
-public class MainProcessEngine implements Engine {
+public class MainProcessEngine extends AbstractEngine {
 	private final Heimdall plugin;
 	private final PlayerStateManager playerStateManager;
 	private final Debug debug;
@@ -104,11 +104,6 @@ public class MainProcessEngine implements Engine {
 			playerStateManager.getPlayerState(event.playerName).incrementGriefPoints(event.griefValue, event.blockOwner);
 	}
 
-	@Override
-	public void processChatMessage(String message) {
-		// TODO Auto-generated method stub
-	}
-	
 	public float getBlockValue(int id) {
 		return (float) config.getDouble("blockpoints."+id, 1);
 	}

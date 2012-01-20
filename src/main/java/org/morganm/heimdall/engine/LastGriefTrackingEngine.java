@@ -16,7 +16,7 @@ import org.morganm.heimdall.util.JavaPluginExtensions;
  * @author morganm
  *
  */
-public class LastGriefTrackingEngine implements Engine {
+public class LastGriefTrackingEngine extends AbstractEngine {
 	@SuppressWarnings("unused")
 	private final JavaPluginExtensions plugin;
 	private final HashMap<String, Location> lastGriefLocation = new HashMap<String, Location>(10);
@@ -54,12 +54,6 @@ public class LastGriefTrackingEngine implements Engine {
 	@Override
 	public void processInventoryChange(final InventoryChangeEvent event) {
 		processEvent(event);
-	}
-
-	@Override
-	public void processChatMessage(final String message) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

@@ -6,28 +6,29 @@ package org.morganm.heimdall.engine;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.InventoryChangeEvent;
+import org.morganm.heimdall.event.PlayerEvent;
 import org.morganm.heimdall.log.GriefEntry;
 import org.morganm.heimdall.log.GriefEntry.Type;
 import org.morganm.heimdall.log.GriefLog;
 import org.morganm.heimdall.player.PlayerState;
 import org.morganm.heimdall.player.PlayerStateManager;
 import org.morganm.heimdall.util.Debug;
-import org.morganm.heimdall.util.JavaPluginExtensions;
 
 /**
  * @author morganm
  *
  */
-public class GriefLogEngine implements Engine {
-	private final JavaPluginExtensions plugin;
+public class GriefLogEngine extends AbstractEngine {
+	private final Heimdall plugin;
 	private final PlayerStateManager playerStateManager;
 	private final Logger logger;
 	private final String logPrefix;
 	
-	public GriefLogEngine(final JavaPluginExtensions plugin, final PlayerStateManager playerStateManager) {
+	public GriefLogEngine(final Heimdall plugin, final PlayerStateManager playerStateManager) {
 		this.plugin = plugin;
 		this.playerStateManager = playerStateManager;
 		this.logger = this.plugin.getLogger();
@@ -72,16 +73,22 @@ public class GriefLogEngine implements Engine {
 		
 		logEvent(event, Type.CHEST_ACCESS_NOT_OWNER, event.griefValue, event.blockOwner, sb.toString());
 	}
-
-	/* (non-Javadoc)
-	 * @see org.morganm.heimdall.engine.Engine#processChatMessage(java.lang.String)
-	 */
-	@Override
-	public void processChatMessage(String message) {
-		// TODO Auto-generated method stub
-
-	}
 	
+	@Override
+	public void processPlayerEvent(PlayerEvent event) {
+		if( event.eventType == PlayerEvent.Type.NEW_PLAYER_JOIN ) {
+			logEvent(event, Type.NEW_PLAYER, 0, null, null);
+		}
+		else if( event.eventType == PlayerEvent.Type.PLAYER_KICK ) {
+			String banCommand = plugin.getBanTracker().getBanCommand(event.playerName);
+			if( banCommand != null ) {
+				String banSender = plugin.getBanTracker().getBanSender(event.playerName);
+				logEvent(event, Type.BANNED_PLAYER, 0, null,
+						"BanSender: "+banSender+", BanCommand: "+banCommand);
+			}
+		}
+	}
+
 	private void logEvent(Event event, Type type, float griefValue, String blockOwner, String additionalData) {
 		PlayerState ps = playerStateManager.getPlayerState(event.getPlayerName());
 		GriefLog log = ps.getGriefLog();

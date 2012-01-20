@@ -13,6 +13,8 @@ public class GriefEntry implements Comparable<GriefEntry> {
 	public static enum Type {
 		BLOCK_BREAK_NOT_OWNER,
 		CHEST_ACCESS_NOT_OWNER,
+		NEW_PLAYER,
+		BANNED_PLAYER
 	}
 	
 	private final Type activity;			// the activity type

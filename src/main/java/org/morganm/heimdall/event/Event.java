@@ -15,7 +15,8 @@ public interface Event {
 	public enum Type {
 		BLOCK_CHANGE,
 		INVENTORY_CHANGE,
-		CHAT_MESSAGE
+		CHAT_MESSAGE,
+		PLAYER_EVENT
 	}
 	
 	/** Clear the event object of any data.

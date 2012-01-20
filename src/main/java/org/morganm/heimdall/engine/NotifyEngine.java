@@ -29,7 +29,7 @@ import org.morganm.heimdall.util.PermissionSystem;
  * @author morganm
  *
  */
-public class NotifyEngine implements Engine {
+public class NotifyEngine extends AbstractEngine {
 	private final Heimdall plugin; 
 	private final PlayerStateManager playerStateManager;
 	private final PermissionSystem perms;
@@ -72,11 +72,6 @@ public class NotifyEngine implements Engine {
 		processEvent(event, " (owner=",event.blockOwner,") ", sb.toString());
 	}
 
-	@Override
-	public void processChatMessage(String message) {
-		// TODO Auto-generated method stub
-	}
-	
 	private void processEvent(Event event, Object...arg) {
 		Float lastNotifyValue = lastNotifyValues.get(event.getPlayerName());
 		if( lastNotifyValue == null )

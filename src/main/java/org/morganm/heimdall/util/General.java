@@ -3,6 +3,7 @@
  */
 package org.morganm.heimdall.util;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -144,6 +145,25 @@ public final class General {
 		return location;
 	}
 	
+	/** Return whether or not Player p is a new player (first time logged in).
+	 * 
+	 * @param p
+	 * @return
+	 */
+    public boolean isNewPlayer(Player p) {
+//    	return !p.hasPlayedBefore();	// this is broken at the moment
+
+    	String playerDat = p.getName() + ".dat";
+    	
+    	// start with the easy, most likely check
+    	File file = new File("world/players/"+playerDat);
+    	if( file.exists() )
+    		return false;
+    	
+    	// if we didn't find any record of this player on any world, they must be new
+    	return true;
+    }
+
 	/** Code borrowed from @Diddiz's LogBlock
 	 * 
 	 * @param items1

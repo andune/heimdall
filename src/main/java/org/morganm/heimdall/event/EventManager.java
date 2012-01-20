@@ -61,7 +61,7 @@ public class EventManager implements Runnable {
 		this.log = this.plugin.getLogger();
 		this.logPrefix = this.plugin.getLogPrefix();
 		
-		plugin.getServer().getScheduler().scheduleAsyncRepeatingTask(plugin, this, 100, 100);
+		plugin.getServer().getScheduler().scheduleAsyncRepeatingTask(plugin, this, 100, 40);
 		eventDebugLog = new EngineLog(this.plugin, new File("plugins/Heimdall/logs/eventDebug.log"));
 	}
 	

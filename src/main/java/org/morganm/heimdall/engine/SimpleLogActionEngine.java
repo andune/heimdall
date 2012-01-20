@@ -20,7 +20,7 @@ import org.morganm.heimdall.player.PlayerStateManager;
  * @author morganm
  *
  */
-public class SimpleLogActionEngine implements Engine {
+public class SimpleLogActionEngine extends AbstractEngine {
 	private static final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM);
 //	private static long TIME_BETWEEN_FLUSH = 5000;	// 5 seconds
 	
@@ -55,12 +55,6 @@ public class SimpleLogActionEngine implements Engine {
 		logEvent(event, event.griefValue);
 	}
 
-	@Override
-	public void processChatMessage(String message) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	private void logEvent(final Event event, final float griefValue) {
 //		Debug.getInstance().debug("SimpleLogActionEngine:processGriefValue(): playerName=",event.getPlayerName(),", griefvalue=",griefValue);
 		if( griefValue == 0 )

@@ -13,6 +13,11 @@ public class HeimdallException extends Exception {
 	/**
 	 * 
 	 */
+	private static final long serialVersionUID = -8837367097998088617L;
+
+	/**
+	 * 
+	 */
 	public HeimdallException() {
 		// TODO Auto-generated constructor stub
 	}
