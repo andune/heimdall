@@ -21,6 +21,7 @@ import org.morganm.heimdall.command.CommandMapper;
 import org.morganm.heimdall.engine.Engine;
 import org.morganm.heimdall.engine.FriendEngine;
 import org.morganm.heimdall.engine.GriefLogEngine;
+import org.morganm.heimdall.engine.HeimdallPersonalityEngine;
 import org.morganm.heimdall.engine.LastGriefTrackingEngine;
 import org.morganm.heimdall.engine.MainProcessEngine;
 import org.morganm.heimdall.engine.NotifyEngine;
@@ -63,7 +64,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	private FriendTracker friendTracker;
 	private LastGriefTrackingEngine lastGriefTrackingEngine;
 	private BlockHistoryManager blockHistoryManager;
-	private BanTracker banTracker;
+//	private BanTracker banTracker;
 	private LWCBridge lwcBridge;
 	private final Set<LogInterface> logs = new HashSet<LogInterface>(5);
 	
@@ -84,7 +85,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		// initialize various objects needed to get things going
 		playerStateManager = new PlayerStateManager(this);
 		eventManager = new EventManager(this);
-		banTracker = new BanTracker(this);
+//		banTracker = new BanTracker(this);
 		
 		lwcBridge = new LWCBridge(this);
 		friendTracker = new FriendTracker(this);
@@ -116,12 +117,14 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		handlers.add(new GriefLogEngine(this, playerStateManager));
 		handlers.add(lastGriefTrackingEngine);
 		handlers.add(notifyEngine);
+		handlers.add(new HeimdallPersonalityEngine(this, playerStateManager));
 
 		// wrap and add all handlers
 		for(Engine e : handlers) {
 			wrapper = new EngineWrapper(e);
 			eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
 			eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
+			eventManager.registerHandler(this, Event.Type.PLAYER_EVENT, wrapper);
 		}
 		
 		final PluginManager pm = getServer().getPluginManager();
@@ -207,7 +210,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	public NotifyEngine getNotifyEngine() { return notifyEngine; }
 	public LastGriefTrackingEngine getLastGriefTrackingEngine() { return lastGriefTrackingEngine; }
 	public FriendTracker getFriendTracker() { return friendTracker; }
-	public BanTracker getBanTracker() { return banTracker; }
+//	public BanTracker getBanTracker() { return banTracker; }
 	public BlockHistoryManager getBlockHistoryManager() { return blockHistoryManager; }
 	public LWCBridge getLWCBridge() { return lwcBridge; }
 	public PlayerStateManager getPlayerStateManager() { return playerStateManager; }

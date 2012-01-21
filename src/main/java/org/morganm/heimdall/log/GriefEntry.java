@@ -14,7 +14,9 @@ public class GriefEntry implements Comparable<GriefEntry> {
 		BLOCK_BREAK_NOT_OWNER,
 		CHEST_ACCESS_NOT_OWNER,
 		NEW_PLAYER,
-		BANNED_PLAYER
+		BANNED_PLAYER,
+		UNBANNED_PLAYER,
+		PLAYER_KICKED
 	}
 	
 	private final Type activity;			// the activity type

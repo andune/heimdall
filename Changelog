@@ -1,3 +1,9 @@
+v0.5 - January 20, 2012
+* lots of prod server testing and bug fixes
+* added new_player and ban messages to griefLog, so it's a self-contained grief report
+* added beginnings of automated friend tracking
+* added ability to ignore LWC public chests for grief tracking
+
 v0.4 - January 7, 2012
 * more testing/cleanup/bugfixes
 * added "/hdgt" (grief teleport) to teleport to location of last griefing

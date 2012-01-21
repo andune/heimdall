@@ -22,6 +22,10 @@ public class BanTracker {
 		bans.put(bannedPlayer, new Ban(banCommand, commandSender));
 	}
 	
+	public void unBan(final String bannedPlayer) {
+		bans.remove(bannedPlayer);
+	}
+	
 	public String getBanCommand(String bannedPlayer) {
 		Ban ban = bans.get(bannedPlayer);
 		if( ban != null )

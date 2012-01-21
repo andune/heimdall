@@ -104,7 +104,7 @@ public class PlayerStateImpl implements PlayerState {
 	@Override
 	public GriefLog getGriefLog() {
 		if( griefLog == null ) {
-			File logFile = new File("plugins/Heimdall/griefLog/"+name+".dat");
+			File logFile = new File("plugins/Heimdall/griefLog/"+name.toLowerCase()+".dat");
 			griefLog = new GriefLog(plugin, logFile);
 		}
 		

@@ -41,14 +41,22 @@ public class BukkitPlayerListener extends PlayerListener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		playerTracker.playerLogin(event.getPlayer().getName());
 		
-		PlayerEvent pe = getNextBlockChangeEvent();
+		PlayerEvent pe = getNextEventObject();
 		
 		if( pe != null ) {
-			if( General.getInstance().isNewPlayer(event.getPlayer()) )
+			if( General.getInstance().isNewPlayer(event.getPlayer()) ) {
 				pe.eventType = Type.NEW_PLAYER_JOIN;
+				Debug.getInstance().debug("New player join: ",event.getPlayer());
+			}
 			else
 				pe.eventType = Type.PLAYER_JOIN;
 
+			pe.playerName = event.getPlayer().getName();
+			pe.location = event.getPlayer().getLocation();
+			pe.x = pe.location.getBlockX();
+			pe.y = pe.location.getBlockY();
+			pe.z = pe.location.getBlockZ();
+			pe.world = pe.location.getWorld();
 			pe.time = System.currentTimeMillis();
 			
 			eventManager.pushEvent(pe);
@@ -59,10 +67,11 @@ public class BukkitPlayerListener extends PlayerListener {
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		playerTracker.removeTrackedPlayer(event.getPlayer().getName());
 
-		PlayerEvent pe = getNextBlockChangeEvent();
+		PlayerEvent pe = getNextEventObject();
 		
 		if( pe != null ) {
 			pe.eventType = Type.PLAYER_QUIT;
+			pe.playerName = event.getPlayer().getName();
 			pe.location = event.getPlayer().getLocation();
 			pe.x = pe.location.getBlockX();
 			pe.y = pe.location.getBlockY();
@@ -80,10 +89,11 @@ public class BukkitPlayerListener extends PlayerListener {
 			return;
 		playerTracker.removeTrackedPlayer(event.getPlayer().getName());
 
-		PlayerEvent pe = getNextBlockChangeEvent();
+		PlayerEvent pe = getNextEventObject();
 		
 		if( pe != null ) {
 			pe.eventType = Type.PLAYER_KICK;
+			pe.playerName = event.getPlayer().getName();
 			pe.location = event.getPlayer().getLocation();
 			pe.x = pe.location.getBlockX();
 			pe.y = pe.location.getBlockY();
@@ -97,14 +107,57 @@ public class BukkitPlayerListener extends PlayerListener {
 	
 	@Override
 	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-		if( event.getMessage().startsWith("/ban") ) {
-			String args = event.getMessage().substring(5);
-			if( args != null ) {
-				int index = args.indexOf(' ');
-				if( index != -1 ) {
-					String bannedPlayer = args.substring(0, index-1);
-					Debug.getInstance().debug("ban command for player ",bannedPlayer," from player ",event.getPlayer());
-					plugin.getBanTracker().addCommand(bannedPlayer, event.getMessage(), event.getPlayer().getName());
+		if( event.getMessage().startsWith("/") ) {
+			if( event.getMessage().startsWith("/ban") ) {
+				String args = event.getMessage().substring(5);
+				if( args != null ) {
+					int index = args.indexOf(' ');
+					if( index != -1 ) {
+						String bannedPlayer = args.substring(0, index-1);
+						Debug.getInstance().debug("ban command for player ",bannedPlayer," from player ",event.getPlayer());
+//						plugin.getBanTracker().addCommand(bannedPlayer, event.getMessage(), event.getPlayer().getName());
+						
+						PlayerEvent pe = getNextEventObject();
+						if( pe != null ) {
+							pe.eventType = Type.PLAYER_BANNED;
+							pe.playerName = event.getPlayer().getName();
+							pe.location = event.getPlayer().getLocation();
+							pe.x = pe.location.getBlockX();
+							pe.y = pe.location.getBlockY();
+							pe.z = pe.location.getBlockZ();
+							pe.world = pe.location.getWorld();
+							pe.time = System.currentTimeMillis();
+							pe.extraData = new String[] {event.getMessage(), event.getPlayer().getName()};
+							
+							eventManager.pushEvent(pe);
+						}
+					}
+				}
+			}
+			else if( event.getMessage().startsWith("/unban") ) {
+				String args = event.getMessage().substring(7);
+				if( args != null ) {
+					int index = args.indexOf(' ');
+					if( index != -1 ) {
+						String unbannedPlayer = args.substring(0, index-1);
+						Debug.getInstance().debug("unban command for player ",unbannedPlayer," from player ",event.getPlayer());
+//						plugin.getBanTracker().unBan(unbannedPlayer);
+						PlayerEvent pe = getNextEventObject();
+						
+						if( pe != null ) {
+							pe.eventType = Type.PLAYER_UNBANNED;
+							pe.playerName = event.getPlayer().getName();
+							pe.location = event.getPlayer().getLocation();
+							pe.x = pe.location.getBlockX();
+							pe.y = pe.location.getBlockY();
+							pe.z = pe.location.getBlockZ();
+							pe.world = pe.location.getWorld();
+							pe.time = System.currentTimeMillis();
+							pe.extraData = new String[] {event.getMessage(), event.getPlayer().getName()};
+							
+							eventManager.pushEvent(pe);
+						}
+					}
 				}
 			}
 		}
@@ -112,7 +165,7 @@ public class BukkitPlayerListener extends PlayerListener {
 	
 	private final static int ERROR_FLOOD_PREVENTION_LIMIT = 3;
 	private int errorFloodPreventionCount = 0;
-	private PlayerEvent getNextBlockChangeEvent() {
+	private PlayerEvent getNextEventObject() {
 		PlayerEvent event = null;
 		try {
 			event = buffer.getNextObject();

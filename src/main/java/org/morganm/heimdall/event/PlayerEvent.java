@@ -16,7 +16,9 @@ public class PlayerEvent implements Event {
 		NEW_PLAYER_JOIN,
 		PLAYER_JOIN,
 		PLAYER_QUIT,
-		PLAYER_KICK
+		PLAYER_KICK,
+		PLAYER_BANNED,
+		PLAYER_UNBANNED
 	}
 	public Type eventType;
 	
@@ -28,6 +30,8 @@ public class PlayerEvent implements Event {
 	public int y;
 	public int z;
 	public transient Location location;
+	
+	public String[] extraData;
 	
 	public transient boolean cleared = true;
 	
@@ -41,6 +45,7 @@ public class PlayerEvent implements Event {
 		y = 0;
 		z = 0;
 		location = null;
+		extraData = null;
 
 		cleared = true;
 	}
@@ -78,5 +83,18 @@ public class PlayerEvent implements Event {
 	@Override
 	public void accept(EventHandler visitor) {
 		visitor.processEvent(this);
+	}
+	
+	public String toString() {
+		return "PlayerEvent:["
+				+"eventType="+eventType
+				+",playerName="+playerName
+				+",time="+time
+				+",world="+world
+				+",x="+x
+				+",y="+y
+				+",z="+z
+				+",location="+location
+				+"]";
 	}
 }

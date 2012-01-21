@@ -6,6 +6,7 @@ package org.morganm.heimdall.event.handlers;
 import org.morganm.heimdall.engine.Engine;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent;
+import org.morganm.heimdall.event.PlayerEvent;
 
 /** Enricher which wraps an Engine and passes it events.
  * 
@@ -27,5 +28,10 @@ public class EngineWrapper extends EventHandler {
 	@Override
 	public void processEvent(InventoryChangeEvent ice) {
 		engine.processInventoryChange(ice);
+	}
+	
+	@Override
+	public void processEvent(PlayerEvent pe) {
+		engine.processPlayerEvent(pe);
 	}
 }

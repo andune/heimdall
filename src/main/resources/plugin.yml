@@ -1,6 +1,6 @@
 name: Heimdall
 main: org.morganm.heimdall.Heimdall
-version: 0.4
+version: 0.5
 author: morganm
 softdepend: [LogBlock]
 commands:

@@ -27,12 +27,14 @@ public class GriefLogEngine extends AbstractEngine {
 	private final PlayerStateManager playerStateManager;
 	private final Logger logger;
 	private final String logPrefix;
+	private final Debug debug;
 	
 	public GriefLogEngine(final Heimdall plugin, final PlayerStateManager playerStateManager) {
 		this.plugin = plugin;
 		this.playerStateManager = playerStateManager;
 		this.logger = this.plugin.getLogger();
 		this.logPrefix = this.plugin.getLogPrefix();
+		this.debug = Debug.getInstance();
 	}
 	
 	/* (non-Javadoc)
@@ -76,16 +78,33 @@ public class GriefLogEngine extends AbstractEngine {
 	
 	@Override
 	public void processPlayerEvent(PlayerEvent event) {
+		debug.debug("GriefLogEngine::processPlayerEvent event=",event);
 		if( event.eventType == PlayerEvent.Type.NEW_PLAYER_JOIN ) {
 			logEvent(event, Type.NEW_PLAYER, 0, null, null);
 		}
-		else if( event.eventType == PlayerEvent.Type.PLAYER_KICK ) {
-			String banCommand = plugin.getBanTracker().getBanCommand(event.playerName);
-			if( banCommand != null ) {
-				String banSender = plugin.getBanTracker().getBanSender(event.playerName);
-				logEvent(event, Type.BANNED_PLAYER, 0, null,
-						"BanSender: "+banSender+", BanCommand: "+banCommand);
+		else if( event.eventType == PlayerEvent.Type.PLAYER_BANNED ) {
+			String banCommand = null;
+			String banSender = null;
+			if( event.extraData.length == 2 ) {
+				banCommand = event.extraData[0];
+				banSender = event.extraData[1];
 			}
+
+			logEvent(event, Type.BANNED_PLAYER, 0, null,
+					"BanSender: "+banSender+", BanCommand: "+banCommand);
+		}
+		else if( event.eventType == PlayerEvent.Type.PLAYER_UNBANNED ) {
+			String unbanCommand = null;
+			String unbanSender = null;
+			if( event.extraData.length == 2 ) {
+				unbanCommand = event.extraData[0];
+				unbanSender = event.extraData[1];
+			}
+			logEvent(event, Type.UNBANNED_PLAYER, 0, null,
+					"UnBanSender: "+unbanSender+", UnBanCommand: "+unbanCommand);
+		}
+		else if( event.eventType == PlayerEvent.Type.PLAYER_KICK ) {
+			logEvent(event, Type.PLAYER_KICKED, 0, null, null);
 		}
 	}
 

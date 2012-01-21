@@ -29,7 +29,7 @@ public class GriefLog implements LogInterface {
 	// least we will flush every TIME_BETWEEN_FLUSH seconds at each call.
 	private static final int TIME_BETWEEN_FLUSH = 10000;
 	
-	private static final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+	private static final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.FULL);
 
 	private static final String HEADER = "# time|timestamp|activity|playerName|activityGriefPoints|totalGriefPoints|location|blockOwner|additionalData";
 
