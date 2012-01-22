@@ -5,6 +5,8 @@ package org.morganm.heimdall.event.handlers;
 
 import org.morganm.heimdall.engine.Engine;
 import org.morganm.heimdall.event.BlockChangeEvent;
+import org.morganm.heimdall.event.FriendEvent;
+import org.morganm.heimdall.event.FriendInviteEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.event.PlayerEvent;
 
@@ -33,5 +35,15 @@ public class EngineWrapper extends EventHandler {
 	@Override
 	public void processEvent(PlayerEvent pe) {
 		engine.processPlayerEvent(pe);
+	}
+	
+	@Override
+	public void processEvent(FriendEvent event) {
+		engine.processHeimdallFriendEvent(event);
+	}
+	
+	@Override
+	public void processEvent(FriendInviteEvent event) {
+		engine.processHeimdallFriendInvite(event);
 	}
 }

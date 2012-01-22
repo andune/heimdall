@@ -80,7 +80,7 @@ public class NotifyEngine extends AbstractEngine {
 		if( notifyTargets != null && notifyTargets.size() > 0 ) {
 			for(Player p : notifyTargets) {
 				p.sendMessage(ChatColor.RED+"[Heimdall]"+ChatColor.WHITE
-						+"Player "+event.getPlayerName()+" has friended player "+event.getFriend());
+						+" Player "+event.getPlayerName()+" has friended player "+event.getFriend());
 			}
 		}
 	}
@@ -91,7 +91,7 @@ public class NotifyEngine extends AbstractEngine {
 		if( notifyTargets != null && notifyTargets.size() > 0 ) {
 			for(Player p : notifyTargets) {
 				p.sendMessage(ChatColor.RED+"[Heimdall]"+ChatColor.WHITE
-						+"Sent automated friend invite to player "+event.getPlayerName()+" for player "+event.getInvitedFriend());
+						+" Sent automated friend invite to player "+event.getPlayerName()+" for player "+event.getInvitedFriend());
 			}
 		}
 	}
