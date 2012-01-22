@@ -6,6 +6,7 @@ package org.morganm.heimdall;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -177,9 +178,16 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 			log.severe(logPrefix+"error saving playerStateManager: "+e.getMessage());
 		}
 		
-		for(Iterator<LogInterface> i = logs.iterator(); i.hasNext();) {
-			i.next().close();
-			i.remove();
+		synchronized (this) {
+			// we do this to get around ConcurrentModificationException (if we used an
+			// iterator) since LogInterface.close() is supposed to remove the element
+			// from the array.
+			LogInterface[] logArray = logs.toArray(new LogInterface[] {});
+			for(int i=0; i < logArray.length; i++) {
+				logArray[i].close();
+				if( logs.contains(logArray[i]) )
+					removeLogger(logArray[i]);
+			}
 		}
 
 		eventManager.unregisterAllPluginEnrichers(this);
@@ -217,13 +225,15 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	}
 
 	public void flushLogs() {
-		for(Iterator<LogInterface> i = logs.iterator(); i.hasNext();) {
-			LogInterface log = i.next();
-			try {
-				log.flush();
-			}
-			catch(IOException e) {
-				i.remove();		// if we get an exception, remove the log
+		synchronized (this) {
+			for(Iterator<LogInterface> i = logs.iterator(); i.hasNext();) {
+				LogInterface log = i.next();
+				try {
+					log.flush();
+				}
+				catch(IOException e) {
+					i.remove();		// if we get an exception, remove the log
+				}
 			}
 		}
 	}

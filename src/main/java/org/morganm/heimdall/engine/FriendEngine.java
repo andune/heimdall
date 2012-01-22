@@ -37,7 +37,7 @@ public class FriendEngine extends AbstractEngine {
 
 	@Override
 	public void processBlockChange(BlockChangeEvent event) {
-		debug.debug("FriendEngine processing block change by player ",event.playerName);
+		debug.devDebug("FriendEngine processing block change by player ",event.playerName);
 		PlayerActivity activity = getPlayerActivityObject(event.playerName);
 		int chunkX = event.getLocation().getChunk().getX();
 		int chunkZ = event.getLocation().getChunk().getZ();

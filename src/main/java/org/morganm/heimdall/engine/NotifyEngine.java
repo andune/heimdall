@@ -23,7 +23,9 @@ import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.FriendEvent;
 import org.morganm.heimdall.event.FriendInviteEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent;
+import org.morganm.heimdall.player.FriendTracker;
 import org.morganm.heimdall.player.PlayerStateManager;
+import org.morganm.heimdall.util.Debug;
 import org.morganm.heimdall.util.General;
 import org.morganm.heimdall.util.PermissionSystem;
 
@@ -39,11 +41,13 @@ public class NotifyEngine extends AbstractEngine {
 	private final Map<String, Set<String>> notifyIgnores = new HashMap<String, Set<String>>();
 	private final FileConfiguration config;
 	private final EngineLog engineLog;
+	private final FriendTracker friendTracker;
 	
 	public NotifyEngine(final Heimdall plugin, final PlayerStateManager playerStateManager) {
 		this.plugin = plugin;
 		this.playerStateManager = playerStateManager;
 		this.perms = plugin.getPermissionSystem();
+		this.friendTracker = plugin.getFriendTracker();
 		
 		String configFile = this.plugin.getConfig().getString("engine.notify.configfile");
 		File file = new File(configFile);
@@ -54,7 +58,7 @@ public class NotifyEngine extends AbstractEngine {
 
 	@Override
 	public void processBlockChange(BlockChangeEvent event) {
-		processEvent(event, " (owner=",event.blockOwner,", Material=",event.type,")");
+		processEvent(event, event.blockOwner, " (owner=",event.blockOwner,", Material=",event.type,")");
 	}
 
 	@Override
@@ -71,7 +75,7 @@ public class NotifyEngine extends AbstractEngine {
 		}
 		sb.append("]");
 
-		processEvent(event, " (owner=",event.blockOwner,") ", sb.toString());
+		processEvent(event, event.blockOwner, " (owner=",event.blockOwner,") ", sb.toString());
 	}
 	
 	@Override
@@ -96,7 +100,7 @@ public class NotifyEngine extends AbstractEngine {
 		}
 	}
 	
-	private void processEvent(Event event, Object...arg) {
+	private void processEvent(Event event, String blockOwner, Object...arg) {
 		Float lastNotifyValue = lastNotifyValues.get(event.getPlayerName());
 		if( lastNotifyValue == null )
 			lastNotifyValue = Float.valueOf(0);
@@ -104,7 +108,10 @@ public class NotifyEngine extends AbstractEngine {
 		
 		// if the number has gone up by at least a whole number, time to notify
 		if( Math.ceil(newValue) > Math.ceil(lastNotifyValue) ) {
-			doNotify(event, newValue, arg);
+			if( !friendTracker.isPosssibleFriend(blockOwner, event.getPlayerName()) )
+				doNotify(event, newValue, arg);
+			else
+				Debug.getInstance().debug("NotifyEngine: did not notify since ",event.getPlayerName()," is possible friend of block owner ",blockOwner);
 		}
 		
 		// we update no matter what, because if the value went down, we want to capture

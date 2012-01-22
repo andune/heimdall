@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -27,6 +28,7 @@ import org.morganm.heimdall.util.Debug;
  *
  */
 public class FriendTracker {
+	private final static int INVITE_TIME_SECONDS = 30;
 	private final static String newLine = System.getProperty("line.separator");
 	
 	@SuppressWarnings("unused")
@@ -38,14 +40,17 @@ public class FriendTracker {
 	 */
 	private final HashMap<String, Set<FriendRelationship>> allRelationships = new HashMap<String, Set<FriendRelationship>>(100);
 	private final HashMap<String, HashMap<FriendRelationship, Integer>> invitePoints = new HashMap<String, HashMap<FriendRelationship, Integer>>(10);
+	/* pending invites by player, value is the expireTime of the invite
+	 */
+	private final HashMap<String, Long> pendingInvites = new HashMap<String, Long>(10);
 	
 	public FriendTracker(final Heimdall plugin) {
 		this.plugin = plugin;
 		this.debug = Debug.getInstance();
 	}
 	
-	/** Lookup the status of whether or not player1 and player2 are thought to be
-	 * friends based on "fuzzy data" of their interactions on the server.
+	/** Lookup the status of whether or player2 is thought to be a friend of
+	 * player1 based on "fuzzy data" of their interactions on the server.
 	 * 
 	 * @param player1
 	 * @param player2
@@ -54,10 +59,17 @@ public class FriendTracker {
 	public boolean isPosssibleFriend(String player1, String player2) {
 		FriendRelationship fr = getRelationship(player1, player2);
 
-		// TODO: tweak this until it makes sense
-		if( fr.points[0] > 30 && fr.points[1] > 30 ) {
+		// determine which side of relationship player1 is on
+		int index = 0;
+		if( fr.players[1].equals(player1) )
+			index = 1;
+		
+		if( fr.isConfirmedFriend[index] )
 			return true;
-		}
+		else if( fr.isConfirmedNotFriend[index] )
+			return false;
+		else if( fr.points[index] > 15 )
+			return true;
 		else
 			return false;
 	}
@@ -70,10 +82,18 @@ public class FriendTracker {
 	 */
 	public boolean isFriend(String player1, String player2) {
 		FriendRelationship fr = getRelationship(player1, player2);
-		if( fr.players[0].equals(player1) )
-			return fr.isConfirmedFriend[0];
-		else
-			return fr.isConfirmedFriend[1];
+		if( fr.players[0].equals(player1) ) {
+			if( fr.isConfirmedNotFriend[0] )
+				return false;
+			else
+				return fr.isConfirmedFriend[0];
+		}
+		else {
+			if( fr.isConfirmedNotFriend[1] )
+				return false;
+			else
+				return fr.isConfirmedFriend[1];
+		}
 	}
 	
 	/** Return all possible friends a player has, this includes both confirmed friends
@@ -173,17 +193,45 @@ public class FriendTracker {
 	 * 
 	 * @param actor
 	 * @param friend
+	 * @return true if an invite is sent, false if we're still waiting for response from a previous invite
+	 * or the player has already explicitly denied the friendship.
 	 */
-	public void sendFriendInvite(final String actor, final String friend) {
+	public boolean sendFriendInvite(final String actor, final String friend) {
 		Player friendPlayer = Bukkit.getPlayer(friend);
 		if( friendPlayer != null ) {
-			friendPlayer.sendMessage(actor+" and you appear to be working together. Please type /yes in the next 15 seconds to confirm you are working together (this is an anti-grief measure).");
+			final FriendRelationship fr = getRelationship(actor, friend);
+			
+			// do nothing if they have been explicitly denied as a friend already
+			if( fr.players[0].equals(friend) ) {
+				if( fr.isConfirmedNotFriend[0] )
+					return false;
+			}
+			else {
+				if( fr.isConfirmedNotFriend[1] )
+					return false;
+			}
+			
+			Long expireTime = pendingInvites.get(friend);
+			if( expireTime != null ) {
+				if(System.currentTimeMillis() > expireTime) {
+					debug.debug("FriendTracker: previous invite to ",friend," has expired");
+					pendingInvites.remove(friend);
+				}
+				else {
+					debug.debug("FriendTracker: tried to send invite to ",friend,", but previous invite still pending (expire time = ",expireTime,")");
+					return false;
+				}
+			}
+			
+			debug.debug("FriendTracker: sending friend invite. actor=",actor,", friend=",friend);
+			friendPlayer.sendMessage(ChatColor.YELLOW + actor+" and you appear to be working together.");
+			friendPlayer.sendMessage(ChatColor.YELLOW + "Please type /yes in the next 30 seconds to confirm they are friendly, or /no if you do not know them. (this is an anti-grief measure)");
 			YesNoCommand.getInstance().registerCallback(friend,
 					new CommandExecutor() {
 						@Override
-						public boolean onCommand(CommandSender arg0, Command arg1, String arg2,	String[] arg3) {
+						public boolean onCommand(CommandSender player, Command arg1, String arg2,	String[] arg3) {
+							pendingInvites.remove(player.getName());
 							if( arg2.startsWith("/yes") ) {
-								FriendRelationship fr = getRelationship(actor, friend);
 								if( fr.players[0].equals(friend) ) {
 									fr.isConfirmedFriend[0] = true;
 									fr.isConfirmedNotFriend[0] = false;
@@ -192,7 +240,7 @@ public class FriendTracker {
 									fr.isConfirmedFriend[1] = true;
 									fr.isConfirmedNotFriend[1] = false;
 								}
-								arg0.sendMessage("Thank you, "+actor+" has been confirmed as your friend.");
+								player.sendMessage("Thank you, "+actor+" has been confirmed as your friend.");
 								FriendEvent event = new FriendEvent(friend, actor);
 								plugin.getEventManager().pushEvent(event);
 								debug.debug("FriendTracker: actor ",actor," confirmed as friend of ",friend);
@@ -207,17 +255,22 @@ public class FriendTracker {
 									fr.isConfirmedNotFriend[1] = true;
 									fr.isConfirmedFriend[1] = false;
 								}
-								arg0.sendMessage("OK, "+actor+" is confirmed as NOT being your friend. Type \"/friend "+actor+"\" if you change your mind.");
+								player.sendMessage("OK, "+actor+" is confirmed as NOT being your friend. Type \"/friend "+actor+"\" if you change your mind.");
 								debug.debug("FriendTracker: actor ",actor," DENIED as friend of ",friend);
 							}
 							// TODO Auto-generated method stub
 							return true;
 						}
-					}, 15);
+					}, INVITE_TIME_SECONDS);
+			
+			// record that we sent the invite
+			pendingInvites.put(friend, System.currentTimeMillis() + (INVITE_TIME_SECONDS*1000));
 			
 			FriendInviteEvent event = new FriendInviteEvent(friend, actor);
 			plugin.getEventManager().pushEvent(event);
 		}
+		
+		return true;
 	}
 	
 	/** Add "friend points" between two players.
@@ -261,19 +314,32 @@ public class FriendTracker {
 			
 			debug.debug("FriendTracker::addFriendPoints: lastInvite=",lastInvite);
 			if( newPoints > 50 && lastInvite < 50 ) {
-				debug.debug("FriendTracker::addFriendPoints: sending first invite");
-				sendFriendInvite(actor, friend);
-				map.put(fr, 50);
+				if( sendFriendInvite(actor, friend) ) {
+					debug.debug("FriendTracker::addFriendPoints: sent first invite");
+					map.put(fr, 50);
+				}
 			}
 			else if( newPoints > 100 && lastInvite < 100 ) {
-				debug.debug("FriendTracker::addFriendPoints: sending second invite");
-				sendFriendInvite(actor, friend);
-				map.put(fr, 100);
+				if( sendFriendInvite(actor, friend) ) {
+					debug.debug("FriendTracker::addFriendPoints: sent second invite");
+					map.put(fr, 100);
+				}
 			}
-			else if( newPoints > 200 && lastInvite < 200 ) {
-				debug.debug("FriendTracker::addFriendPoints: sending third invite");
-				sendFriendInvite(actor, friend);
-				map.put(fr, 200);
+			else if( newPoints > 150 && lastInvite < 150 ) {
+				if( sendFriendInvite(actor, friend) ) {
+					debug.debug("FriendTracker::addFriendPoints: sent third invite");
+					map.put(fr, 150);
+				}
+			}
+			else {
+				// make sure there's not a pending invite still
+				if( pendingInvites.get(friend) == null ) {
+					debug.debug("FriendTracker::addFriendPoints: automatically linking friends: ",friend,":",actor);
+					addFriend(friend, actor);				
+					Player p = Bukkit.getPlayer(friend);
+					if( p != null )
+						p.sendMessage("You have not responded to friend requests, so "+actor+" has automatically been added as your friend.");
+				}
 			}
 			// we try up to 3 times to "link up" friends, after that, we give up
 		}
@@ -398,18 +464,24 @@ public class FriendTracker {
 			sb.append(":");
 			sb.append(newLine);
 			for(FriendRelationship fr : entry.getValue()) {
-				sb.append("  Friend: ");
 				if( fr.players[0].equals(entry.getKey()) ) {
-					sb.append(fr.players[1]);
-					sb.append(", friendPoints=");
-					sb.append(fr.points[0]);	// how many points I have with/against that player
+					if( fr.points[0] > 0 ) {
+						sb.append("  Friend: ");
+						sb.append(fr.players[1]);
+						sb.append(", friendPoints=");
+						sb.append(fr.points[0]);	// how many points I have with/against that player
+						sb.append(newLine);
+					}
 				}
 				else {
-					sb.append(fr.players[0]);
-					sb.append(", friendPoints=");
-					sb.append(fr.points[1]);	// how many points I have with/against that player
+					if( fr.points[1] > 0 ) {
+						sb.append("  Friend: ");
+						sb.append(fr.players[0]);
+						sb.append(", friendPoints=");
+						sb.append(fr.points[1]);	// how many points I have with/against that player
+						sb.append(newLine);
+					}
 				}
-				sb.append(newLine);
 			}
 		}
 		

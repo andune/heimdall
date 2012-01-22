@@ -56,8 +56,4 @@ public class HeimdallPersonalityEngine extends AbstractEngine {
 	public void processInventoryChange(InventoryChangeEvent event) {
 		processEvent(event);
 	}
-	@Override
-	public void processPlayerEvent(PlayerEvent event) {
-		processEvent(event);
-	}
 }
