@@ -149,7 +149,9 @@ public class PlayerStateImpl implements PlayerState {
 		
 		Set<String> possibleFriends = friendTracker.getAllPossibleFriends(name);
 		for(String friend : possibleFriends) {
-			dataStore.set("possibleFriend."+friend, friendTracker.getFriendPoints(name, friend));
+			float points = friendTracker.getFriendPoints(name, friend);
+			if( points > 0 )
+				dataStore.set("possibleFriend."+friend, friendTracker.getFriendPoints(name, friend));
 		}
 
 		dataStore.save(dataFile);

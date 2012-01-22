@@ -459,13 +459,21 @@ public class FriendTracker {
 	public String dumpFriendsMap() {
 		StringBuilder sb = new StringBuilder(100);
 		for(Map.Entry<String, Set<FriendRelationship>> entry : allRelationships.entrySet()) {
-			sb.append("Player ");
-			sb.append(entry.getKey());
-			sb.append(":");
-			sb.append(newLine);
+			StringBuilder playerHeader = new StringBuilder(30);
+			playerHeader.append("Player ");
+			playerHeader.append(entry.getKey());
+			playerHeader.append(":");
+			playerHeader.append(newLine);
+			boolean dumpedPlayerHeader = false;
+			
 			for(FriendRelationship fr : entry.getValue()) {
 				if( fr.players[0].equals(entry.getKey()) ) {
-					if( fr.points[0] > 0 ) {
+					if( !fr.isConfirmedFriend[0] && fr.points[0] > 0 ) {
+						if( !dumpedPlayerHeader ) {
+							dumpedPlayerHeader = true;
+							sb.append(playerHeader.toString());
+						}
+
 						sb.append("  Friend: ");
 						sb.append(fr.players[1]);
 						sb.append(", friendPoints=");
@@ -474,7 +482,12 @@ public class FriendTracker {
 					}
 				}
 				else {
-					if( fr.points[1] > 0 ) {
+					if( !fr.isConfirmedFriend[1] && fr.points[1] > 0 ) {
+						if( !dumpedPlayerHeader ) {
+							dumpedPlayerHeader = true;
+							sb.append(playerHeader.toString());
+						}
+
 						sb.append("  Friend: ");
 						sb.append(fr.players[0]);
 						sb.append(", friendPoints=");

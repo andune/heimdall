@@ -34,11 +34,13 @@ import org.morganm.heimdall.util.PermissionSystem;
  *
  */
 public class NotifyEngine extends AbstractEngine {
+	private static final int SECONDS_BETWEEN_NOTIFY = 10;
 	private final Heimdall plugin; 
 	private final PlayerStateManager playerStateManager;
 	private final PermissionSystem perms;
 	private final Map<String, Float> lastNotifyValues = new HashMap<String, Float>(20);
 	private final Map<String, Set<String>> notifyIgnores = new HashMap<String, Set<String>>();
+	private final Map<String, Map<String, NotifyAntiFlood>> lastNotify = new HashMap<String, Map<String, NotifyAntiFlood>>(10);
 	private final FileConfiguration config;
 	private final EngineLog engineLog;
 	private final FriendTracker friendTracker;
@@ -58,7 +60,7 @@ public class NotifyEngine extends AbstractEngine {
 
 	@Override
 	public void processBlockChange(BlockChangeEvent event) {
-		processEvent(event, event.blockOwner, " (owner=",event.blockOwner,", Material=",event.type,")");
+		processEvent(event, event.griefValue, event.blockOwner, " (owner=",event.blockOwner,", Material=",event.type,")");
 	}
 
 	@Override
@@ -75,7 +77,7 @@ public class NotifyEngine extends AbstractEngine {
 		}
 		sb.append("]");
 
-		processEvent(event, event.blockOwner, " (owner=",event.blockOwner,") ", sb.toString());
+		processEvent(event, event.griefValue, event.blockOwner, " (owner=",event.blockOwner,") ", sb.toString());
 	}
 	
 	@Override
@@ -100,7 +102,7 @@ public class NotifyEngine extends AbstractEngine {
 		}
 	}
 	
-	private void processEvent(Event event, String blockOwner, Object...arg) {
+	private void processEvent(final Event event, final float griefPoints, final String blockOwner, final Object...arg) {
 		Float lastNotifyValue = lastNotifyValues.get(event.getPlayerName());
 		if( lastNotifyValue == null )
 			lastNotifyValue = Float.valueOf(0);
@@ -109,7 +111,7 @@ public class NotifyEngine extends AbstractEngine {
 		// if the number has gone up by at least a whole number, time to notify
 		if( Math.ceil(newValue) > Math.ceil(lastNotifyValue) ) {
 			if( !friendTracker.isPosssibleFriend(blockOwner, event.getPlayerName()) )
-				doNotify(event, newValue, arg);
+				doNotify(event, griefPoints, arg);
 			else
 				Debug.getInstance().debug("NotifyEngine: did not notify since ",event.getPlayerName()," is possible friend of block owner ",blockOwner);
 		}
@@ -148,7 +150,9 @@ public class NotifyEngine extends AbstractEngine {
 	}
 	
 	private void doNotify(final Event event, final float griefPoints, final Object...arg) {
+		final float totalGriefPoints = playerStateManager.getPlayerState(event.getPlayerName()).getGriefPoints();
 		final List<Player> notifyTargets = getOnlineNotifyTargets();
+		
 		if( notifyTargets != null && notifyTargets.size() > 0 ) {
 			final StringBuilder sb = new StringBuilder(60);
 			for(int i=0; i < arg.length; i++) {
@@ -163,9 +167,42 @@ public class NotifyEngine extends AbstractEngine {
 				
 				// notify if no ignores are set or if the player is not in the ignore list
 				if( ignores == null || !ignores.contains(lowerCaseName) ) {
+					Map<String, NotifyAntiFlood> map = lastNotify.get(p.getName());
+					if( map == null ) {
+						map = new HashMap<String, NotifyAntiFlood>(5);
+						lastNotify.put(p.getName(), map);
+					}
+					
+					NotifyAntiFlood naf = map.get(event.getPlayerName());
+					if( naf == null ) {
+						naf = new NotifyAntiFlood();
+						map.put(event.getPlayerName(), naf);
+					}
+					// notification suppression; suppress notify events that are close in time, although
+					// if a single large grief event comes through, always send that one.
+					else if( griefPoints < 20 && System.currentTimeMillis() < naf.lastNotify + (SECONDS_BETWEEN_NOTIFY*1000) ) {
+						naf.griefPointsAccrued += griefPoints;	// tally grief points accrued while suppressed
+						naf.suppressedEventCount++;
+						break;	// skip this notify
+					}
+					// we're past SECONDS_BETWEEN_NOTIFY, lift suppression
+					else {
+						long seconds = (System.currentTimeMillis() - naf.lastNotify) / 1000;
+						
+						p.sendMessage(ChatColor.RED+"[Heimdall]"+ChatColor.WHITE
+								+" Player "+event.getPlayerName()+" has accumulated "
+								+naf.griefPointsAccrued+" since last notification "+seconds+" seconds ago."
+								+" (Heimdall suppressed "+naf.suppressedEventCount+" notification events as"
+								+" part of it's anti notify-flood system and send you this summary instead)");
+					}
+					
+					naf.lastNotify = System.currentTimeMillis();
+					naf.griefPointsAccrued = 0;
+					naf.suppressedEventCount = 0;
+					
 					p.sendMessage(ChatColor.RED+"[Heimdall]"+ChatColor.WHITE
 							+" Player "+event.getPlayerName()+" has accumulated "
-							+griefPoints+" total grief points. Latest action "+event.getEventTypeString()
+							+totalGriefPoints+" total grief points. Latest action "+event.getEventTypeString()
 							+" at location {"+General.getInstance().shortLocationString(event.getLocation())+"}"
 							+additionalData);
 
@@ -199,5 +236,16 @@ public class NotifyEngine extends AbstractEngine {
 		}
 		
 		return notifyTargets;
+	}
+	
+	/** Class for keeping state data when supression notification floods.
+	 * 
+	 * @author morganm
+	 *
+	 */
+	private class NotifyAntiFlood {
+		public long lastNotify;
+		public float griefPointsAccrued = 0;
+		public int suppressedEventCount = 0;
 	}
 }
