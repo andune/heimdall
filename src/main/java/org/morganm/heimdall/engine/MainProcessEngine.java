@@ -11,6 +11,7 @@ import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent.InventoryEventType;
+import org.morganm.heimdall.player.FriendTracker;
 import org.morganm.heimdall.player.PlayerState;
 import org.morganm.heimdall.player.PlayerStateManager;
 import org.morganm.heimdall.util.Debug;
@@ -26,10 +27,12 @@ public class MainProcessEngine extends AbstractEngine {
 	private final YamlConfiguration config;
 	private final EngineLog log;
 	private final boolean isLogging;
+	private final FriendTracker friendTracker;
 	
 	public MainProcessEngine(final Heimdall plugin, final PlayerStateManager playerStateManager) {
 		this.plugin = plugin;
 		this.playerStateManager = playerStateManager;
+		this.friendTracker = plugin.getFriendTracker();
 		this.debug = Debug.getInstance();
 		
 		String configFile = this.plugin.getConfig().getString("engine.main.configfile");
@@ -58,10 +61,15 @@ public class MainProcessEngine extends AbstractEngine {
 			int typeId = event.type.getId();
 			if( event.blockOwner != null
 					&& !event.playerName.equals(event.blockOwner)
-					&& !"Enderman".equals(event.blockOwner)								// ignore Enderman-placed blocks
 					&& (event.ownerTypeId == 0 || typeId == event.ownerTypeId) ) {
-				debug.debug("block grief penalty: owner and player don't match, owner=",event.blockOwner,", player=",event.playerName);
-				event.griefValue = getBlockValue(typeId);
+				
+				// ignore any broken blocks between friends
+				if( !friendTracker.isFriend(event.blockOwner, event.playerName) ) {
+					debug.debug("block grief penalty: owner and player don't match, owner=",event.blockOwner,", player=",event.playerName);
+					event.griefValue = getBlockValue(typeId);
+				}
+				else
+					debug.debug("player ",event.blockOwner," has claimed player ",event.playerName," as friend: no grief penalty");
 			}
 //			event.griefValue = getBlockValue(typeId);	// testing;
 			
@@ -89,11 +97,16 @@ public class MainProcessEngine extends AbstractEngine {
 		if( event.type == InventoryEventType.CONTAINER_ACCESS ) {
 			if( event.blockOwner != null && !event.playerName.equals(event.blockOwner) ) {
 				if( !event.isLwcPublic ) {
-					debug.debug("MainProcessEngine:processInventoryChange inventory grief penalty: owner and player don't match, owner=",event.blockOwner,", player=",event.playerName);
-					for(int i=0; i < event.diff.length; i++) {
-						event.griefValue += getInventoryValue(event.diff[i]);
-						debug.debug("MainProcessEngine:processInventoryChange event grief value = ",event.griefValue);
+					// ignore any chest access between friends
+					if( !friendTracker.isFriend(event.blockOwner, event.playerName) ) {
+						debug.debug("MainProcessEngine:processInventoryChange inventory grief penalty: owner and player don't match, owner=",event.blockOwner,", player=",event.playerName);
+						for(int i=0; i < event.diff.length; i++) {
+							event.griefValue += getInventoryValue(event.diff[i]);
+							debug.debug("MainProcessEngine:processInventoryChange event grief value = ",event.griefValue);
+						}
 					}
+					else
+						debug.debug("player ",event.blockOwner," has claimed player ",event.playerName," as friend: no grief penalty");
 				}
 				else
 					debug.debug("MainProcessEngine:processInventoryChange block is flagged as LWC public, no grief penalty");

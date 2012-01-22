@@ -16,7 +16,9 @@ public interface Event {
 		BLOCK_CHANGE,
 		INVENTORY_CHANGE,
 		CHAT_MESSAGE,
-		PLAYER_EVENT
+		PLAYER_EVENT,
+		HEIMDALL_FRIEND_EVENT,
+		HEIMDALL_FRIEND_INVITE_SENT,
 	}
 	
 	/** Clear the event object of any data.

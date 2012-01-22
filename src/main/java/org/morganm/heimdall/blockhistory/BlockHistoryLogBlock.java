@@ -3,6 +3,8 @@
  */
 package org.morganm.heimdall.blockhistory;
 
+import java.util.HashSet;
+
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
 import org.morganm.heimdall.util.Debug;
@@ -16,10 +18,23 @@ import de.diddiz.LogBlock.QueryParams.BlockChangeType;
  *
  */
 public class BlockHistoryLogBlock implements BlockHistoryManager {
+	private final static HashSet<String> ignoredOwners = new HashSet<String>(15);
 	private final Plugin plugin;
 	private final LogBlock logBlock;
 	private final Debug debug;
 	private final BlockHistoryCache bhCache;
+	
+	static {
+		ignoredOwners.add("WaterFlow");
+		ignoredOwners.add("LavaFlow");
+		ignoredOwners.add("TNT");
+		ignoredOwners.add("Creeper");
+		ignoredOwners.add("Fire");
+		ignoredOwners.add("Ghast");
+		ignoredOwners.add("Environment");
+		ignoredOwners.add("Enderman");
+		ignoredOwners.add("LeavesDecay");
+	}
 	
 	public BlockHistoryLogBlock(final Plugin plugin, final BlockHistoryCache bhCache) {
 		this.plugin = plugin;
@@ -65,6 +80,10 @@ public class BlockHistoryLogBlock implements BlockHistoryManager {
 					debug.devDebug("logBlock query = ",params.getQuery());
 				}
 				for (de.diddiz.LogBlock.BlockChange lbChange : logBlock.getBlockChanges(params)) {
+					// skip ignored owners
+					if( ignoredOwners.contains(lbChange.playerName) )
+						continue;
+					
 					bh = new BlockHistory(lbChange.playerName, lbChange.type, l);
 					debug.debug("got logBlock result, lbOwner=",lbChange.playerName);
 				}

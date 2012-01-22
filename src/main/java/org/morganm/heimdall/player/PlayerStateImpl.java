@@ -38,13 +38,15 @@ public class PlayerStateImpl implements PlayerState {
 	private final transient PlayerStateManager playerStateManager;
 	private transient GriefLog griefLog;
 	private transient YamlConfiguration dataStore;
+	private final transient FriendTracker friendTracker;
 	
 	public PlayerStateImpl(final Heimdall plugin, final String name, final PlayerStateManager playerStateManager) {
 		this.plugin = plugin;
 		this.permSystem = this.plugin.getPermissionSystem();
 		this.name = name;
 		this.playerStateManager = playerStateManager;
-		this.dataFile = new File("plugins/Heimdall/playerData/"+name+".yml");
+		this.dataFile = new File("plugins/Heimdall/playerData/"+name.toLowerCase()+".yml");
+		this.friendTracker = this.plugin.getFriendTracker();
 	}
 	
 	@Override
@@ -92,8 +94,7 @@ public class PlayerStateImpl implements PlayerState {
 
 	@Override
 	public boolean isFriend(PlayerState p) {
-		// TODO: something intelligent later (with playerStateManager)
-		return false;
+		return friendTracker.isFriend(name, p.getName());
 	}
 
 	@Override
@@ -109,6 +110,15 @@ public class PlayerStateImpl implements PlayerState {
 		}
 		
 		return griefLog;
+	}
+	
+	public void close() throws Exception {
+		save();
+		if( griefLog != null ) {
+			griefLog.close();
+			griefLog = null;
+		}
+		playerStateManager.removePlayerState(this);
 	}
 	
 	public void save() throws IOException {
@@ -132,6 +142,14 @@ public class PlayerStateImpl implements PlayerState {
 			for(Map.Entry<String, Float> entry : pointsByOwner.entrySet()) {
 				dataStore.set("pointsByOwner."+entry.getKey(), entry.getValue());
 			}
+		}
+		
+		dataStore.set("friends", friendTracker.getFriends(name));
+		dataStore.set("notFriends", friendTracker.getNotFriends(name));
+		
+		Set<String> possibleFriends = friendTracker.getAllPossibleFriends(name);
+		for(String friend : possibleFriends) {
+			dataStore.set("possibleFriend."+friend, friendTracker.getFriendPoints(name, friend));
 		}
 
 		dataStore.save(dataFile);
@@ -157,6 +175,31 @@ public class PlayerStateImpl implements PlayerState {
 			if( owners != null ) {
 				for(String owner : owners) {
 					pointsByOwner.put(owner, Float.valueOf((float) section.getDouble(owner)));
+				}
+			}
+		}
+		
+		List<String> friends = dataStore.getStringList("friends");
+		for(String friend : friends) {
+			friendTracker.setFriend(name, friend);
+		}
+		
+		List<String> notFriends = dataStore.getStringList("notFriends");
+		for(String notFriend : notFriends) {
+			friendTracker.setNotFriend(name, notFriend);
+		}
+		
+		section = dataStore.getConfigurationSection("possibleFriend");
+		if( section != null ) {
+			Set<String> possibleFriends = section.getKeys(false);
+			if( possibleFriends != null ) {
+				for(String friend : possibleFriends) {
+//					Debug.getInstance().debug("PlayerStateImpl::load possibleFriend = ",friend);
+					float points = 0;
+					Double d = section.getDouble(friend);
+					if( d != null )
+						points = (float) d.doubleValue();
+					friendTracker.setFriendPoints(name, friend, points);
 				}
 			}
 		}

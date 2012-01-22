@@ -4,6 +4,7 @@
 package org.morganm.heimdall;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -18,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.morganm.heimdall.blockhistory.BlockHistoryFactory;
 import org.morganm.heimdall.blockhistory.BlockHistoryManager;
 import org.morganm.heimdall.command.CommandMapper;
+import org.morganm.heimdall.command.YesNoCommand;
 import org.morganm.heimdall.engine.Engine;
 import org.morganm.heimdall.engine.FriendEngine;
 import org.morganm.heimdall.engine.GriefLogEngine;
@@ -30,6 +32,7 @@ import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.EventManager;
 import org.morganm.heimdall.event.handlers.BlockHistoryEnricher;
 import org.morganm.heimdall.event.handlers.EngineWrapper;
+import org.morganm.heimdall.event.handlers.PlayerCleanupHandler;
 import org.morganm.heimdall.listener.BukkitBlockListener;
 import org.morganm.heimdall.listener.BukkitPlayerListener;
 import org.morganm.heimdall.listener.SpoutChestAccessListener;
@@ -125,7 +128,12 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 			eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
 			eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
 			eventManager.registerHandler(this, Event.Type.PLAYER_EVENT, wrapper);
+			eventManager.registerHandler(this, Event.Type.HEIMDALL_FRIEND_EVENT, wrapper);
+			eventManager.registerHandler(this, Event.Type.HEIMDALL_FRIEND_INVITE_SENT, wrapper);
 		}
+		
+		eventManager.registerHandler(this, Event.Type.PLAYER_EVENT,
+				new PlayerCleanupHandler(this, playerStateManager));
 		
 		final PluginManager pm = getServer().getPluginManager();
 		blockListener = new BukkitBlockListener(this, eventManager);
@@ -143,6 +151,9 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		pm.registerEvent(Type.PLAYER_JOIN, playerListener, Priority.Monitor, this);
 		pm.registerEvent(Type.PLAYER_KICK, playerListener, Priority.Monitor, this);
 		pm.registerEvent(Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Monitor, this);
+		
+		pm.registerEvent(Type.PLAYER_COMMAND_PREPROCESS, YesNoCommand.getInstance(), Priority.Lowest, this);
+//		getServer().getPluginManager().registerEvents(YesCommand.getInstance(), this);
 		
 		playerStateManager.getPlayerTracker().reset();
 		
@@ -201,12 +212,23 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		logs.add(log);
 	}
 	
+	public void removeLogger(LogInterface log) {
+		logs.remove(log);
+	}
+
 	public void flushLogs() {
-		for(LogInterface log : logs) {
-			log.flush();
+		for(Iterator<LogInterface> i = logs.iterator(); i.hasNext();) {
+			LogInterface log = i.next();
+			try {
+				log.flush();
+			}
+			catch(IOException e) {
+				i.remove();		// if we get an exception, remove the log
+			}
 		}
 	}
 
+	public EventManager getEventManager() { return eventManager; }
 	public NotifyEngine getNotifyEngine() { return notifyEngine; }
 	public LastGriefTrackingEngine getLastGriefTrackingEngine() { return lastGriefTrackingEngine; }
 	public FriendTracker getFriendTracker() { return friendTracker; }

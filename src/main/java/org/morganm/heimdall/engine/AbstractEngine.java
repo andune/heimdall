@@ -4,6 +4,8 @@
 package org.morganm.heimdall.engine;
 
 import org.morganm.heimdall.event.BlockChangeEvent;
+import org.morganm.heimdall.event.FriendEvent;
+import org.morganm.heimdall.event.FriendInviteEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.event.PlayerEvent;
 
@@ -16,19 +18,15 @@ import org.morganm.heimdall.event.PlayerEvent;
 public abstract class AbstractEngine implements Engine {
 
 	@Override
-	public void processBlockChange(BlockChangeEvent event) {
-	}
-
+	public void processBlockChange(BlockChangeEvent event) {}
 	@Override
-	public void processInventoryChange(InventoryChangeEvent event) {
-	}
-
+	public void processInventoryChange(InventoryChangeEvent event) {}
 	@Override
-	public void processChatMessage(String message) {
-	}
-
+	public void processChatMessage(String message) {}
 	@Override
-	public void processPlayerEvent(PlayerEvent event) {
-	}
-
+	public void processPlayerEvent(PlayerEvent event) {}
+	@Override
+	public void processHeimdallFriendEvent(FriendEvent event) {}
+	@Override
+	public void processHeimdallFriendInvite(FriendInviteEvent event) {}
 }

@@ -121,6 +121,11 @@ public class FriendEngine extends AbstractEngine {
 			debug.devDebug("updateActivityPoints: checking nearby player ",p," due to activity from player ",playerName);
 			PlayerActivity pa = getPlayerActivityObject(p.getName());
 			
+			if( friendTracker.isFriend(p.getName(), playerName) ) {
+				debug.devDebug("updateActivityPoints: ",p," has already claimed ",playerName," as a friend. Skipping.");
+				continue;
+			}
+			
 			// Look for recent activity from the nearby player. If they were recently
 			// active, then increment the friendship points
 			for(int i=0; i < pa.chunkActivity.length; i++) {

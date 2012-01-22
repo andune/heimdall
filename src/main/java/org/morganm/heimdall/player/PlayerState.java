@@ -54,6 +54,11 @@ public interface PlayerState {
 	 */
 	public GriefLog getGriefLog();
 
+	/** Save and close out this PlayerState object (close all open file handles).
+	 * 
+	 */
+	public void close() throws Exception;
+
 	/** Save this PlayerState to backing store (up to implementation).
 	 * 
 	 */

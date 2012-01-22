@@ -3,12 +3,10 @@
  */
 package org.morganm.heimdall.player;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.morganm.heimdall.Heimdall;
 
 /** Class for tracking and storing PlayerState objects.
@@ -21,8 +19,8 @@ public class PlayerStateManager {
 	private final Logger log;
 	private final String logPrefix;
 	private final Map<String, PlayerState> playerStateMap;
-	private File friendDataFile = new File("plugins/Heimdall/friends.yml");
-	private YamlConfiguration friendData;
+//	private File friendDataFile = new File("plugins/Heimdall/friends.yml");
+//	private YamlConfiguration friendData;
 	private final PlayerTracker playerTracker;
 	
 	public PlayerStateManager(final Heimdall plugin) {
@@ -41,16 +39,13 @@ public class PlayerStateManager {
 	 * @return the PlayerState object, guaranteed to be non-null
 	 */
 	public PlayerState getPlayerState(final String playerName) {
-		if( friendData == null )
-			loadFriends();
-		
 		if( playerName == null )
 			throw new NullPointerException("playerName is null");
 
-		PlayerState ps = playerStateMap.get(playerName);
+		PlayerState ps = playerStateMap.get(playerName.toLowerCase());
 		if( ps == null ) {
-			ps = loadPlayerState(playerName);
-			playerStateMap.put(playerName, ps);
+			ps = loadPlayerState(playerName);		// intentionally not .toLowerCase()
+			playerStateMap.put(playerName.toLowerCase(), ps);
 		}
 		return ps;
 	}
@@ -67,15 +62,16 @@ public class PlayerStateManager {
 		return ps;
 	}
 	
-	private void loadFriends() {
-//		friendData = YamlConfiguration.loadConfiguration(friendDataFile);
-//		friendData.getKeys(false);
+	/** Package visibility method.
+	 * 
+	 * @param ps
+	 */
+	void removePlayerState(final PlayerState ps) {
+		playerStateMap.remove(ps);
 	}
-	private void saveFriends() {
-		
-	}
+	
 	public void save() throws Exception {
-		saveFriends();
+//		saveFriends();
 
 		for(PlayerState ps : playerStateMap.values()) {
 			ps.save();

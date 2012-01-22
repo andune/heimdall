@@ -28,6 +28,11 @@ commands:
            /<command> - send to most recent grief action
            /<command> player - send to most recent grief action by player
     executor: org.morganm.heimdall.commands.GriefTeleport
+  friend:
+    description: Add a player as your friend
+    permission: heimdall.command.friend
+    usage: /<command> player - add player as your friend
+    executor: org.morganm.heimdall.commands.Friend
 permissions:
     heimdall.admin.*:
         description: Gives access to all Heimdall admin commands
@@ -48,3 +53,6 @@ permissions:
     heimdall.admin.teleport:
         description: Allows use of the /hdt command
         default: op
+    heimdall.command.friend:
+        description: Allows use of the /friend command
+        default: true

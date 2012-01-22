@@ -4,8 +4,10 @@
 package org.morganm.heimdall.commands;
 
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.morganm.heimdall.command.BaseCommand;
+import org.morganm.heimdall.command.YesNoCommand;
 import org.morganm.heimdall.util.Debug;
 
 /**
@@ -59,6 +61,27 @@ public class Heimdall extends BaseCommand {
 		else if( "df".equals(args[0]) ) {		// dump friends
 			sender.sendMessage("Dumping friend map");
 			sender.sendMessage(plugin.getFriendTracker().dumpFriendsMap());
+			return true;
+		}
+		else if( "tyn".equals(args[0]) ) {		// testing
+			YesNoCommand.getInstance().registerCallback(sender.getName(),
+					new CommandExecutor() {
+						@Override
+						public boolean onCommand(CommandSender sender, Command arg1, String arg2,
+								String[] arg3) {
+							if( arg2.startsWith("/yes") ) {
+								sender.sendMessage("Yes command received");
+							}
+							else if( arg2.startsWith("/no") ) {
+								sender.sendMessage("No command received");
+							}
+							else {
+								sender.sendMessage("ERROR, not supposed to happen: "+arg2);
+							}
+							return true;
+						}
+					}, 15);
+			sender.sendMessage("Yes command test started, send /yes within 15 seconds");
 			return true;
 		}
 		

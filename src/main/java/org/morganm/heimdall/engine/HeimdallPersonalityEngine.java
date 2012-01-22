@@ -19,6 +19,7 @@ import org.morganm.heimdall.player.PlayerStateManager;
  *
  */
 public class HeimdallPersonalityEngine extends AbstractEngine {
+	@SuppressWarnings("unused")
 	private final Heimdall plugin;
 	final PlayerStateManager playerStateManager;
 	final HeimdallPersonality personality;

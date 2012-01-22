@@ -4,6 +4,7 @@
 package org.morganm.heimdall;
 
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -18,6 +19,12 @@ import org.morganm.heimdall.util.PermissionSystem;
  *
  */
 public class HeimdallPersonality {
+	private static final String[] griefBellows = new String[] {
+		ChatColor.RED+"Heimdall bellows: What have we here? I'm going to keep my eye on this one.",
+		ChatColor.RED+"Heimdall bellows to someone far away: STOP RUINING MY WORLD!",
+		ChatColor.RED+"Heimdall says: I smell a rat."
+	};
+	private final Random random = new Random(System.currentTimeMillis());
 	private final Heimdall plugin;
 	private final PermissionSystem perm;
 
@@ -32,6 +39,10 @@ public class HeimdallPersonality {
 	
 	public void announcePossibleGriefer(final String playerName) {
 		List<String> silentPerms = plugin.getConfig().getStringList("core.personality.silentPerms");
+
+		int r = random.nextInt(griefBellows.length);
+		final String bellow = griefBellows[r];
+		Debug.getInstance().debug("Heimdall bellow string chosen: ",bellow);
 		
 		Player[] players = Bukkit.getOnlinePlayers();
 		for(int i=0; i < players.length; i++) {
@@ -51,8 +62,8 @@ public class HeimdallPersonality {
 			}
 			
 			if( !silentPerm ) {
-				players[i].sendMessage(ChatColor.RED+"Heimdall bellows: What have we here? I'm going to keep my eye on this one..");
-				Debug.getInstance().debug("Heimdall \"possible grief\" bellow sent to player ",players[i]);
+				players[i].sendMessage(bellow);
+//				Debug.getInstance().debug("Heimdall \"possible grief\" bellow sent to player ",players[i]);
 			}
 		}
 	}

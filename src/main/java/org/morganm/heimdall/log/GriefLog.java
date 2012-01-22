@@ -67,6 +67,8 @@ public class GriefLog implements LogInterface {
 			writeHeader();
 	}
 	public void close() {
+		this.plugin.removeLogger(this);
+
 		if( writer != null ) {
 			try {
 				writer.close();
@@ -76,14 +78,9 @@ public class GriefLog implements LogInterface {
 			}
 		}
 	}
-	public void flush() {
+	public void flush() throws IOException {
 		if( writer != null ) {
-			try {
-				writer.flush();
-			}
-			catch(IOException e) {
-				e.printStackTrace();
-			}
+			writer.flush();
 		}
 		lastFlush = System.currentTimeMillis(); 
 	}

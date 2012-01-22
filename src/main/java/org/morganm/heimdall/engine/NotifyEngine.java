@@ -20,6 +20,8 @@ import org.bukkit.entity.Player;
 import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.Event;
+import org.morganm.heimdall.event.FriendEvent;
+import org.morganm.heimdall.event.FriendInviteEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.player.PlayerStateManager;
 import org.morganm.heimdall.util.General;
@@ -71,7 +73,29 @@ public class NotifyEngine extends AbstractEngine {
 
 		processEvent(event, " (owner=",event.blockOwner,") ", sb.toString());
 	}
-
+	
+	@Override
+	public void processHeimdallFriendEvent(FriendEvent event) {
+		final List<Player> notifyTargets = getOnlineNotifyTargets();
+		if( notifyTargets != null && notifyTargets.size() > 0 ) {
+			for(Player p : notifyTargets) {
+				p.sendMessage(ChatColor.RED+"[Heimdall]"+ChatColor.WHITE
+						+"Player "+event.getPlayerName()+" has friended player "+event.getFriend());
+			}
+		}
+	}
+	
+	@Override
+	public void processHeimdallFriendInvite(FriendInviteEvent event) {
+		final List<Player> notifyTargets = getOnlineNotifyTargets();
+		if( notifyTargets != null && notifyTargets.size() > 0 ) {
+			for(Player p : notifyTargets) {
+				p.sendMessage(ChatColor.RED+"[Heimdall]"+ChatColor.WHITE
+						+"Sent automated friend invite to player "+event.getPlayerName()+" for player "+event.getInvitedFriend());
+			}
+		}
+	}
+	
 	private void processEvent(Event event, Object...arg) {
 		Float lastNotifyValue = lastNotifyValues.get(event.getPlayerName());
 		if( lastNotifyValue == null )
@@ -115,7 +139,7 @@ public class NotifyEngine extends AbstractEngine {
 	public Set<String> getNotifyIgnoreList(final String adminPlayer) {
 		return notifyIgnores.get(adminPlayer);
 	}
-
+	
 	private void doNotify(final Event event, final float griefPoints, final Object...arg) {
 		final List<Player> notifyTargets = getOnlineNotifyTargets();
 		if( notifyTargets != null && notifyTargets.size() > 0 ) {
