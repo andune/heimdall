@@ -183,6 +183,7 @@ public class NotifyEngine extends AbstractEngine {
 					else if( griefPoints < 20 && System.currentTimeMillis() < naf.lastNotify + (SECONDS_BETWEEN_NOTIFY*1000) ) {
 						naf.griefPointsAccrued += griefPoints;	// tally grief points accrued while suppressed
 						naf.suppressedEventCount++;
+						Debug.getInstance().debug("suppressed notification to ",p," about player ",event.getPlayerName());
 						break;	// skip this notify
 					}
 					// we're past SECONDS_BETWEEN_NOTIFY, lift suppression
@@ -194,6 +195,7 @@ public class NotifyEngine extends AbstractEngine {
 								+naf.griefPointsAccrued+" since last notification "+seconds+" seconds ago."
 								+" (Heimdall suppressed "+naf.suppressedEventCount+" notification events as"
 								+" part of it's anti notify-flood system and send you this summary instead)");
+						Debug.getInstance().debug("notification suppression message sent to ",p,", total suppressed events = ",naf.suppressedEventCount);
 					}
 					
 					naf.lastNotify = System.currentTimeMillis();
