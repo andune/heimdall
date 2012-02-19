@@ -43,4 +43,8 @@ public class BlockHistoryTest implements BlockHistoryManager {
 		return bh;
 	}
 
+	@Override
+	public void pluginLoaded(Plugin plugin) {}
+	@Override
+	public void pluginUnloaded(Plugin plugin) {}
 }

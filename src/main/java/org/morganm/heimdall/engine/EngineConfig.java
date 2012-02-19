@@ -32,7 +32,7 @@ public class EngineConfig {
 		engineAliases.put("BlockHistoryEngine".toLowerCase(), "org.morganm.heimdall.engine.BlockHistoryEngine");
 		engineAliases.put("GriefPointEngine".toLowerCase(), "org.morganm.heimdall.engine.GriefPointEngine");
 		engineAliases.put("FriendEngine".toLowerCase(), "org.morganm.heimdall.engine.FriendEngine");
-		engineAliases.put("SimpleLogEngine".toLowerCase(), "org.morganm.heimdall.engine.SimpleLogEngine");
+		engineAliases.put("SimpleLogEngine".toLowerCase(), "org.morganm.heimdall.engine.SimpleLogActionEngine");
 		engineAliases.put("GriefLogEngine".toLowerCase(), "org.morganm.heimdall.engine.GriefLogEngine");
 		engineAliases.put("LastGriefTrackingEngine".toLowerCase(), "org.morganm.heimdall.engine.LastGriefTrackingEngine");
 		engineAliases.put("NotifyEngine".toLowerCase(), "org.morganm.heimdall.engine.NotifyEngine");

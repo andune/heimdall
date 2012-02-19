@@ -24,6 +24,8 @@ import org.morganm.heimdall.util.Debug;
  *
  */
 public class GriefPointEngine extends AbstractEngine {
+	private static final String DEFAULT_CONFIG_FILE = "engine/main.yml";
+
 	private final Heimdall plugin;
 	private final PlayerStateManager playerStateManager;
 	private final Debug debug;
@@ -41,15 +43,8 @@ public class GriefPointEngine extends AbstractEngine {
 		this.friendTracker = this.plugin.getFriendTracker();
 		this.debug = Debug.getInstance();
 		
-		File file = new File(configFile);
-//		debug.debug("loading file ",file);
-		this.config = YamlConfiguration.loadConfiguration(file);
-//		debug.debug("config.getInt(\"blockpoints.4\") = ",config.getInt("blockpoints.4"));
-		
-		// shouldn't ever happen according to Bukkit contract, but better to be paranoid
-		if( this.config == null )
-			throw new NullPointerException("Yaml config is null: "+configFile);
-		
+		this.config = loadConfig(plugin, configFile, DEFAULT_CONFIG_FILE);
+
 		this.isLogging = this.config.getBoolean("engine.main.writeEngineLog", false);
 		if( this.isLogging ) {
 			File logFile = new File(this.config.getString("engine.main.logfile"));
@@ -59,7 +54,7 @@ public class GriefPointEngine extends AbstractEngine {
 		else
 			log = null;
 	}
-
+	
 	@Override
 	public Event.Type[] getRegisteredEventTypes() {
 		return new Event.Type[] { Event.Type.BLOCK_CHANGE, Event.Type.INVENTORY_CHANGE };

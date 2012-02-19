@@ -89,6 +89,9 @@ public class PermissionSystem {
 	public int getSystemInUse() { return systemInUse; }
 	
 	public void setupPermissions() {
+		setupPermissions(true);
+	}
+	public void setupPermissions(final boolean verbose) {
 		List<String> permPrefs = null;
 		if( plugin.getConfig().get("permissions") != null ) {
 			permPrefs = plugin.getConfig().getStringList("permissions");
@@ -107,39 +110,45 @@ public class PermissionSystem {
 			if( "vault".equalsIgnoreCase(system) ) {
 				if( setupVaultPermissions() ) {
 					systemInUse = VAULT;
-		        	log.info(logPrefix+"using Vault permissions");
+					if( verbose )
+						log.info(logPrefix+"using Vault permissions");
 					break;
 				}
 			}
 			else if( "wepif".equalsIgnoreCase(system) ) {
 				if( setupWEPIFPermissions() ) {
 					systemInUse = WEPIF;
-		        	log.info(logPrefix+"using WEPIF permissions");
+					if( verbose )
+						log.info(logPrefix+"using WEPIF permissions");
 					break;
 				}
 			}
 			else if( "pex".equalsIgnoreCase(system) ) {
 				if( setupPEXPermissions() ) {
 					systemInUse = PEX;
-		        	log.info(logPrefix+"using PEX permissions");
+					if( verbose )
+						log.info(logPrefix+"using PEX permissions");
 					break;
 				}
 			}
 			else if( "perm2".equalsIgnoreCase(system) || "perm2-compat".equalsIgnoreCase(system) ) {
 				if( setupPerm2() ) {
 					systemInUse = PERM2_COMPAT;
-		        	log.info(logPrefix+"using Perm2-compatible permissions");
+					if( verbose )
+						log.info(logPrefix+"using Perm2-compatible permissions");
 					break;
 				}
 			}
 			else if( "superperms".equalsIgnoreCase(system) ) {
 				systemInUse = SUPERPERMS;
-	        	log.info(logPrefix+"using Superperms permissions");
+				if( verbose )
+					log.info(logPrefix+"using Superperms permissions");
 	        	break;
 			}
 			else if( "ops".equalsIgnoreCase(system) ) {
 				systemInUse = OPS;
-	        	log.info(logPrefix+"using basic Op check for permissions");
+				if( verbose )
+					log.info(logPrefix+"using basic Op check for permissions");
 	        	break;
 			}
 		}

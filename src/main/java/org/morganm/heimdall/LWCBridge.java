@@ -10,7 +10,8 @@ import com.griefcraft.lwc.LWC;
 import com.griefcraft.lwc.LWCPlugin;
 import com.griefcraft.model.Protection;
 
-/**
+/** Class that provides a simplified wrapper to LWC.
+ * 
  * @author morganm
  *
  */
@@ -22,10 +23,17 @@ public class LWCBridge {
 		this.plugin = plugin;
 		
 		Plugin p = this.plugin.getServer().getPluginManager().getPlugin("LWC");
-		if( p != null ) {
-			lwc = ((LWCPlugin) p).getLWC();
-			plugin.getLogger().info(plugin.getLogPrefix()+"LWC version "+p.getDescription().getVersion()+" found and will be used to identify public chests");
+		if( p != null )
+			updateLWC((LWCPlugin) p);
+	}
+	
+	public void updateLWC(final LWCPlugin lwcPlugin) {
+		if( lwcPlugin != null ) {
+			this.lwc = lwcPlugin.getLWC();
+			this.plugin.getLogger().info(this.plugin.getLogPrefix()+"LWC version "+lwcPlugin.getDescription().getVersion()+" found and will be used to identify public chests");
 		}
+		else
+			this.lwc = null;
 	}
 	
 	public boolean isEnabled() {

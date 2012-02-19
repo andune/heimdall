@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  *
  */
 public class JarUtils {
-	// version: 9
+	// version: 10
 	private final Logger log;
 	private final String logPrefix;
 	private JavaPluginExtensions plugin;
@@ -32,10 +32,11 @@ public class JarUtils {
 //		this(plugin,jarFile, null, null);
 //	}
 	
-	/** Code adapted from Puckerpluck's MultiInv plugin.
+	/** Code adapted from Puckerpluck's MultiInv plugin. Used to copy a config file
+	 * from the plugin JAR to the plugin's data directory.
 	 * 
-	 * @param string
-	 * @return
+	 * @param fileName the name of the file. example: "config.yml"
+	 * @param outfile the File to copy to. example: "plugins/MyPlugin/config.yml"
 	 */
     public void copyConfigFromJar(String fileName, File outfile) {
         File file = new File(plugin.getDataFolder(), fileName);

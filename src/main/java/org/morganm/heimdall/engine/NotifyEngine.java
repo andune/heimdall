@@ -15,7 +15,6 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
@@ -34,7 +33,9 @@ import org.morganm.heimdall.util.PermissionSystem;
  *
  */
 public class NotifyEngine extends AbstractEngine {
+	private static final String DEFAULT_CONFIG_FILE = "engine/notify.yml";
 	private static final int SECONDS_BETWEEN_NOTIFY = 10;
+	
 	private final Heimdall plugin; 
 	private final PlayerStateManager playerStateManager;
 	private final PermissionSystem perms;
@@ -54,15 +55,8 @@ public class NotifyEngine extends AbstractEngine {
 		this.perms = this.plugin.getPermissionSystem();
 		this.friendTracker = this.plugin.getFriendTracker();
 		
-		File file = new File(configFile);
-		this.config = YamlConfiguration.loadConfiguration(file);
-		
-		// shouldn't ever happen according to Bukkit contract, but better to be paranoid
-		if( this.config == null )
-			throw new NullPointerException("Yaml config is null: "+configFile);
-		
-//		Debug.getInstance().debug("config.getInt(\"blockpoints.4\") = ",config.getInt("blockpoints.4"));
-		engineLog = new EngineLog(plugin, new File("plugins/Heimdall/logs/notify.log"));
+		this.config = loadConfig(plugin, configFile, DEFAULT_CONFIG_FILE);
+		this.engineLog = new EngineLog(plugin, new File("plugins/Heimdall/logs/notify.log"));
 	}
 
 	@Override

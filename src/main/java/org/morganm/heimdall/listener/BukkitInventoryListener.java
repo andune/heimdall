@@ -39,7 +39,6 @@ public class BukkitInventoryListener implements Listener {
 	private final Heimdall plugin;
 	private final Map<Player, ContainerState> containers = new HashMap<Player, ContainerState>();
 	private final EventManager eventManager;
-	private final LWCBridge lwc;
 	private final General util;
 	private final EventCircularBuffer<InventoryChangeEvent> buffer;
 	private final PlayerTracker tracker;
@@ -47,7 +46,6 @@ public class BukkitInventoryListener implements Listener {
 	public BukkitInventoryListener(final Heimdall plugin, final EventManager eventManager) {
 		this.plugin = plugin;
 		this.eventManager = eventManager;
-		this.lwc = this.plugin.getLWCBridge();
 		this.util = General.getInstance();
 		this.tracker = plugin.getPlayerStateManager().getPlayerTracker();
 		
@@ -68,7 +66,8 @@ public class BukkitInventoryListener implements Listener {
 			
 			ice.diff = diff;
 			
-			if( lwc.isEnabled() && lwc.isPublic(l.getBlock()) )
+			final LWCBridge lwc = plugin.getDependencyManager().getLWCBridge();
+			if( lwc != null && lwc.isEnabled() && lwc.isPublic(l.getBlock()) )
 				ice.isLwcPublic = true;
 			else
 				ice.isLwcPublic = false;

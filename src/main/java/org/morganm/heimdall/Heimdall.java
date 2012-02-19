@@ -52,7 +52,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	private FriendTracker friendTracker;
 	private LastGriefTrackingEngine lastGriefTrackingEngine;
 	private BlockHistoryManager blockHistoryManager;
-	private LWCBridge lwcBridge;
+	private DependencyManager dependencyManager;
 	private final Set<LogInterface> logs = new HashSet<LogInterface>(5);
 	
 	@Override
@@ -65,14 +65,14 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		Debug.getInstance().debug("onEnable() starting, config loaded");
 		
 		perm = new PermissionSystem(this, log, logPrefix);
-		perm.setupPermissions();
+		perm.setupPermissions(isVerboseEnabled());
 
 		new CommandMapper(this).mapCommands();		// map our command objects
 		
 		// initialize various objects needed to get things going
+		dependencyManager = new DependencyManager(this);
 		playerStateManager = new PlayerStateManager(this);
 		eventManager = new EventManager(this);
-		lwcBridge = new LWCBridge(this);
 		friendTracker = new FriendTracker(this);
 
 		// register all config-controlled Engines
@@ -86,6 +86,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		pm.registerEvents(new BukkitInventoryListener(this, eventManager), this);
 		pm.registerEvents(new BukkitPlayerListener(this, eventManager), this);
 		pm.registerEvents(YesNoCommand.getInstance(), this);
+		pm.registerEvents(dependencyManager, this);
 		
 		playerStateManager.getPlayerTracker().reset();
 		
@@ -93,7 +94,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 			public void run() { flushLogs(); }
 		}, 300, 300);	// every 15 seconds
 
-		log.info(logPrefix + "version "+version+", build "+buildNumber+" is enabled");
+		verbose("version "+version+", build "+buildNumber+" is enabled");
 		Debug.getInstance().debug("onEnable() finished");
 }
 	
@@ -124,11 +125,22 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		eventManager.unregisterAllPluginEnrichers(this);
 		eventManager.unregisterAllPluginHandlers(this);
 		
-		log.info(logPrefix + "version "+version+", build "+buildNumber+" is disabled");
+		verbose("version "+version+", build "+buildNumber+" is disabled");
 		Debug.getInstance().debug("onDisable() finished");
 		Debug.getInstance().disable();
 	}
 
+	public boolean isVerboseEnabled() { return getConfig().getBoolean("verbose", true); }
+	
+	/** Log a message to the console, but only if verbose is configured to true.
+	 * 
+	 * @param message
+	 */
+	public void verbose(final String message) {
+		if( isVerboseEnabled() )
+			log.info(logPrefix+message);
+	}
+	
 	public void loadConfig() {
 		File file = new File(getDataFolder(), "config.yml");
 		if( !file.exists() ) {
@@ -174,7 +186,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	public LastGriefTrackingEngine getLastGriefTrackingEngine() { return lastGriefTrackingEngine; }
 	public FriendTracker getFriendTracker() { return friendTracker; }
 	public BlockHistoryManager getBlockHistoryManager() { return blockHistoryManager; }
-	public LWCBridge getLWCBridge() { return lwcBridge; }
+	public DependencyManager getDependencyManager() { return dependencyManager; }
 	public PlayerStateManager getPlayerStateManager() { return playerStateManager; }
 	
 	@Override
