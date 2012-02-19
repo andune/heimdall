@@ -187,7 +187,7 @@ public class NotifyEngine extends AbstractEngine {
 						break;	// skip this notify
 					}
 					// we're past SECONDS_BETWEEN_NOTIFY, lift suppression
-					else {
+					else if( naf.suppressedEventCount > 0 ) {
 						long seconds = (System.currentTimeMillis() - naf.lastNotify) / 1000;
 						
 						p.sendMessage(ChatColor.RED+"[Heimdall]"+ChatColor.WHITE
