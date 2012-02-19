@@ -2,44 +2,44 @@
 # processed in the order defined.
 enrichers:
   blockHistory:
-    class: com.morganm.heimdall.event.handler.BlockHistoryEnricher
-  griefDetectionEngine:
-    class: com.morganm.heimdall.engine.GriefPointEngine
+    engine: BlockHistoryEngine
+  griefPointEngine:
+    engine: GriefPointEngine
     configFile: plugins/Heimdall/main.yml
 
-# handlers run after all enrichers and process the event. Handlers
-# are processed in the order defined.
+# handlers run after all enrichers. Handlers are processed in
+# the order defined.
 handlers:
   # Engine which keeps track of various things to find "friends"
   # automatically (avoids notifications/actions/etc as a result of
   # two people working together)
   friendEngine:
-    class: com.morganm.heimdall.engine.FriendEngine
+    engine: FriendEngine
 
   # simple log engine for logging basic activity. Useful for debugging
   # to make sure Heimdall is working.`
   simpleLogEngine:
-    class: com.morganm.heimdall.engine.SimpleLogActionEngine
+    engine: SimpleLogEngine
 
   # this engine writes grief events to a "griefLog" directory for
   # easy browsing, and is also used by the "/hdgl" command.
   griefLogEngine:
-    class: com.morganm.heimdall.engine.GriefLogEngine
+    engine: GriefLogEngine
 
   # this engine allows the '/hdgt' command to work
   lastGriefTrackingEngine:
-    class: com.morganm.heimdall.engine.LastGriefTrackingEngine
+    engine: LastGriefTrackingEngine
 
   # This engine sends notifications to online mods/admins
   notifyEngine:
-    class: com.morganm.heimdall.engine.NotifyEngine
+    engine: NotifyEngine
     configFile: plugins/Heimdall/notify.yml
 
   # Enables Heimdall personality; Heimdall will send broadcast messages
   # when he sees acts of griefing taking place or when he takes
   # action against griefers.
   personality:
-    class: com.morganm.heimdall.engine.HeimdallPersonalityEngine
+    engine: PersonalityEngine
     configFile: plugins/Heimdall/personality.yml
 
     # permissions that will not see any Heimdall broadcast messages

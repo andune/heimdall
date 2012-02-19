@@ -4,6 +4,7 @@
 package org.morganm.heimdall.engine;
 
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,10 +22,22 @@ import org.morganm.heimdall.util.Debug;
  *
  */
 public class EngineConfig {
+	private static final HashMap<String, String> engineAliases = new HashMap<String, String>(10);
 	private final Logger log;
 	private final String logPrefix;
 	private final Heimdall plugin;
 	private final Debug debug;
+	
+	static {
+		engineAliases.put("BlockHistoryEngine".toLowerCase(), "org.morganm.heimdall.engine.BlockHistoryEngine");
+		engineAliases.put("GriefPointEngine".toLowerCase(), "org.morganm.heimdall.engine.GriefPointEngine");
+		engineAliases.put("FriendEngine".toLowerCase(), "org.morganm.heimdall.engine.FriendEngine");
+		engineAliases.put("SimpleLogEngine".toLowerCase(), "org.morganm.heimdall.engine.SimpleLogEngine");
+		engineAliases.put("GriefLogEngine".toLowerCase(), "org.morganm.heimdall.engine.GriefLogEngine");
+		engineAliases.put("LastGriefTrackingEngine".toLowerCase(), "org.morganm.heimdall.engine.LastGriefTrackingEngine");
+		engineAliases.put("NotifyEngine".toLowerCase(), "org.morganm.heimdall.engine.NotifyEngine");
+		engineAliases.put("PersonalityEngine".toLowerCase(), "org.morganm.heimdall.engine.HeimdallPersonalityEngine");
+	}
 	
 	public EngineConfig(final Heimdall plugin) {
 		this.plugin = plugin;
@@ -37,14 +50,32 @@ public class EngineConfig {
 	 * 
 	 */
 	public void registerEngines() {
+		debug.debug("registerEngines invoked");
 		FileConfiguration config = plugin.getConfig();
 
 		final String[] sections = new String[] { "enrichers", "handlers" };
 		for(int i=0; i < sections.length; i++) {
+			debug.debug("checking ",sections[i]);
 			ConfigurationSection section = config.getConfigurationSection(sections[i]);
 			Set<String> keys = section.getKeys(false);
 			for(String handler : keys) {
-				String className = config.getString(sections[i]+"."+handler+".class");
+				String engineName = config.getString(sections[i]+"."+handler+".engine");
+				String className = null;
+				if( engineName != null ) {
+					className = engineAliases.get(engineName.toLowerCase());
+					if( className == null ) {
+						log.warning(logPrefix+"engineName "+engineName+" does not map to any valid engines");
+						continue;
+					}
+				}
+				else
+					className = config.getString(sections[i]+"."+handler+".class");
+				
+				if( className == null ) {
+					log.warning(logPrefix+"null className for engine definition "+sections[i]+", skipping");
+					continue;
+				}
+
 				String configFile = config.getString(sections[i]+"."+handler+".configFile");
 				debug.debug("Instantiating engine ",handler,", class=",className,", configFile=",configFile);
 				Engine engine = instantiateEngine(handler, className, configFile);
@@ -60,7 +91,9 @@ public class EngineConfig {
 	private Engine instantiateEngine(final String handlerName, final String className, final String configFile) {
 		Engine engine = null;
 
+		final ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
 		try {
+			Thread.currentThread().setContextClassLoader(plugin.getClassLoader());
 			Class<?> clazz = Class.forName(className);
 			Class<? extends Engine> engineClass = clazz.asSubclass(Engine.class);
 			Constructor<? extends Engine> constructor = null;
@@ -88,6 +121,9 @@ public class EngineConfig {
 		}
 		catch(Exception e) {
 			log.log(Level.WARNING, logPrefix+"Exception instantiating engine "+handlerName+": "+e.getMessage(), e);
+		}
+		finally {
+			Thread.currentThread().setContextClassLoader(oldLoader);
 		}
 
 		return engine;
