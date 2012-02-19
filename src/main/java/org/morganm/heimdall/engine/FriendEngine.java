@@ -157,6 +157,7 @@ public class FriendEngine extends AbstractEngine {
 		public PlayerActivity(final String playerName) {
 			this.playerName = playerName;
 		}
+		@SuppressWarnings("unused")
 		public String getPlayerName() { return playerName; }
 		
 		public ChunkActivity getChunkActivity(int x, int z) {

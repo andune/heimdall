@@ -26,6 +26,7 @@ public class SimpleLogActionEngine extends AbstractEngine {
 	private static final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM);
 //	private static long TIME_BETWEEN_FLUSH = 5000;	// 5 seconds
 	
+	@SuppressWarnings("unused")
 	private final Heimdall plugin;
 	private EngineLog log;
 	private final PlayerStateManager playerStateManager;

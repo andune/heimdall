@@ -11,6 +11,7 @@ import java.util.HashMap;
  *
  */
 public class BanTracker {
+	@SuppressWarnings("unused")
 	private final Heimdall plugin;
 	private final HashMap<String, Ban> bans = new HashMap<String, Ban>(10);
 	

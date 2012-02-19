@@ -10,7 +10,6 @@ import org.morganm.heimdall.HeimdallPersonality;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.InventoryChangeEvent;
-import org.morganm.heimdall.event.PlayerEvent;
 import org.morganm.heimdall.player.PlayerState;
 import org.morganm.heimdall.player.PlayerStateManager;
 

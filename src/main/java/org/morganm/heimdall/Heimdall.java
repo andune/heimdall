@@ -6,15 +6,12 @@ package org.morganm.heimdall;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.bukkit.event.Event.Priority;
-import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.morganm.heimdall.blockhistory.BlockHistoryFactory;
@@ -35,8 +32,8 @@ import org.morganm.heimdall.event.handlers.BlockHistoryEnricher;
 import org.morganm.heimdall.event.handlers.EngineWrapper;
 import org.morganm.heimdall.event.handlers.PlayerCleanupHandler;
 import org.morganm.heimdall.listener.BukkitBlockListener;
+import org.morganm.heimdall.listener.BukkitInventoryListener;
 import org.morganm.heimdall.listener.BukkitPlayerListener;
-import org.morganm.heimdall.listener.SpoutChestAccessListener;
 import org.morganm.heimdall.log.LogInterface;
 import org.morganm.heimdall.player.FriendTracker;
 import org.morganm.heimdall.player.PlayerStateManager;
@@ -60,8 +57,8 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	private PermissionSystem perm;
 	private JarUtils jarUtil;
 	private EventManager eventManager;
-	private BukkitBlockListener blockListener;	// block listener to push block breaks into buffer
-	private BukkitPlayerListener playerListener;
+//	private BukkitBlockListener blockListener;	// block listener to push block breaks into buffer
+//	private BukkitPlayerListener playerListener;
 	private PlayerStateManager playerStateManager;
 	private Engine griefEngine;
 	private NotifyEngine notifyEngine;
@@ -137,23 +134,27 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 				new PlayerCleanupHandler(this, playerStateManager));
 		
 		final PluginManager pm = getServer().getPluginManager();
-		blockListener = new BukkitBlockListener(this, eventManager);
-		pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Monitor, this);
-		pm.registerEvent(Type.BLOCK_PLACE, blockListener, Priority.Monitor, this);
-		pm.registerEvent(Type.SIGN_CHANGE, blockListener, Priority.Monitor, this);
+		pm.registerEvents(new BukkitBlockListener(this, eventManager), this);
+		pm.registerEvents(new BukkitInventoryListener(this, eventManager), this);
+		pm.registerEvents(new BukkitPlayerListener(this, eventManager), this);
+		pm.registerEvents(YesNoCommand.getInstance(), this);
 		
-		if (pm.isPluginEnabled("Spout")) {
-			pm.registerEvent(Type.CUSTOM_EVENT, new SpoutChestAccessListener(this, eventManager), Priority.Monitor, this);
-			log.info(logPrefix+ "Using Spout API to log chest access");
-		}
+//		pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Monitor, this);
+//		pm.registerEvent(Type.BLOCK_PLACE, blockListener, Priority.Monitor, this);
+//		pm.registerEvent(Type.SIGN_CHANGE, blockListener, Priority.Monitor, this);
 		
-		playerListener = new BukkitPlayerListener(this, eventManager);
-		pm.registerEvent(Type.PLAYER_QUIT, playerListener, Priority.Monitor, this);
-		pm.registerEvent(Type.PLAYER_JOIN, playerListener, Priority.Monitor, this);
-		pm.registerEvent(Type.PLAYER_KICK, playerListener, Priority.Monitor, this);
-		pm.registerEvent(Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Monitor, this);
+//		if (pm.isPluginEnabled("Spout")) {
+//			pm.registerEvent(Type.CUSTOM_EVENT, new SpoutChestAccessListener(this, eventManager), Priority.Monitor, this);
+//			log.info(logPrefix+ "Using Spout API to log chest access");
+//		}
 		
-		pm.registerEvent(Type.PLAYER_COMMAND_PREPROCESS, YesNoCommand.getInstance(), Priority.Lowest, this);
+//		playerListener = new BukkitPlayerListener(this, eventManager);
+//		pm.registerEvent(Type.PLAYER_QUIT, playerListener, Priority.Monitor, this);
+//		pm.registerEvent(Type.PLAYER_JOIN, playerListener, Priority.Monitor, this);
+//		pm.registerEvent(Type.PLAYER_KICK, playerListener, Priority.Monitor, this);
+//		pm.registerEvent(Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Monitor, this);
+//		
+//		pm.registerEvent(Type.PLAYER_COMMAND_PREPROCESS, YesNoCommand.getInstance(), Priority.Lowest, this);
 //		getServer().getPluginManager().registerEvents(YesCommand.getInstance(), this);
 		
 		playerStateManager.getPlayerTracker().reset();
