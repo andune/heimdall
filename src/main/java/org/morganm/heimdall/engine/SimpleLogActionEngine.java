@@ -30,9 +30,9 @@ public class SimpleLogActionEngine extends AbstractEngine {
 	private EngineLog log;
 	private final PlayerStateManager playerStateManager;
 	
-	public SimpleLogActionEngine(final Heimdall plugin, final PlayerStateManager playerStateManager) {
+	public SimpleLogActionEngine(final Heimdall plugin) {
 		this.plugin = plugin;
-		this.playerStateManager = playerStateManager;
+		this.playerStateManager = this.plugin.getPlayerStateManager();
 		
 		// TODO: drive file location from config file
 		this.log = new EngineLog(plugin, new File("plugins/Heimdall/logs/simpleLogActionEngine.log"));
@@ -43,6 +43,12 @@ public class SimpleLogActionEngine extends AbstractEngine {
 			log = null;
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public Event.Type[] getRegisteredEventTypes() {
+		return new Event.Type[] { Event.Type.BLOCK_CHANGE, Event.Type.INVENTORY_CHANGE,
+				Event.Type.HEIMDALL_FRIEND_EVENT, Event.Type.HEIMDALL_FRIEND_INVITE_SENT };
 	}
 
 	@Override

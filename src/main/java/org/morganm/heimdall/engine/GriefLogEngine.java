@@ -23,18 +23,23 @@ import org.morganm.heimdall.util.Debug;
  *
  */
 public class GriefLogEngine extends AbstractEngine {
+	private final Debug debug;
 	private final Heimdall plugin;
 	private final PlayerStateManager playerStateManager;
 	private final Logger logger;
 	private final String logPrefix;
-	private final Debug debug;
 	
-	public GriefLogEngine(final Heimdall plugin, final PlayerStateManager playerStateManager) {
+	public GriefLogEngine(final Heimdall plugin) {
 		this.plugin = plugin;
-		this.playerStateManager = playerStateManager;
+		this.playerStateManager = plugin.getPlayerStateManager();
 		this.logger = this.plugin.getLogger();
 		this.logPrefix = this.plugin.getLogPrefix();
 		this.debug = Debug.getInstance();
+	}
+	
+	@Override
+	public Event.Type[] getRegisteredEventTypes() {
+		return new Event.Type[] { Event.Type.BLOCK_CHANGE, Event.Type.INVENTORY_CHANGE, Event.Type.PLAYER_EVENT };
 	}
 	
 	/* (non-Javadoc)

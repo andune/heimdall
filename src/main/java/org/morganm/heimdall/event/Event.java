@@ -21,6 +21,19 @@ public interface Event {
 		HEIMDALL_FRIEND_INVITE_SENT,
 	}
 	
+	/* Bukkit has deprecated their event types. While the new event system is
+	 * much better, event types are still useful for a plugin like Heimdall
+	 * where event data is stored and processed asynchronously. Heimdall's
+	 * event types were designed to be less granular, so this enum is used
+	 * to track the original Bukkit event type for places where that might
+	 * be useful (such as logging).
+	 */
+	public enum BukkitType {
+		BLOCK_PLACE,
+		BLOCK_BREAK,
+		SIGN_CHANGE
+	}
+	
 	/** Clear the event object of any data.
 	 * 
 	 */

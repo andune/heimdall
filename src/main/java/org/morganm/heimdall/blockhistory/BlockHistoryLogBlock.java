@@ -20,9 +20,9 @@ import de.diddiz.LogBlock.QueryParams.BlockChangeType;
 public class BlockHistoryLogBlock implements BlockHistoryManager {
 	private final static HashSet<String> ignoredOwners = new HashSet<String>(15);
 	private final Plugin plugin;
-	private final LogBlock logBlock;
 	private final Debug debug;
 	private final BlockHistoryCache bhCache;
+	private LogBlock logBlock;
 	
 	static {
 		ignoredOwners.add("WaterFlow");
@@ -48,6 +48,18 @@ public class BlockHistoryLogBlock implements BlockHistoryManager {
 			this.logBlock = null;
 	}
 	
+	@Override
+	public void pluginLoaded(final Plugin p) {
+		if( p instanceof LogBlock )
+			this.logBlock = (LogBlock) p;
+	}
+	
+	@Override
+	public void pluginUnloaded(final Plugin p) {
+		if( p instanceof LogBlock )
+			this.logBlock = null;
+	}
+
 	@Override
 	public BlockHistory getBlockHistory(final Location l) {
 		if( l == null )

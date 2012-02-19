@@ -5,6 +5,7 @@ package org.morganm.heimdall.event.handlers;
 
 import org.morganm.heimdall.engine.Engine;
 import org.morganm.heimdall.event.BlockChangeEvent;
+import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.FriendEvent;
 import org.morganm.heimdall.event.FriendInviteEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent;
@@ -20,6 +21,10 @@ public class EngineWrapper extends EventHandler {
 	
 	public EngineWrapper(final Engine engine) {
 		this.engine = engine;
+	}
+
+	public Event.Type[] getRegisteredEventTypes() {
+		return engine.getRegisteredEventTypes();
 	}
 
 	@Override

@@ -7,12 +7,15 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
+import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.EventCircularBuffer;
 import org.morganm.heimdall.event.EventManager;
 import org.morganm.heimdall.player.PlayerTracker;
@@ -22,7 +25,7 @@ import org.morganm.heimdall.util.Debug;
  * @author morganm
  *
  */
-public class BukkitBlockListener extends BlockListener {
+public class BukkitBlockListener implements Listener {
 	private final static int ERROR_FLOOD_PREVENTION_LIMIT = 3;
 	
 	@SuppressWarnings("unused")
@@ -41,7 +44,7 @@ public class BukkitBlockListener extends BlockListener {
 		buffer = new EventCircularBuffer<BlockChangeEvent>(BlockChangeEvent.class, 1000, false, true);
 	}
 	
-	@Override
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onBlockBreak(BlockBreakEvent event) {
 		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
 			return;
@@ -52,7 +55,7 @@ public class BukkitBlockListener extends BlockListener {
 		if( bc != null ) {
 			bc.playerName = event.getPlayer().getName();
 			bc.time = System.currentTimeMillis();
-		    bc.bukkitEventType = event.getType();
+			bc.bukkitEventType = Event.BukkitType.BLOCK_BREAK;
 			bc.x = b.getX();
 			bc.y = b.getY();
 			bc.z = b.getZ();
@@ -65,7 +68,7 @@ public class BukkitBlockListener extends BlockListener {
 		}
 	}
 	
-	@Override
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onBlockPlace(BlockPlaceEvent event) {
 		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
 			return;
@@ -76,7 +79,7 @@ public class BukkitBlockListener extends BlockListener {
 		if( bc != null ) {
 			bc.playerName = event.getPlayer().getName();
 			bc.time = System.currentTimeMillis();
-		    bc.bukkitEventType = event.getType();
+			bc.bukkitEventType = Event.BukkitType.BLOCK_PLACE;
 			bc.x = b.getX();
 			bc.y = b.getY();
 			bc.z = b.getZ();
@@ -90,7 +93,7 @@ public class BukkitBlockListener extends BlockListener {
 		}
 	}
 	
-	@Override
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onSignChange(SignChangeEvent event) {
 		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
 			return;
@@ -101,7 +104,7 @@ public class BukkitBlockListener extends BlockListener {
 		if( bc != null ) {
 			bc.playerName = event.getPlayer().getName();
 			bc.time = System.currentTimeMillis();
-		    bc.bukkitEventType = event.getType();
+			bc.bukkitEventType = Event.BukkitType.SIGN_CHANGE;
 			bc.x = b.getX();
 			bc.y = b.getY();
 			bc.z = b.getZ();

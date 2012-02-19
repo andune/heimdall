@@ -10,6 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.plugin.Plugin;
@@ -35,6 +36,7 @@ public class EventManager implements Runnable {
 	private final static int CIRCULAR_BUFFER_SIZE = 10000;
 	
 	private final Heimdall plugin;
+	@SuppressWarnings("unused")
 	private final EngineLog eventDebugLog;
 	private final Logger log;
 	private final String logPrefix;
@@ -64,34 +66,33 @@ public class EventManager implements Runnable {
 		eventDebugLog = new EngineLog(this.plugin, new File("plugins/Heimdall/logs/eventDebug.log"));
 	}
 	
-	public void registerHandler(final Plugin plugin, final Event.Type type, final EventHandler handler) {
-		Map<Plugin, Set<EventHandler>> map = eventHandlers.get(type);
-		if( map == null ) {
-			map = new HashMap<Plugin, Set<EventHandler>>();
-			eventHandlers.put(type, map);
-		}
-		Set<EventHandler> list = map.get(plugin);
-		if( list == null ) {
-			list = new LinkedHashSet<EventHandler>();
-			map.put(plugin, list);
-		}
+	public void registerHandler(final Plugin plugin, final EventHandler handler,
+			Map<Event.Type, Map<Plugin, Set<EventHandler>>> handlersMap) {
+		final Event.Type[] types = handler.getRegisteredEventTypes();
 		
-		list.add(handler);
+		for(int i=0; i < types.length; i++) {
+			final Event.Type type = types[i];
+			Map<Plugin, Set<EventHandler>> map = handlersMap.get(type);
+			if( map == null ) {
+				map = new HashMap<Plugin, Set<EventHandler>>();
+				handlersMap.put(type, map);
+			}
+			Set<EventHandler> list = map.get(plugin);
+			if( list == null ) {
+				list = new LinkedHashSet<EventHandler>();
+				map.put(plugin, list);
+			}
+
+			list.add(handler);
+		}
 	}
 	
-	public void registerEnricher(final Plugin plugin, final Event.Type type, final EventHandler enricher) {
-		Map<Plugin, Set<EventHandler>> map = eventEnrichers.get(type);
-		if( map == null ) {
-			map = new HashMap<Plugin, Set<EventHandler>>();
-			eventEnrichers.put(type, map);
-		}
-		Set<EventHandler> list = map.get(plugin);
-		if( list == null ) {
-			list = new LinkedHashSet<EventHandler>();
-			map.put(plugin, list);
-		}
-		
-		list.add(enricher);
+	public void registerHandler(final Plugin plugin, final EventHandler handler) {
+		registerHandler(plugin, handler, eventHandlers);
+	}
+	
+	public void registerEnricher(final Plugin plugin, final EventHandler enricher) {
+		registerHandler(plugin, enricher, eventEnrichers);
 	}
 	
 	public void unregisterAllPluginHandlers(final Plugin plugin) {
@@ -158,7 +159,7 @@ public class EventManager implements Runnable {
 //				}
 				// DEBUGGING
 				
-				Debug.getInstance().devDebug("Begin processing event "+event);
+				Debug.getInstance().devDebug("Begin processing event ",event);
 				Event.Type type = event.getType();
 				
 				// first process any event enrichers
@@ -172,8 +173,7 @@ public class EventManager implements Runnable {
 									event.accept(handler);					// visitor pattern
 								}
 								catch(Throwable t) {
-									log.warning(logPrefix+" Caught exception processing event for enricher "+handler+", error: "+t.getMessage());
-									t.printStackTrace();
+									log.log(Level.WARNING, logPrefix+" Caught exception processing event for enricher "+handler+", error: "+t.getMessage(), t);
 								}
 							}
 						}
@@ -191,8 +191,7 @@ public class EventManager implements Runnable {
 									event.accept(handler);					// visitor pattern
 								}
 								catch(Throwable t) {
-									log.warning(logPrefix+" Caught exception processing event for handler "+handler+", error: "+t.getMessage());
-									t.printStackTrace();
+									log.log(Level.WARNING, logPrefix+" Caught exception processing event for handler "+handler+", error: "+t.getMessage(), t);
 								}
 							}
 						}

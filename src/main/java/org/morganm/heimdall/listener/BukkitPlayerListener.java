@@ -3,10 +3,13 @@
  */
 package org.morganm.heimdall.listener;
 
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerInventoryEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.EventCircularBuffer;
@@ -22,7 +25,7 @@ import org.morganm.heimdall.util.General;
  * @author morganm
  *
  */
-public class BukkitPlayerListener extends PlayerListener {
+public class BukkitPlayerListener implements Listener {
 	private final Heimdall plugin;
 	private final PlayerStateManager playerStateManager;
 	private final PlayerTracker playerTracker;
@@ -37,7 +40,7 @@ public class BukkitPlayerListener extends PlayerListener {
 		buffer = new EventCircularBuffer<PlayerEvent>(PlayerEvent.class, 1000, false, true);
 	}
 
-	@Override
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		playerTracker.playerLogin(event.getPlayer().getName());
 		
@@ -63,7 +66,7 @@ public class BukkitPlayerListener extends PlayerListener {
 		}
 	}
 	
-	@Override
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		playerTracker.removeTrackedPlayer(event.getPlayer().getName());
 
@@ -83,7 +86,7 @@ public class BukkitPlayerListener extends PlayerListener {
 		}
 	}
 	
-	@Override
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerKick(PlayerKickEvent event) {
 		if( event.isCancelled() )
 			return;
@@ -105,7 +108,7 @@ public class BukkitPlayerListener extends PlayerListener {
 		}
 	}
 	
-	@Override
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
 		if( event.getMessage().startsWith("/") ) {
 			if( event.getMessage().startsWith("/ban") ) {
@@ -161,6 +164,10 @@ public class BukkitPlayerListener extends PlayerListener {
 				}
 			}
 		}
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onPlayerInventory(PlayerInventoryEvent event) {
 	}
 	
 	private final static int ERROR_FLOOD_PREVENTION_LIMIT = 3;

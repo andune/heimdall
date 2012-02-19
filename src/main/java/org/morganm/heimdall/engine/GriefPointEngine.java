@@ -9,6 +9,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
+import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent.InventoryEventType;
 import org.morganm.heimdall.player.FriendTracker;
@@ -16,11 +17,15 @@ import org.morganm.heimdall.player.PlayerState;
 import org.morganm.heimdall.player.PlayerStateManager;
 import org.morganm.heimdall.util.Debug;
 
-/**
+/** Engine responsible for determining the grief point value for a given
+ * action (if any).
+ * 
  * @author morganm
  *
  */
-public class MainProcessEngine extends AbstractEngine {
+public class GriefPointEngine extends AbstractEngine {
+	private static final String DEFAULT_CONFIG_FILE = "engine/main.yml";
+
 	private final Heimdall plugin;
 	private final PlayerStateManager playerStateManager;
 	private final Debug debug;
@@ -29,18 +34,17 @@ public class MainProcessEngine extends AbstractEngine {
 	private final boolean isLogging;
 	private final FriendTracker friendTracker;
 	
-	public MainProcessEngine(final Heimdall plugin, final PlayerStateManager playerStateManager) {
+	public GriefPointEngine(final Heimdall plugin, final String configFile) {
+		if( configFile == null )
+			throw new NullPointerException("configFile is null");
+
 		this.plugin = plugin;
-		this.playerStateManager = playerStateManager;
-		this.friendTracker = plugin.getFriendTracker();
+		this.playerStateManager = this.plugin.getPlayerStateManager();
+		this.friendTracker = this.plugin.getFriendTracker();
 		this.debug = Debug.getInstance();
 		
-		String configFile = this.plugin.getConfig().getString("engine.main.configfile");
-		File file = new File(configFile);
-//		debug.debug("loading file ",file);
-		this.config = YamlConfiguration.loadConfiguration(file);
-//		debug.debug("config.getInt(\"blockpoints.4\") = ",config.getInt("blockpoints.4"));
-		
+		this.config = loadConfig(plugin, configFile, DEFAULT_CONFIG_FILE);
+
 		this.isLogging = this.config.getBoolean("engine.main.writeEngineLog", false);
 		if( this.isLogging ) {
 			File logFile = new File(this.config.getString("engine.main.logfile"));
@@ -50,6 +54,11 @@ public class MainProcessEngine extends AbstractEngine {
 		else
 			log = null;
 	}
+	
+	@Override
+	public Event.Type[] getRegisteredEventTypes() {
+		return new Event.Type[] { Event.Type.BLOCK_CHANGE, Event.Type.INVENTORY_CHANGE };
+	}
 
 	@Override
 	public void processBlockChange(BlockChangeEvent event) {
@@ -57,7 +66,7 @@ public class MainProcessEngine extends AbstractEngine {
 		if( ps.isExemptFromChecks() )
 			return;
 		
-		if( event.bukkitEventType == org.bukkit.event.Event.Type.BLOCK_BREAK ) {
+		if( event.bukkitEventType == Event.BukkitType.BLOCK_BREAK ) {
 			int typeId = event.type.getId();
 			if( event.blockOwner != null
 					&& !event.playerName.equals(event.blockOwner)
@@ -77,7 +86,7 @@ public class MainProcessEngine extends AbstractEngine {
 			if( isLogging && log != null )
 				log.logIgnoreError("assessing grief value of "+event.griefValue+" to player "+event.playerName);
 		}
-		else if( event.bukkitEventType == org.bukkit.event.Event.Type.BLOCK_PLACE ) {
+		else if( event.bukkitEventType == Event.BukkitType.BLOCK_PLACE ) {
 			event.griefValue = - getBlockValue(event.type.getId());
 			event.griefValue /= 4;		// block place is worth 1/4 the points as a grief destroy
 							// TODO: move ratio to config file

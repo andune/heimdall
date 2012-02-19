@@ -10,7 +10,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerListener;
 
 /** So as to not fight with other plugins that might use a /yes and /no response,
  * we implement our yes/no responses as pre-command hook. We keep track of when
@@ -21,7 +20,7 @@ import org.bukkit.event.player.PlayerListener;
  * @author morganm
  *
  */
-public class YesNoCommand extends PlayerListener {
+public class YesNoCommand implements Listener {
 	private static final String[] emptyStringArray = new String[] {};
 	private static YesNoCommand instance;
 	private final HashMap<String, CallbackEntity> yesCallBacks = new HashMap<String, CallbackEntity>(10);
@@ -38,7 +37,7 @@ public class YesNoCommand extends PlayerListener {
 		return instance;
 	}
 	
-	@Override
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
 		CallbackEntity callbackEntity = yesCallBacks.get(event.getPlayer().getName());
 		if( callbackEntity != null ) {

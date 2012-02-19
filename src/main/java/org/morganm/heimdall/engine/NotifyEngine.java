@@ -15,7 +15,6 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
@@ -34,7 +33,9 @@ import org.morganm.heimdall.util.PermissionSystem;
  *
  */
 public class NotifyEngine extends AbstractEngine {
+	private static final String DEFAULT_CONFIG_FILE = "engine/notify.yml";
 	private static final int SECONDS_BETWEEN_NOTIFY = 10;
+	
 	private final Heimdall plugin; 
 	private final PlayerStateManager playerStateManager;
 	private final PermissionSystem perms;
@@ -45,17 +46,23 @@ public class NotifyEngine extends AbstractEngine {
 	private final EngineLog engineLog;
 	private final FriendTracker friendTracker;
 	
-	public NotifyEngine(final Heimdall plugin, final PlayerStateManager playerStateManager) {
+	public NotifyEngine(final Heimdall plugin, final String configFile) {
+		if( configFile == null )
+			throw new NullPointerException("configFile is null");
+
 		this.plugin = plugin;
-		this.playerStateManager = playerStateManager;
-		this.perms = plugin.getPermissionSystem();
-		this.friendTracker = plugin.getFriendTracker();
+		this.playerStateManager = this.plugin.getPlayerStateManager();
+		this.perms = this.plugin.getPermissionSystem();
+		this.friendTracker = this.plugin.getFriendTracker();
 		
-		String configFile = this.plugin.getConfig().getString("engine.notify.configfile");
-		File file = new File(configFile);
-		this.config = YamlConfiguration.loadConfiguration(file);
-//		Debug.getInstance().debug("config.getInt(\"blockpoints.4\") = ",config.getInt("blockpoints.4"));
-		engineLog = new EngineLog(plugin, new File("plugins/Heimdall/logs/notify.log"));
+		this.config = loadConfig(plugin, configFile, DEFAULT_CONFIG_FILE);
+		this.engineLog = new EngineLog(plugin, new File("plugins/Heimdall/logs/notify.log"));
+	}
+
+	@Override
+	public Event.Type[] getRegisteredEventTypes() {
+		return new Event.Type[] { Event.Type.BLOCK_CHANGE, Event.Type.INVENTORY_CHANGE,
+				Event.Type.HEIMDALL_FRIEND_EVENT, Event.Type.HEIMDALL_FRIEND_INVITE_SENT };
 	}
 
 	@Override
@@ -187,7 +194,7 @@ public class NotifyEngine extends AbstractEngine {
 						break;	// skip this notify
 					}
 					// we're past SECONDS_BETWEEN_NOTIFY, lift suppression
-					else {
+					else if( naf.suppressedEventCount > 0 ) {
 						long seconds = (System.currentTimeMillis() - naf.lastNotify) / 1000;
 						
 						p.sendMessage(ChatColor.RED+"[Heimdall]"+ChatColor.WHITE

@@ -14,7 +14,7 @@ import org.morganm.heimdall.event.handlers.EventHandler;
  */
 public class BlockChangeEvent implements Event {
 	// BLOCK_PLACE, BLOCK_BREAK, etc
-	public org.bukkit.event.Event.Type bukkitEventType;
+	public Event.BukkitType bukkitEventType;
 	
 	public String playerName;
 	public long time;		// time of the event

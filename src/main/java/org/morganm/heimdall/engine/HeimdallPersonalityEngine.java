@@ -10,7 +10,6 @@ import org.morganm.heimdall.HeimdallPersonality;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.InventoryChangeEvent;
-import org.morganm.heimdall.event.PlayerEvent;
 import org.morganm.heimdall.player.PlayerState;
 import org.morganm.heimdall.player.PlayerStateManager;
 
@@ -21,14 +20,19 @@ import org.morganm.heimdall.player.PlayerStateManager;
 public class HeimdallPersonalityEngine extends AbstractEngine {
 	@SuppressWarnings("unused")
 	private final Heimdall plugin;
-	final PlayerStateManager playerStateManager;
-	final HeimdallPersonality personality;
-	final HashMap<String, Integer> announceLevel = new HashMap<String, Integer>(10);
+	private final PlayerStateManager playerStateManager;
+	private final HeimdallPersonality personality;
+	private final HashMap<String, Integer> announceLevel = new HashMap<String, Integer>(10);
 	
-	public HeimdallPersonalityEngine(final Heimdall plugin, final PlayerStateManager playerStateManager) {
+	public HeimdallPersonalityEngine(final Heimdall plugin) {
 		this.plugin = plugin;
-		this.playerStateManager = playerStateManager;
+		this.playerStateManager = plugin.getPlayerStateManager();
 		this.personality = new HeimdallPersonality(plugin);
+	}
+	
+	@Override
+	public Event.Type[] getRegisteredEventTypes() {
+		return new Event.Type[] { Event.Type.BLOCK_CHANGE, Event.Type.INVENTORY_CHANGE };
 	}
 	
 	private void processEvent(final Event event) {

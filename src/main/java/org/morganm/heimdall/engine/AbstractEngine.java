@@ -3,6 +3,10 @@
  */
 package org.morganm.heimdall.engine;
 
+import java.io.File;
+
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.FriendEvent;
 import org.morganm.heimdall.event.FriendInviteEvent;
@@ -16,6 +20,20 @@ import org.morganm.heimdall.event.PlayerEvent;
  *
  */
 public abstract class AbstractEngine implements Engine {
+	protected YamlConfiguration loadConfig(final Heimdall plugin, final String configFile, final String defaultConfigFile) {
+		File file = new File(configFile);
+		// copy default into place if file doesn't exist
+		if( !file.exists() )
+			plugin.getJarUtils().copyConfigFromJar(defaultConfigFile, file);
+		
+		final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		
+		// shouldn't ever happen according to Bukkit contract, but better to be paranoid
+		if( config == null )
+			throw new NullPointerException("Yaml config is null: "+configFile);
+		
+		return config;
+	}
 
 	@Override
 	public void processBlockChange(BlockChangeEvent event) {}

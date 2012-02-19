@@ -1,1 +1,57 @@
+# enrichers run to add data to a Heimdall event. Enrichers are
+# processed in the order defined.
+enrichers:
+  blockHistory:
+    engine: BlockHistoryEngine
+  griefPointEngine:
+    engine: GriefPointEngine
+    configFile: plugins/Heimdall/main.yml
+
+# handlers run after all enrichers. Handlers are processed in
+# the order defined.
+handlers:
+  # Engine which keeps track of various things to find "friends"
+  # automatically (avoids notifications/actions/etc as a result of
+  # two people working together)
+  friendEngine:
+    engine: FriendEngine
+
+  # simple log engine for logging basic activity. Useful for debugging
+  # to make sure Heimdall is working.`
+  simpleLogEngine:
+    engine: SimpleLogEngine
+
+  # this engine writes grief events to a "griefLog" directory for
+  # easy browsing, and is also used by the "/hdgl" command.
+  griefLogEngine:
+    engine: GriefLogEngine
+
+  # this engine allows the '/hdgt' command to work
+  lastGriefTrackingEngine:
+    engine: LastGriefTrackingEngine
+
+  # This engine sends notifications to online mods/admins
+  notifyEngine:
+    engine: NotifyEngine
+    configFile: plugins/Heimdall/notify.yml
+
+  # Enables Heimdall personality; Heimdall will send broadcast messages
+  # when he sees acts of griefing taking place or when he takes
+  # action against griefers.
+  personality:
+    engine: PersonalityEngine
+    configFile: plugins/Heimdall/personality.yml
+
+    # permissions that will not see any Heimdall broadcast messages
+    silentPerms:
+      - group.Guest
+
+# Permissions listed here are totally ignored by Heimdall. Since Heimdall's
+# intent and focus is on accurately detecting new player griefing, it is
+# recommended that you list any permissions/groups here that aren't your
+# guests. I'm not going to help tune Heimdall to work for "all your players
+# all the time", so if that's how you're trying to use it, stop.
+exemptPermissions:
+  - group.Member
+
 debug: false

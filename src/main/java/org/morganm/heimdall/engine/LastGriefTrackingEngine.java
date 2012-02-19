@@ -6,10 +6,10 @@ package org.morganm.heimdall.engine;
 import java.util.HashMap;
 
 import org.bukkit.Location;
+import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
 import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.InventoryChangeEvent;
-import org.morganm.heimdall.util.JavaPluginExtensions;
 
 /** Engine that keeps track of the most recent grief event per-player.
  * 
@@ -18,12 +18,17 @@ import org.morganm.heimdall.util.JavaPluginExtensions;
  */
 public class LastGriefTrackingEngine extends AbstractEngine {
 	@SuppressWarnings("unused")
-	private final JavaPluginExtensions plugin;
+	private final Heimdall plugin;
 	private final HashMap<String, Location> lastGriefLocation = new HashMap<String, Location>(10);
 	private String lastGriefPlayerName = null;
 
-	public LastGriefTrackingEngine(final JavaPluginExtensions plugin) {
+	public LastGriefTrackingEngine(final Heimdall plugin) {
 		this.plugin = plugin;
+	}
+
+	@Override
+	public Event.Type[] getRegisteredEventTypes() {
+		return new Event.Type[] { Event.Type.BLOCK_CHANGE, Event.Type.INVENTORY_CHANGE };
 	}
 
 	/* Return the name of the most recent person to get a grief alert.
