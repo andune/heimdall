@@ -1,5 +1,9 @@
 v0.6
 * more features added to automated friend tracking
+* several minor bug fixes
+* changed engine definition to config-driven instead of hard coded
+* engines will copy default config into place if it doesn't exist
+* first public release
 
 v0.5 - January 20, 2012
 * lots of prod server testing and bug fixes

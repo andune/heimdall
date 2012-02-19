@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.morganm.heimdall.blockhistory.BlockHistoryFactory;
 import org.morganm.heimdall.blockhistory.BlockHistoryManager;
 import org.morganm.heimdall.command.CommandMapper;
 import org.morganm.heimdall.command.YesNoCommand;
@@ -74,6 +75,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		playerStateManager = new PlayerStateManager(this);
 		eventManager = new EventManager(this);
 		friendTracker = new FriendTracker(this);
+		blockHistoryManager = BlockHistoryFactory.getBlockHistoryManager(this);
 
 		// register all config-controlled Engines
 		final EngineConfig engineConfig = new EngineConfig(this);

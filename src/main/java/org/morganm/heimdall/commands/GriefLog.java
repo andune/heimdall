@@ -34,9 +34,20 @@ public class GriefLog extends BaseCommand {
 		PlayerState ps = playerStateManager.getPlayerState(args[0]);
 		org.morganm.heimdall.log.GriefLog griefLog = ps.getGriefLog();
 		
+		int page = 1;
+		if( args.length > 1 ) {
+			try {
+				page = Integer.parseInt(args[1]);
+			}
+			catch(NumberFormatException e) {
+				sender.sendMessage("Invalid number: "+args[1]);
+				return true;
+			}
+		}
+		
 		GriefEntry[] entries = null;
 		try {
-			entries = griefLog.getLastNEntries(5);
+			entries = griefLog.getLastNEntries(page*5);
 		}
 		catch(IOException e) {
 			sender.sendMessage("Error retrieving grief entries for player "+args[0]+", check sytem log");
@@ -44,8 +55,20 @@ public class GriefLog extends BaseCommand {
 		}
 		
 		if( entries != null && entries.length > 0 ) {
-			sender.sendMessage("Last 5 grief log entries for player "+args[0]+":");
-			for(int i=0; i < entries.length; i++) {
+			if( page < 2 )
+				sender.sendMessage("Last 5 grief log entries for player "+args[0]+":");
+			else {
+				int bottom = (page-1)*5;
+				int top = page*5;
+				if( entries.length < (page*5) ) {
+					page = (entries.length / 5) +1;
+					top = entries.length;
+					bottom = top-5;
+				}
+				sender.sendMessage("Last "+bottom+" to "+top+" (page "+page+") grief log entries for player "+args[0]+":");
+			}
+			
+			for(int i=0; i < 5; i++) {
 				StringBuilder sb = new StringBuilder(80);
 				sb.append("[");
 				sb.append(dateFormat.format(new Date(entries[i].getTime())));
