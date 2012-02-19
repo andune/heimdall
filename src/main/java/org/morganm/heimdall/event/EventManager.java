@@ -35,6 +35,7 @@ public class EventManager implements Runnable {
 	private final static int CIRCULAR_BUFFER_SIZE = 10000;
 	
 	private final Heimdall plugin;
+	@SuppressWarnings("unused")
 	private final EngineLog eventDebugLog;
 	private final Logger log;
 	private final String logPrefix;

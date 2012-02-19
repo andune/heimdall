@@ -4,7 +4,6 @@
 package org.morganm.heimdall.event;
 
 import org.bukkit.Location;
-import org.morganm.heimdall.event.Event.Type;
 import org.morganm.heimdall.event.handlers.EventHandler;
 
 /** Event created when a friend invite is sent.

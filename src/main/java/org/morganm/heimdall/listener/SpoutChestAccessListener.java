@@ -9,10 +9,6 @@ import java.util.Map;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.getspout.spoutapi.event.inventory.InventoryCloseEvent;
-import org.getspout.spoutapi.event.inventory.InventoryCraftEvent;
-import org.getspout.spoutapi.event.inventory.InventoryListener;
-import org.getspout.spoutapi.event.inventory.InventoryOpenEvent;
 import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.LWCBridge;
 import org.morganm.heimdall.event.EventCircularBuffer;
@@ -21,13 +17,15 @@ import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent.InventoryEventType;
 import org.morganm.heimdall.player.PlayerTracker;
 import org.morganm.heimdall.util.General;
+import org.spout.api.event.EventHandler;
+import org.spout.api.event.Listener;
 
 /** Code originally copied from @Diddiz's LogBlock plugin.
  * 
  * @author morganm, Diddiz (original Logblock code)
  *
  */
-public class SpoutChestAccessListener extends InventoryListener {
+public class SpoutChestAccessListener implements Listener {
 	private final static int ERROR_FLOOD_PREVENTION_LIMIT = 3;
 
 	private final Heimdall plugin;
@@ -53,7 +51,7 @@ public class SpoutChestAccessListener extends InventoryListener {
 	 * 
 	 * @author morganm, Diddiz (original LogBlock code)
 	 */
-	@Override
+	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event) {
 		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
 			return;
@@ -97,7 +95,7 @@ public class SpoutChestAccessListener extends InventoryListener {
 	 * 
 	 * @author Diddiz
 	 */
-	@Override
+	@EventHandler
 	public void onInventoryOpen(InventoryOpenEvent event) {
 		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
 			return;

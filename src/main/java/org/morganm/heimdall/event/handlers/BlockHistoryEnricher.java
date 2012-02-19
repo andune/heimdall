@@ -3,11 +3,11 @@
  */
 package org.morganm.heimdall.event.handlers;
 
-import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.Plugin;
 import org.morganm.heimdall.blockhistory.BlockHistory;
 import org.morganm.heimdall.blockhistory.BlockHistoryManager;
 import org.morganm.heimdall.event.BlockChangeEvent;
+import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent.InventoryEventType;
 import org.morganm.heimdall.player.PlayerState;
@@ -39,7 +39,8 @@ public class BlockHistoryEnricher extends EventHandler {
 			return;
 
 		Debug.getInstance().debug("BlockHistoryEnricher:processEvent() bc=",event);
-		if( event.bukkitEventType == Type.BLOCK_BREAK ) {
+		if( event.bukkitEventType == Event.BukkitType.BLOCK_BREAK ) {
+//		if( event.bukkitEventType == Type.BLOCK_BREAK ) {
 			BlockHistory bh = blockHistoryManager.getBlockHistory(event.getLocation());
 			
 			if( bh != null ) {

@@ -3,8 +3,6 @@
  */
 package org.morganm.heimdall.event.handlers;
 
-import java.io.IOException;
-
 import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.PlayerEvent;
 import org.morganm.heimdall.event.PlayerEvent.Type;
@@ -18,7 +16,6 @@ import org.morganm.heimdall.util.Debug;
  *
  */
 public class PlayerCleanupHandler extends EventHandler {
-	@SuppressWarnings("unused")
 	private final Heimdall plugin;
 	private final PlayerStateManager playerStateManager;
 	

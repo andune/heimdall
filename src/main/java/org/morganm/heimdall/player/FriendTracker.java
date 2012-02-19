@@ -31,7 +31,6 @@ public class FriendTracker {
 	private final static int INVITE_TIME_SECONDS = 30;
 	private final static String newLine = System.getProperty("line.separator");
 	
-	@SuppressWarnings("unused")
 	private final Heimdall plugin;
 	private final Debug debug;
 //	private final HashMap<FriendRelationship, Float> friendPoints = new HashMap<FriendRelationship, Float>(100);

@@ -9,6 +9,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
+import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.InventoryChangeEvent;
 import org.morganm.heimdall.event.InventoryChangeEvent.InventoryEventType;
 import org.morganm.heimdall.player.FriendTracker;
@@ -57,7 +58,7 @@ public class MainProcessEngine extends AbstractEngine {
 		if( ps.isExemptFromChecks() )
 			return;
 		
-		if( event.bukkitEventType == org.bukkit.event.Event.Type.BLOCK_BREAK ) {
+		if( event.bukkitEventType == Event.BukkitType.BLOCK_BREAK ) {
 			int typeId = event.type.getId();
 			if( event.blockOwner != null
 					&& !event.playerName.equals(event.blockOwner)
@@ -77,7 +78,7 @@ public class MainProcessEngine extends AbstractEngine {
 			if( isLogging && log != null )
 				log.logIgnoreError("assessing grief value of "+event.griefValue+" to player "+event.playerName);
 		}
-		else if( event.bukkitEventType == org.bukkit.event.Event.Type.BLOCK_PLACE ) {
+		else if( event.bukkitEventType == Event.BukkitType.BLOCK_PLACE ) {
 			event.griefValue = - getBlockValue(event.type.getId());
 			event.griefValue /= 4;		// block place is worth 1/4 the points as a grief destroy
 							// TODO: move ratio to config file
