@@ -113,10 +113,10 @@ public class NotifyEngine extends AbstractEngine {
 		Float lastNotifyValue = lastNotifyValues.get(event.getPlayerName());
 		if( lastNotifyValue == null )
 			lastNotifyValue = Float.valueOf(0);
-		float newValue = playerStateManager.getPlayerState(event.getPlayerName()).getGriefPoints();
+		float newValue = (float) Math.ceil(playerStateManager.getPlayerState(event.getPlayerName()).getGriefPoints());
 		
 		// if the number has gone up by at least a whole number, time to notify
-		if( Math.ceil(newValue) > Math.ceil(lastNotifyValue) ) {
+		if( newValue > Math.ceil(lastNotifyValue) ) {
 			if( !friendTracker.isPosssibleFriend(blockOwner, event.getPlayerName()) )
 				doNotify(event, griefPoints, arg);
 			else

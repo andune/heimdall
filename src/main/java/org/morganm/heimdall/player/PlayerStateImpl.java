@@ -27,6 +27,7 @@ public class PlayerStateImpl implements PlayerState {
 	private final transient PermissionSystem permSystem;  
 	private final String name;
 	private float griefPoints=0;
+	private float antiGriefPoints=0;
 	/* We track pointsByOwner so that if a player friends another player (after they've accumulated
 	 * some grief as a result of breaking others players blocks, for example), we can subtract the
 	 * points from the player that are owned by the new friend.
@@ -54,12 +55,15 @@ public class PlayerStateImpl implements PlayerState {
 
 	@Override
 	public float incrementGriefPoints(final float f, final String owner) {
-		griefPoints += f;
+		if( griefPoints > 0 )
+			griefPoints += f;
+		else
+			antiGriefPoints += f;
 		
 		Debug.getInstance().debug("incrementGriefPoints(player = "+name+") points="+f+", owner="+owner);
 		
 		// track owner points, if owner was given
-		if( owner != null ) {
+		if( owner != null && griefPoints > 0 ) {
 			if( pointsByOwner == null )
 				pointsByOwner = new HashMap<String, Float>();
 			
@@ -77,6 +81,10 @@ public class PlayerStateImpl implements PlayerState {
 	@Override
 	public float getGriefPoints() {
 		return griefPoints;
+	}
+	
+	public float getAntiGriefPoints() {
+		return antiGriefPoints;
 	}
 
 	@Override
@@ -100,6 +108,12 @@ public class PlayerStateImpl implements PlayerState {
 	@Override
 	public float getPointsByOwner(PlayerState p) {
 		return pointsByOwner.get(p.getName());
+	}
+	
+	@Override
+	public void clearPointsByOwner(PlayerState p) {
+		griefPoints -= getPointsByOwner(p);
+		pointsByOwner.remove(p);
 	}
 
 	@Override
@@ -137,6 +151,7 @@ public class PlayerStateImpl implements PlayerState {
 			dataStore = new YamlConfiguration();
 		
 		dataStore.set("griefPoints", griefPoints);
+		dataStore.set("antiGriefPoints", antiGriefPoints);
 		
 		if( pointsByOwner != null ) {
 			for(Map.Entry<String, Float> entry : pointsByOwner.entrySet()) {
@@ -168,6 +183,7 @@ public class PlayerStateImpl implements PlayerState {
 			dataStore.load(dataFile);
 		
 		griefPoints = (float) dataStore.getDouble("griefPoints");
+		antiGriefPoints = (float) dataStore.getDouble("antiGriefPoints");
 		
 		if( pointsByOwner == null )
 			pointsByOwner = new HashMap<String, Float>();

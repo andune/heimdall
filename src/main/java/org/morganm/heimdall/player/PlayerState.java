@@ -28,6 +28,11 @@ public interface PlayerState {
 	 * @return
 	 */
 	public float getGriefPoints();
+	/** Return the total antiGrief points for this player.
+	 * 
+	 * @return
+	 */
+	public float getAntiGriefPoints();
 	/** Return true if this player is exempt from grief checks.
 	 * 
 	 * @return
@@ -47,6 +52,15 @@ public interface PlayerState {
 	 * @return
 	 */
 	public float getPointsByOwner(PlayerState p);
+	
+	/** When one player friends another, this method can be used to accumulate any
+	 * griefPoints that were accumulated against that player prior to the friendship.
+	 * The expected behavior is that this should clear the griefPointsByOwner
+	 * against that player.
+	 * 
+	 * @param p
+	 */
+	public void clearPointsByOwner(PlayerState p);
 	
 	/** Get the GriefLog object for this player.
 	 * 

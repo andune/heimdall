@@ -357,6 +357,10 @@ public class FriendTracker {
 		setFriend(player1, player2);
 		FriendEvent event = new FriendEvent(player1, player2);
 		plugin.getEventManager().pushEvent(event);
+		
+		PlayerState ps1 = plugin.getPlayerStateManager().getPlayerState(player1);
+		PlayerState ps2 = plugin.getPlayerStateManager().getPlayerState(player2);
+		ps1.clearPointsByOwner(ps2);
 	}
 	
 	/** Add player2 as an explicit friend of player1.

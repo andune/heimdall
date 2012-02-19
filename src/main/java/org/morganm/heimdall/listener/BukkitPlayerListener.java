@@ -123,7 +123,7 @@ public class BukkitPlayerListener implements Listener {
 						PlayerEvent pe = getNextEventObject();
 						if( pe != null ) {
 							pe.eventType = Type.PLAYER_BANNED;
-							pe.playerName = event.getPlayer().getName();
+							pe.playerName = bannedPlayer;
 							pe.location = event.getPlayer().getLocation();
 							pe.x = pe.location.getBlockX();
 							pe.y = pe.location.getBlockY();
@@ -149,7 +149,7 @@ public class BukkitPlayerListener implements Listener {
 						
 						if( pe != null ) {
 							pe.eventType = Type.PLAYER_UNBANNED;
-							pe.playerName = event.getPlayer().getName();
+							pe.playerName = unbannedPlayer;
 							pe.location = event.getPlayer().getLocation();
 							pe.x = pe.location.getBlockX();
 							pe.y = pe.location.getBlockY();

@@ -18,7 +18,8 @@ import org.morganm.heimdall.player.PlayerState;
 import org.morganm.heimdall.player.PlayerStateManager;
 import org.morganm.heimdall.util.Debug;
 
-/**
+/** Engine that logs grief events per-player.
+ * 
  * @author morganm
  *
  */
