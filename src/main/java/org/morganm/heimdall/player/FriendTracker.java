@@ -224,7 +224,7 @@ public class FriendTracker {
 			
 			debug.debug("FriendTracker: sending friend invite. actor=",actor,", friend=",friend);
 			friendPlayer.sendMessage(ChatColor.YELLOW + actor+" and you appear to be working together.");
-			friendPlayer.sendMessage(ChatColor.YELLOW + "Please type /yes in the next 30 seconds to confirm they are friendly, or /no if you do not know them. (this is an anti-grief measure)");
+			friendPlayer.sendMessage(ChatColor.YELLOW + "Please type /yes in the next 30 seconds if you are friends, or /no if you do not know them.");
 			YesNoCommand.getInstance().registerCallback(friend,
 					new CommandExecutor() {
 						@Override
@@ -518,13 +518,13 @@ public class FriendTracker {
 	}
 	
 	private class FriendRelationship {
-		public String[] players = new String[2];
-		public float[] points = new float[2];
+		public final String[] players = new String[2];
+		public final float[] points = new float[2];
 		/* True to match the side that confirmed. So if element 0 is true, then
 		 * players[0] has confirmed they are a friend of players[1].
 		 */
-		public boolean[] isConfirmedFriend = new boolean[] { false, false };
-		public boolean[] isConfirmedNotFriend = new boolean[] { false, false };
+		public final boolean[] isConfirmedFriend = new boolean[] { false, false };
+		public final boolean[] isConfirmedNotFriend = new boolean[] { false, false };
 		
 		public FriendRelationship(String player1, String player2) {
 			players[0] = player1;
