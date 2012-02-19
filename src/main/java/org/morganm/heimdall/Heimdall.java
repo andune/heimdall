@@ -5,7 +5,6 @@ package org.morganm.heimdall;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -14,22 +13,13 @@ import java.util.logging.Logger;
 
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.morganm.heimdall.blockhistory.BlockHistoryFactory;
 import org.morganm.heimdall.blockhistory.BlockHistoryManager;
 import org.morganm.heimdall.command.CommandMapper;
 import org.morganm.heimdall.command.YesNoCommand;
-import org.morganm.heimdall.engine.Engine;
-import org.morganm.heimdall.engine.FriendEngine;
-import org.morganm.heimdall.engine.GriefLogEngine;
-import org.morganm.heimdall.engine.HeimdallPersonalityEngine;
+import org.morganm.heimdall.engine.EngineConfig;
 import org.morganm.heimdall.engine.LastGriefTrackingEngine;
-import org.morganm.heimdall.engine.MainProcessEngine;
 import org.morganm.heimdall.engine.NotifyEngine;
-import org.morganm.heimdall.engine.SimpleLogActionEngine;
-import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.EventManager;
-import org.morganm.heimdall.event.handlers.BlockHistoryEnricher;
-import org.morganm.heimdall.event.handlers.EngineWrapper;
 import org.morganm.heimdall.event.handlers.PlayerCleanupHandler;
 import org.morganm.heimdall.listener.BukkitBlockListener;
 import org.morganm.heimdall.listener.BukkitInventoryListener;
@@ -57,10 +47,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	private PermissionSystem perm;
 	private JarUtils jarUtil;
 	private EventManager eventManager;
-//	private BukkitBlockListener blockListener;	// block listener to push block breaks into buffer
-//	private BukkitPlayerListener playerListener;
 	private PlayerStateManager playerStateManager;
-	private Engine griefEngine;
 	private NotifyEngine notifyEngine;
 	private FriendTracker friendTracker;
 	private LastGriefTrackingEngine lastGriefTrackingEngine;
@@ -90,72 +77,18 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		
 		lwcBridge = new LWCBridge(this);
 		friendTracker = new FriendTracker(this);
-		
-		// register enricher to add block history information to events
-		blockHistoryManager = BlockHistoryFactory.getBlockHistoryManager(this);
-		if( blockHistoryManager != null ) {
-			BlockHistoryEnricher bhe = new BlockHistoryEnricher(this, blockHistoryManager, playerStateManager);
-			eventManager.registerEnricher(this, Event.Type.BLOCK_CHANGE, bhe);
-			eventManager.registerEnricher(this, Event.Type.INVENTORY_CHANGE, bhe);
-			Debug.getInstance().debug("BlockHistoryEnricher ",bhe," has been registered");
-		}
-		
-		// TODO: at some point the engine definition will be driven out of a config
-		// and this hard coded stuff cleaned up.
-		
-		// main grief engine, runs as an enricher (adds grief information to event)
-		griefEngine = new MainProcessEngine(this, playerStateManager);
-		EngineWrapper wrapper = new EngineWrapper(griefEngine);
-		eventManager.registerEnricher(this, Event.Type.BLOCK_CHANGE, wrapper);
-		eventManager.registerEnricher(this, Event.Type.INVENTORY_CHANGE, wrapper);
-		
-		notifyEngine = new NotifyEngine(this, playerStateManager);
-		lastGriefTrackingEngine = new LastGriefTrackingEngine(this);
-		
-		final ArrayList<Engine> handlers = new ArrayList<Engine>(8);
-		handlers.add(new FriendEngine(this));
-		handlers.add(new SimpleLogActionEngine(this, playerStateManager));
-		handlers.add(new GriefLogEngine(this, playerStateManager));
-		handlers.add(lastGriefTrackingEngine);
-		handlers.add(notifyEngine);
-		handlers.add(new HeimdallPersonalityEngine(this, playerStateManager));
 
-		// wrap and add all handlers
-		for(Engine e : handlers) {
-			wrapper = new EngineWrapper(e);
-			eventManager.registerHandler(this, Event.Type.BLOCK_CHANGE, wrapper);
-			eventManager.registerHandler(this, Event.Type.INVENTORY_CHANGE, wrapper);
-			eventManager.registerHandler(this, Event.Type.PLAYER_EVENT, wrapper);
-			eventManager.registerHandler(this, Event.Type.HEIMDALL_FRIEND_EVENT, wrapper);
-			eventManager.registerHandler(this, Event.Type.HEIMDALL_FRIEND_INVITE_SENT, wrapper);
-		}
-		
-		eventManager.registerHandler(this, Event.Type.PLAYER_EVENT,
-				new PlayerCleanupHandler(this, playerStateManager));
+		// register all config-controlled Engines
+		final EngineConfig engineConfig = new EngineConfig(this);
+		engineConfig.registerEngines();
+
+		eventManager.registerHandler(this, new PlayerCleanupHandler(this, playerStateManager));
 		
 		final PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(new BukkitBlockListener(this, eventManager), this);
 		pm.registerEvents(new BukkitInventoryListener(this, eventManager), this);
 		pm.registerEvents(new BukkitPlayerListener(this, eventManager), this);
 		pm.registerEvents(YesNoCommand.getInstance(), this);
-		
-//		pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Monitor, this);
-//		pm.registerEvent(Type.BLOCK_PLACE, blockListener, Priority.Monitor, this);
-//		pm.registerEvent(Type.SIGN_CHANGE, blockListener, Priority.Monitor, this);
-		
-//		if (pm.isPluginEnabled("Spout")) {
-//			pm.registerEvent(Type.CUSTOM_EVENT, new SpoutChestAccessListener(this, eventManager), Priority.Monitor, this);
-//			log.info(logPrefix+ "Using Spout API to log chest access");
-//		}
-		
-//		playerListener = new BukkitPlayerListener(this, eventManager);
-//		pm.registerEvent(Type.PLAYER_QUIT, playerListener, Priority.Monitor, this);
-//		pm.registerEvent(Type.PLAYER_JOIN, playerListener, Priority.Monitor, this);
-//		pm.registerEvent(Type.PLAYER_KICK, playerListener, Priority.Monitor, this);
-//		pm.registerEvent(Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Monitor, this);
-//		
-//		pm.registerEvent(Type.PLAYER_COMMAND_PREPROCESS, YesNoCommand.getInstance(), Priority.Lowest, this);
-//		getServer().getPluginManager().registerEvents(YesCommand.getInstance(), this);
 		
 		playerStateManager.getPlayerTracker().reset();
 		

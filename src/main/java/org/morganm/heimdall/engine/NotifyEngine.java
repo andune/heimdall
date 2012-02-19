@@ -45,17 +45,30 @@ public class NotifyEngine extends AbstractEngine {
 	private final EngineLog engineLog;
 	private final FriendTracker friendTracker;
 	
-	public NotifyEngine(final Heimdall plugin, final PlayerStateManager playerStateManager) {
+	public NotifyEngine(final Heimdall plugin, final String configFile) {
+		if( configFile == null )
+			throw new NullPointerException("configFile is null");
+
 		this.plugin = plugin;
-		this.playerStateManager = playerStateManager;
-		this.perms = plugin.getPermissionSystem();
-		this.friendTracker = plugin.getFriendTracker();
+		this.playerStateManager = this.plugin.getPlayerStateManager();
+		this.perms = this.plugin.getPermissionSystem();
+		this.friendTracker = this.plugin.getFriendTracker();
 		
-		String configFile = this.plugin.getConfig().getString("engine.notify.configfile");
 		File file = new File(configFile);
 		this.config = YamlConfiguration.loadConfiguration(file);
+		
+		// shouldn't ever happen according to Bukkit contract, but better to be paranoid
+		if( this.config == null )
+			throw new NullPointerException("Yaml config is null: "+configFile);
+		
 //		Debug.getInstance().debug("config.getInt(\"blockpoints.4\") = ",config.getInt("blockpoints.4"));
 		engineLog = new EngineLog(plugin, new File("plugins/Heimdall/logs/notify.log"));
+	}
+
+	@Override
+	public Event.Type[] getRegisteredEventTypes() {
+		return new Event.Type[] { Event.Type.BLOCK_CHANGE, Event.Type.INVENTORY_CHANGE,
+				Event.Type.HEIMDALL_FRIEND_EVENT, Event.Type.HEIMDALL_FRIEND_INVITE_SENT };
 	}
 
 	@Override

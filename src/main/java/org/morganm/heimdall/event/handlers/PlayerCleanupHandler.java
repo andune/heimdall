@@ -4,6 +4,7 @@
 package org.morganm.heimdall.event.handlers;
 
 import org.morganm.heimdall.Heimdall;
+import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.event.PlayerEvent;
 import org.morganm.heimdall.event.PlayerEvent.Type;
 import org.morganm.heimdall.player.PlayerState;
@@ -22,6 +23,11 @@ public class PlayerCleanupHandler extends EventHandler {
 	public PlayerCleanupHandler(final Heimdall plugin, final PlayerStateManager playerStateManager) {
 		this.plugin = plugin;
 		this.playerStateManager = playerStateManager;
+	}
+
+	@Override
+	public Event.Type[] getRegisteredEventTypes() {
+		return new Event.Type[] { Event.Type.PLAYER_EVENT };
 	}
 
 	@Override

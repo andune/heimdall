@@ -12,7 +12,7 @@ import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.event.BlockChangeEvent;
-import org.morganm.heimdall.event.InventoryChangeEvent;
+import org.morganm.heimdall.event.Event;
 import org.morganm.heimdall.player.FriendTracker;
 import org.morganm.heimdall.util.Debug;
 
@@ -36,6 +36,11 @@ public class FriendEngine extends AbstractEngine {
 	}
 
 	@Override
+	public Event.Type[] getRegisteredEventTypes() {
+		return new Event.Type[] { Event.Type.BLOCK_CHANGE };
+	}
+
+	@Override
 	public void processBlockChange(BlockChangeEvent event) {
 		debug.devDebug("FriendEngine processing block change by player ",event.playerName);
 		PlayerActivity activity = getPlayerActivityObject(event.playerName);
@@ -51,10 +56,6 @@ public class FriendEngine extends AbstractEngine {
 			activity.addNewChunkActivity(chunkX, chunkZ, event.time);
 		
 		updateActivityPoints(event.playerName, event.time, 1);
-	}
-
-	@Override
-	public void processInventoryChange(InventoryChangeEvent event) {
 	}
 
 	/** Return players that are nearby the given player. Players are considered to be

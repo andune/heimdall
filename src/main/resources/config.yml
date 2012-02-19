@@ -4,7 +4,7 @@ enrichers:
   blockHistory:
     class: com.morganm.heimdall.event.handler.BlockHistoryEnricher
   griefDetectionEngine:
-    class: com.morganm.heimdall.engine.MainProcessEngine
+    class: com.morganm.heimdall.engine.GriefPointEngine
     configFile: plugins/Heimdall/main.yml
 
 # handlers run after all enrichers and process the event. Handlers
@@ -40,6 +40,7 @@ handlers:
   # action against griefers.
   personality:
     class: com.morganm.heimdall.engine.HeimdallPersonalityEngine
+    configFile: plugins/Heimdall/personality.yml
 
     # permissions that will not see any Heimdall broadcast messages
     silentPerms:
