@@ -171,8 +171,14 @@ public class GriefLog implements LogInterface {
 			Location location = null;
 			if( locationString != null )
 				location = General.getInstance().readShortLocationString(locationString);
-			String blockOwner = parts[i++];
-			String additionalData = parts[i++];
+			
+			String blockOwner = null;
+			if( ++i < parts.length )
+				blockOwner = parts[i];
+			
+			String additionalData = null;
+			if( ++i < parts.length )
+				additionalData = parts[i];
 			
 			entry = new GriefEntry(activity, time, playerName, griefPoints, totalGriefPoints, location, blockOwner, additionalData);
 		}
@@ -203,7 +209,7 @@ public class GriefLog implements LogInterface {
 		}
 		return entries.toArray(emtpyGriefEntryArray);
 	}
-
+	
 	public GriefEntry[] getLastNEntries(int n) throws IOException {
 		GriefEntry[] entries = new GriefEntry[n];
 		
