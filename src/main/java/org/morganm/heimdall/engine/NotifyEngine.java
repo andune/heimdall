@@ -158,6 +158,7 @@ public class NotifyEngine extends AbstractEngine {
 	
 	private void doNotify(final Event event, final float griefPoints, final Object...arg) {
 		final float totalGriefPoints = playerStateManager.getPlayerState(event.getPlayerName()).getGriefPoints();
+		final float totalAntiGriefPoints = playerStateManager.getPlayerState(event.getPlayerName()).getAntiGriefPoints();
 		final List<Player> notifyTargets = getOnlineNotifyTargets();
 		
 		if( notifyTargets != null && notifyTargets.size() > 0 ) {
@@ -211,7 +212,8 @@ public class NotifyEngine extends AbstractEngine {
 					
 					p.sendMessage(ChatColor.RED+"[Heimdall]"+ChatColor.WHITE
 							+" Player "+event.getPlayerName()+" has accumulated "
-							+totalGriefPoints+" total grief points. Latest action "+event.getEventTypeString()
+							+totalGriefPoints+"/"+totalAntiGriefPoints
+							+" total grief/antigrief points. Latest action "+event.getEventTypeString()
 							+" at location {"+General.getInstance().shortLocationString(event.getLocation())+"}"
 							+additionalData);
 

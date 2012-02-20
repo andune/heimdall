@@ -55,6 +55,12 @@ public class PlayerStateImpl implements PlayerState {
 
 	@Override
 	public float incrementGriefPoints(final float f, final String owner) {
+		// we used to let griefPoints go negative before we had the notion of
+		// antiGriefPoints. So if we have negative griefPoints already, reset
+		// to baseline of 0.
+		if( griefPoints < 0 )
+			griefPoints=0;
+		
 		if( griefPoints > 0 )
 			griefPoints += f;
 		else
