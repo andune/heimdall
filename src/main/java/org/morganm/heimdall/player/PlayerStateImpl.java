@@ -61,7 +61,7 @@ public class PlayerStateImpl implements PlayerState {
 		if( griefPoints < 0 )
 			griefPoints=0;
 		
-		if( griefPoints > 0 )
+		if( f > 0 )
 			griefPoints += f;
 		else
 			antiGriefPoints += f;
@@ -150,7 +150,7 @@ public class PlayerStateImpl implements PlayerState {
 		}
 		
 		// don't do anything if nothing to record
-		if( griefPoints == 0 && pointsByOwner == null )
+		if( griefPoints == 0 && antiGriefPoints == 0 && pointsByOwner == null )
 			return;
 		
 		if( dataStore == null )

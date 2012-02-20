@@ -113,14 +113,21 @@ public class NotifyEngine extends AbstractEngine {
 		Float lastNotifyValue = lastNotifyValues.get(event.getPlayerName());
 		if( lastNotifyValue == null )
 			lastNotifyValue = Float.valueOf(0);
+		lastNotifyValue = (float) Math.ceil(lastNotifyValue);
 		float newValue = (float) Math.ceil(playerStateManager.getPlayerState(event.getPlayerName()).getGriefPoints());
 		
 		// if the number has gone up by at least a whole number, time to notify
-		if( newValue > Math.ceil(lastNotifyValue) ) {
-			if( !friendTracker.isPosssibleFriend(blockOwner, event.getPlayerName()) )
-				doNotify(event, griefPoints, arg);
+		if( newValue > lastNotifyValue ) {
+			Debug.getInstance().debug("NotifyEngine:processEvent() newValue=",newValue,", lastNotifyValue=",lastNotifyValue);
+
+			if( blockOwner != null ) {
+				if( !friendTracker.isPosssibleFriend(blockOwner, event.getPlayerName()) )
+					doNotify(event, griefPoints, arg);
+				else
+					Debug.getInstance().debug("NotifyEngine: did not notify since ",event.getPlayerName()," is possible friend of block owner ",blockOwner);
+			}
 			else
-				Debug.getInstance().debug("NotifyEngine: did not notify since ",event.getPlayerName()," is possible friend of block owner ",blockOwner);
+				Debug.getInstance().debug("NotifyEngine:processEvent() detected griefPoint change when owner is null");
 		}
 		
 		// we update no matter what, because if the value went down, we want to capture

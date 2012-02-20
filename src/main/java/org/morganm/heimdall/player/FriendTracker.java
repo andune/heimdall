@@ -145,8 +145,12 @@ public class FriendTracker {
 		Set<FriendRelationship> relationships = getRelationships(player);
 		if( relationships != null ) {
 			for(FriendRelationship fr : relationships) {
+				// shouldn't ever happen, but it does for some reason..
+				if( fr == null || fr.players == null || fr.players[0] == null )
+					continue;
+
 				// add the player that isn't us
-				if( fr.players[0].equalsIgnoreCase(player) ) {
+				if( player.equalsIgnoreCase(fr.players[0]) ) {
 					if( fr.isConfirmedFriend[0] )
 						friends.add(fr.players[1]);
 				}
