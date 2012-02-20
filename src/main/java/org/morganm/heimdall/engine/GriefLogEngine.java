@@ -84,6 +84,9 @@ public class GriefLogEngine extends AbstractEngine {
 	
 	@Override
 	public void processPlayerEvent(PlayerEvent event) {
+		if( !playerStateManager.getPlayerTracker().isTrackedPlayer(event.playerName) )
+			return;
+
 		debug.debug("GriefLogEngine::processPlayerEvent event=",event);
 		if( event.eventType == PlayerEvent.Type.NEW_PLAYER_JOIN ) {
 			logEvent(event, Type.NEW_PLAYER, 0, null, null);
