@@ -36,6 +36,9 @@ public class HeimdallPersonalityEngine extends AbstractEngine {
 	}
 	
 	private void processEvent(final Event event) {
+		if( !personality.isEnabled() )
+			return;
+		
 		final String playerName = event.getPlayerName();
 		final PlayerState ps = playerStateManager.getPlayerState(playerName);
 		

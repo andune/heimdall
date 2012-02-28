@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.morganm.heimdall.util;
 
 import java.util.ArrayList;
@@ -12,10 +9,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
@@ -36,7 +33,7 @@ import com.sk89q.wepif.PermissionsResolverManager;
  *
  */
 public class PermissionSystem {
-	// class version: 9
+	// class version: 10
 	public static final int SUPERPERMS = 0x00;		// default
 	public static final int VAULT = 0x01;
 	public static final int WEPIF = 0x02;
@@ -368,6 +365,8 @@ public class PermissionSystem {
 		    	// version "5.0" is equivalent to build #670
 		    	else if( "5.0".equals(version) )
 		    		versionNumber = 670;
+		    	else if( version.startsWith("5.") )		// 5.x series
+		    		versionNumber = 840;
 		    	else {
 			    	int index = version.indexOf('-');
 			    	versionNumber = Integer.parseInt(version.substring(0, index));
@@ -375,6 +374,7 @@ public class PermissionSystem {
 	    	}
 	    	catch(Exception e) {}	// catch any NumberFormatException or anything else
 	    	
+//	    	System.out.println("WorldEdit version: "+version+", number="+versionNumber);
 	    	if( versionNumber < 660 ) {
 	    		log.info(logPrefix + "You are currently running version "+version+" of WorldEdit. WEPIF was changed in #660, please update to latest WorldEdit. (skipping WEPIF for permissions)");
 	    		return false;

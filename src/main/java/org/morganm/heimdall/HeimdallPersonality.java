@@ -38,6 +38,9 @@ public class HeimdallPersonality {
 	}
 	
 	public void announcePossibleGriefer(final String playerName) {
+		if( !isEnabled() )
+			return;
+
 		List<String> silentPerms = plugin.getConfig().getStringList("core.personality.silentPerms");
 
 		int r = random.nextInt(griefBellows.length);
