@@ -80,6 +80,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		// register all config-controlled Engines
 		final EngineConfig engineConfig = new EngineConfig(this);
 		engineConfig.registerEngines();
+		notifyEngine = engineConfig.getNotifyEngine();
 
 		eventManager.registerHandler(this, new PlayerCleanupHandler(this, playerStateManager));
 		

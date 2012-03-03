@@ -28,6 +28,11 @@ public class EngineConfig {
 	private final Heimdall plugin;
 	private final Debug debug;
 	
+	// bad design, I'd rather not have the engines externally exposed, but this one is for
+	// now due to a legacy /hdi feature that I haven't had time to re-think how to implement
+	// yet..
+	private NotifyEngine notifyEngine;
+	
 	static {
 		engineAliases.put("BlockHistoryEngine".toLowerCase(), "org.morganm.heimdall.engine.BlockHistoryEngine");
 		engineAliases.put("GriefPointEngine".toLowerCase(), "org.morganm.heimdall.engine.GriefPointEngine");
@@ -45,6 +50,8 @@ public class EngineConfig {
 		this.logPrefix = plugin.getLogPrefix();
 		this.debug = Debug.getInstance();
 	}
+	
+	public NotifyEngine getNotifyEngine() { return notifyEngine; }
 	
 	/** Read plugin config to determine registered engines and register them all.
 	 * 
@@ -83,6 +90,11 @@ public class EngineConfig {
 					EngineWrapper wrapper = new EngineWrapper(engine);
 					plugin.getEventManager().registerEnricher(plugin, wrapper);
 					debug.debug("Engine ",handler," registered successfully");
+					
+					// ugh shoot me, terrible design.  FIX ME!
+					if( className.equals("org.morganm.heimdall.engine.NotifyEngine") ) {
+						notifyEngine = (NotifyEngine) engine;
+					}
 				}
 			}
 		}
