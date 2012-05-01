@@ -24,6 +24,8 @@ import org.bukkit.inventory.ItemStack;
  *
  */
 public final class General {
+	// class version: 1
+	
 	private static BlockFace[] directions = new BlockFace[] {
 		BlockFace.UP,
 		BlockFace.NORTH,

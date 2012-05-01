@@ -33,7 +33,7 @@ import org.morganm.heimdall.util.Debug;
  *
  */
 public class EventManager implements Runnable {
-	private final static int CIRCULAR_BUFFER_SIZE = 10000;
+	private final static int CIRCULAR_BUFFER_SIZE = 30000;
 	
 	private final Heimdall plugin;
 	@SuppressWarnings("unused")

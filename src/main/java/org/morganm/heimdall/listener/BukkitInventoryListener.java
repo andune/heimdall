@@ -9,7 +9,6 @@ import java.util.Map;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.ContainerBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -20,6 +19,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.LWCBridge;
@@ -82,9 +82,9 @@ public class BukkitInventoryListener implements Listener {
 		if (cont != null) {
 			final ItemStack[] before = cont.items;
 			final BlockState state = cont.loc.getBlock().getState();
-			if (!(state instanceof ContainerBlock))
+			if (!(state instanceof InventoryHolder))
 				return;
-			final ItemStack[] after = util.compressInventory(((ContainerBlock)state).getInventory().getContents());
+			final ItemStack[] after = util.compressInventory(((InventoryHolder)state).getInventory().getContents());
 			final ItemStack[] diff = util.compareInventories(before, after);
 
 			pushInventoryChangeEvent(player, cont.loc, diff);
@@ -97,9 +97,9 @@ public class BukkitInventoryListener implements Listener {
 
 	public void checkInventoryOpen(Player player, Block block) {
 		final BlockState state = block.getState();
-		if (!(state instanceof ContainerBlock))
+		if (!(state instanceof InventoryHolder))
 			return;
-		containers.put(player, new ContainerState(block.getLocation(), util.compressInventory(((ContainerBlock)state).getInventory().getContents())));
+		containers.put(player, new ContainerState(block.getLocation(), util.compressInventory(((InventoryHolder)state).getInventory().getContents())));
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)

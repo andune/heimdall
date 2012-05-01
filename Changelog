@@ -1,4 +1,8 @@
-v0.6
+v0.6.1 - Apr 30, 2012
+* updated to latest Bukkit-1.2.5-R1.3 API
+* cleaned up a few deprecated warnings
+
+v0.6 - Feb 19, 2012
 * more features added to automated friend tracking
 * several minor bug fixes
 * changed engine definition to config-driven instead of hard coded

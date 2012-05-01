@@ -4,6 +4,7 @@
 package org.morganm.heimdall.util;
 
 import java.lang.reflect.Array;
+import java.util.logging.Logger;
 
 
 /** Circular buffer that holds objects. The intent is that this can be used to
@@ -14,13 +15,15 @@ import java.lang.reflect.Array;
  *
  */
 public class CircularBuffer<E> {
+	private Logger log;
+	private String logPrefix;
 	private final E[] objects;
 	private final boolean nullOnPop;
 	private final int bufferSize;
 	/* If bufferWrap is true, it means this buffer will never be popped from.
 	 * 
 	 */
-	private boolean bufferWrap;
+	private boolean bufferWrap = false;
 	private final Class<E> objectClass;
 	
 	private int start = 0;
@@ -124,9 +127,14 @@ public class CircularBuffer<E> {
 				if( ++start >= bufferSize )
 					start = 0;
 			}
-			// TODO: consider logging or throwing error here, this means we just wrapped a full buffer
+			
+			if( log != null )
+				log.warning(logPrefix+" Buffer wrap, buffer start="+start+", end="+end);
 		}
 
 		objects[end] = event;
 	}
+	
+	public void setLog(Logger log) { this.log = log; }
+	public void setLogPrefix(String prefix) { this.logPrefix = prefix; }
 }
