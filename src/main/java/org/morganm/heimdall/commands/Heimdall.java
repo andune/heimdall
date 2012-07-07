@@ -26,7 +26,19 @@ public class Heimdall extends BaseCommand {
 			return false;
 		}
 		
-		if( "debug".equals(args[0]) && args.length > 1 ) {
+		if( "friend".equals(args[0])  ) {
+			if( args.length < 3 ) {
+				sender.sendMessage("Usage: /heimdall friend <player1> <player2>");
+				return true;
+			}
+			
+			// friend both sides of the relationship
+			plugin.getFriendTracker().addFriend(args[1], args[2]);
+			plugin.getFriendTracker().addFriend(args[2], args[1]);
+			sender.sendMessage(args[1]+" and "+args[2]+" are now friends.");
+			return true;
+		}
+		else if( "debug".equals(args[0]) && args.length > 1 ) {
 			if( "on".equals(args[1]) ) {
 				Debug.getInstance().resetConsoleToINFO();
 				Debug.getInstance().setDebug(true);
