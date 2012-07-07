@@ -113,13 +113,17 @@ public class PlayerStateImpl implements PlayerState {
 
 	@Override
 	public float getPointsByOwner(PlayerState p) {
+		if( pointsByOwner == null )
+			return 0;
 		return pointsByOwner.get(p.getName());
 	}
 	
 	@Override
 	public void clearPointsByOwner(PlayerState p) {
-		griefPoints -= getPointsByOwner(p);
-		pointsByOwner.remove(p);
+		if( pointsByOwner != null ) {
+			griefPoints -= getPointsByOwner(p);
+			pointsByOwner.remove(p);
+		}
 	}
 
 	@Override
