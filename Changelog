@@ -1,4 +1,4 @@
-v0.7 - Apr 30, 2012
+v0.7 - 
 * converted build system to maven (easy dependency management for new devs)
 * fixed an annoying NPE
 * added "/heim friend <player1> <player2>" command for admins/mods to force friendship
