@@ -1,3 +1,8 @@
+v0.7 - Apr 30, 2012
+* converted build system to maven (easy dependency management for new devs)
+* fixed an annoying NPE
+* added "/heim friend <player1> <player2>" command for admins/mods to force friendship
+
 v0.6.1 - Apr 30, 2012
 * updated to latest Bukkit-1.2.5-R1.3 API
 * cleaned up a few deprecated warnings
