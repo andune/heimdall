@@ -103,7 +103,7 @@ public class SimpleLogActionEngine extends AbstractEngine {
 
 	private void logEvent(final Event event, final float griefValue) {
 //		Debug.getInstance().debug("SimpleLogActionEngine:processGriefValue(): playerName=",event.getPlayerName(),", griefvalue=",griefValue);
-		if( griefValue == 0 )
+		if( griefValue < 0 )
 			return;
 
 		PlayerState ps = playerStateManager.getPlayerState(event.getPlayerName());
