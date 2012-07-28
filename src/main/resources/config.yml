@@ -46,6 +46,12 @@ handlers:
     silentPerms:
       - group.Guest
 
+# List worlds here that you don't want Heimdall to do any
+# processing on.
+#disabledWorlds:
+#  - world1
+#  - world2
+
 # Permissions listed here are totally ignored by Heimdall. Since Heimdall's
 # intent and focus is on accurately detecting new player griefing, it is
 # recommended that you list any permissions/groups here that aren't your

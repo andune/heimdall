@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,6 +56,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	private BlockHistoryManager blockHistoryManager;
 	private DependencyManager dependencyManager;
 	private final Set<LogInterface> logs = new HashSet<LogInterface>(5);
+	private List<String> disabledWorlds;
 	
 	@Override
 	public void onEnable() {
@@ -160,6 +162,16 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 		Debug.getInstance().init(log, logPrefix, "plugins/Heimdall/logs/debug.log", false);
 		Debug.getInstance().setDebug(getConfig().getBoolean("devDebug", false), Level.FINEST);
 		Debug.getInstance().setDebug(getConfig().getBoolean("debug", false));
+		
+		disabledWorlds = super.getConfig().getStringList("disabledWorlds");
+		Debug.getInstance().debug("disabledWorlds=",disabledWorlds);
+	}
+	
+	public boolean isDisabledWorld(String worldName) {
+		if( disabledWorlds != null )
+			return disabledWorlds.contains(worldName);
+		else
+			return false;
 	}
 
 	public void addLogger(LogInterface log) {

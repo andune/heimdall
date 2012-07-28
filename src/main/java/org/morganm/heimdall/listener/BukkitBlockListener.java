@@ -28,7 +28,6 @@ import org.morganm.heimdall.util.Debug;
 public class BukkitBlockListener implements Listener {
 	private final static int ERROR_FLOOD_PREVENTION_LIMIT = 3;
 	
-	@SuppressWarnings("unused")
 	private final Heimdall plugin;
 	private final EventManager eventManager;
 	private final EventCircularBuffer<BlockChangeEvent> buffer;
@@ -39,7 +38,7 @@ public class BukkitBlockListener implements Listener {
 		this.plugin = plugin;
 		this.eventManager = eventManager;
 		this.debug = Debug.getInstance();
-		this.tracker = plugin.getPlayerStateManager().getPlayerTracker();
+		this.tracker = this.plugin.getPlayerStateManager().getPlayerTracker();
 		
 		buffer = new EventCircularBuffer<BlockChangeEvent>(BlockChangeEvent.class, 1000, false, true);
 	}
@@ -50,6 +49,9 @@ public class BukkitBlockListener implements Listener {
 			return;
 		
 		Block b = event.getBlock();
+		if( plugin.isDisabledWorld(b.getWorld().getName()) )
+			return;
+			
 		BlockChangeEvent bc = getNextBlockChangeEvent();
 		
 		if( bc != null ) {
@@ -74,6 +76,9 @@ public class BukkitBlockListener implements Listener {
 			return;
 		
 		Block b = event.getBlock();
+		if( plugin.isDisabledWorld(b.getWorld().getName()) )
+			return;
+
 		BlockChangeEvent bc = getNextBlockChangeEvent();
 		
 		if( bc != null ) {
@@ -99,6 +104,9 @@ public class BukkitBlockListener implements Listener {
 			return;
 		
 		Block b = event.getBlock();
+		if( plugin.isDisabledWorld(b.getWorld().getName()) )
+			return;
+
 		BlockChangeEvent bc = getNextBlockChangeEvent();
 
 		if( bc != null ) {

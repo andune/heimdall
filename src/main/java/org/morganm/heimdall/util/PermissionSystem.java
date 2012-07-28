@@ -26,8 +26,12 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 import com.sk89q.wepif.PermissionsResolverManager;
 
 /** Permission abstraction class, use Vault, WEPIF, Perm2 or superperms, depending on what's available.
- *
- * Dependencies handled through maven.
+ * 
+ * Dependencies: (handled through maven automatically now)
+ *   Vault 1.x: http://dev.bukkit.org/server-mods/vault/
+ *   WorldEdit 5.x: http://build.sk89q.com/
+ *   PermissionsEx: http://goo.gl/jthCz
+ *   Permissions 2.7 or 3.x: http://goo.gl/liHFt (2.7) or http://goo.gl/rn4LP (3.x) 
  *   
  * Author's note: The "ideal" design would be to setup an interface class and let each permission
  *   type implement that interface and use polymorphism. In fact, that's how Vault and WEPIF work.
@@ -39,7 +43,7 @@ import com.sk89q.wepif.PermissionsResolverManager;
  *
  */
 public class PermissionSystem {
-	// class version: 14
+	// class version: 15
 	public enum Type {
 		SUPERPERMS,
 		VAULT,

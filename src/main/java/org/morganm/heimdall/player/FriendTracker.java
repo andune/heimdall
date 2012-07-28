@@ -363,7 +363,11 @@ public class FriendTracker {
 		plugin.getEventManager().pushEvent(event);
 		
 		PlayerState ps1 = plugin.getPlayerStateManager().getPlayerState(player1);
+		if( ps1 == null )
+			throw new NullPointerException("PlayerState is null for player "+player1);
 		PlayerState ps2 = plugin.getPlayerStateManager().getPlayerState(player2);
+		if( ps2 == null )
+			throw new NullPointerException("PlayerState is null for player "+player2);
 		ps1.clearPointsByOwner(ps2);
 	}
 	

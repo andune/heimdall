@@ -9,16 +9,14 @@ import java.util.Map;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerChatEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.morganm.heimdall.Heimdall;
@@ -51,7 +49,7 @@ public class BukkitInventoryListener implements Listener {
 		
 		this.buffer = new EventCircularBuffer<InventoryChangeEvent>(InventoryChangeEvent.class, 1000, false, true);
 	}
-
+	
 	private void pushInventoryChangeEvent(final Player player, final Location l, final ItemStack[] diff) {
 		InventoryChangeEvent ice = getNextInventoryChangeEvent();
 		if( ice != null ) {
@@ -77,7 +75,7 @@ public class BukkitInventoryListener implements Listener {
 		
 	}
 	
-	public void checkInventoryClose(Player player) {
+	private void checkInventoryClose(Player player) {
 		final ContainerState cont = containers.get(player);
 		if (cont != null) {
 			final ItemStack[] before = cont.items;
@@ -88,14 +86,11 @@ public class BukkitInventoryListener implements Listener {
 			final ItemStack[] diff = util.compareInventories(before, after);
 
 			pushInventoryChangeEvent(player, cont.loc, diff);
-			
-//				for (final ItemStack item : diff)
-//				consumer.queueChestAccess(player.getName(), cont.loc, state.getTypeId(), (short)item.getTypeId(), (short)item.getAmount(), rawData(item));
 			containers.remove(player);
 		}
 	}
 
-	public void checkInventoryOpen(Player player, Block block) {
+	private void checkInventoryOpen(Player player, Block block) {
 		final BlockState state = block.getState();
 		if (!(state instanceof InventoryHolder))
 			return;
@@ -103,31 +98,17 @@ public class BukkitInventoryListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
-	public void onPlayerChat(PlayerChatEvent event) {
-		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
-			return;
-		checkInventoryClose(event.getPlayer());
-	}
-
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
-			return;
-		checkInventoryClose(event.getPlayer());
-	}
-
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void onPlayerQuit(PlayerQuitEvent event) {
+	public void inventoryCloseEvent(InventoryCloseEvent event) {
 		if( !tracker.isTrackedPlayer(event.getPlayer().getName()) )
 			return;
-		checkInventoryClose(event.getPlayer());
-	}
-
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void onPlayerTeleport(PlayerTeleportEvent event) {
-		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
+		if( plugin.isDisabledWorld(event.getPlayer().getWorld().getName()) )
 			return;
-		checkInventoryClose(event.getPlayer());
+
+		HumanEntity entity = event.getPlayer();
+		if( !(entity instanceof Player) )
+			return;
+		
+		checkInventoryClose((Player) entity);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -135,6 +116,9 @@ public class BukkitInventoryListener implements Listener {
 		if( event.isCancelled() || !tracker.isTrackedPlayer(event.getPlayer().getName()) )
 			return;
 		final Player player = event.getPlayer();
+		if( plugin.isDisabledWorld(player.getWorld().getName()) )
+			return;
+		
 		checkInventoryClose(player);
 		if (!event.isCancelled() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			final Block block = event.getClickedBlock();

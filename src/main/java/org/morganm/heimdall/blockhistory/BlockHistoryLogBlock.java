@@ -7,6 +7,7 @@ import java.util.HashSet;
 
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
+import org.morganm.heimdall.Heimdall;
 import org.morganm.heimdall.util.Debug;
 
 import de.diddiz.LogBlock.LogBlock;
@@ -19,7 +20,7 @@ import de.diddiz.LogBlock.QueryParams.BlockChangeType;
  */
 public class BlockHistoryLogBlock implements BlockHistoryManager {
 	private final static HashSet<String> ignoredOwners = new HashSet<String>(15);
-	private final Plugin plugin;
+	private final Heimdall plugin;
 	private final Debug debug;
 	private final BlockHistoryCache bhCache;
 	private LogBlock logBlock;
@@ -36,7 +37,7 @@ public class BlockHistoryLogBlock implements BlockHistoryManager {
 		ignoredOwners.add("LeavesDecay");
 	}
 	
-	public BlockHistoryLogBlock(final Plugin plugin, final BlockHistoryCache bhCache) {
+	public BlockHistoryLogBlock(final Heimdall plugin, final BlockHistoryCache bhCache) {
 		this.plugin = plugin;
 		this.debug = Debug.getInstance();
 		this.bhCache = bhCache;
@@ -69,6 +70,10 @@ public class BlockHistoryLogBlock implements BlockHistoryManager {
 		BlockHistory bh = bhCache.getCacheObject(l);
 		if( bh != null )
 			return bh;
+		
+		// don't run a lookup if this world is disabled
+		if( plugin.isDisabledWorld(l.getWorld().getName()) )
+			return null;
 		
 		// if it's a broken block and we have logBlock, lookup the owner
 		if( logBlock != null ) {
