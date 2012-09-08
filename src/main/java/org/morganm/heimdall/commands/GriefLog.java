@@ -50,7 +50,7 @@ public class GriefLog extends BaseCommand {
 			entries = griefLog.getLastNEntries(page*5);
 		}
 		catch(IOException e) {
-			sender.sendMessage("Error retrieving grief entries for player "+args[0]+", check sytem log");
+			sender.sendMessage("Error retrieving grief entries for player "+args[0]+", check system log");
 			e.printStackTrace();
 		}
 		
