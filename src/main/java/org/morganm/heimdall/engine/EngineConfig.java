@@ -105,7 +105,7 @@ public class EngineConfig {
 
 		final ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
 		try {
-			Thread.currentThread().setContextClassLoader(plugin.getClassLoader());
+			Thread.currentThread().setContextClassLoader(plugin.getClassLoaderPublic());
 			Class<?> clazz = Class.forName(className);
 			Class<? extends Engine> engineClass = clazz.asSubclass(Engine.class);
 			Constructor<? extends Engine> constructor = null;

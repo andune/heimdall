@@ -66,7 +66,7 @@ public class CommandMapper {
                 
                 if( className != null && className instanceof String ) {
                 	try {
-	                	Class<?> clazz = Class.forName((String) className, true, plugin.getClassLoader());
+	                	Class<?> clazz = Class.forName((String) className, true, plugin.getClassLoaderPublic());
 	                    Class<? extends Command> commandClass = clazz.asSubclass(Command.class);
 	                    Constructor<? extends Command> constructor = commandClass.getConstructor();
 	

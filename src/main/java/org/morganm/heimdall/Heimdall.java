@@ -208,9 +208,6 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	public PermissionSystem getPermissionSystem() { return perm; }
 
 	@Override
-	public Logger getLogger() { return log; }
-
-	@Override
 	public String getLogPrefix() { return logPrefix; }
 
 	@Override
@@ -220,5 +217,5 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
 	public File getFile() { return super.getFile(); }
 	
 	@Override
-	public ClassLoader getClassLoader() { return super.getClassLoader(); }
+    public ClassLoader getClassLoaderPublic() { return super.getClassLoader(); }
 }

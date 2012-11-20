@@ -207,6 +207,7 @@ public class GriefLog implements LogInterface {
 			if( entry != null )
 				entries.add(entry);
 		}
+		reader.close();
 		return entries.toArray(emtpyGriefEntryArray);
 	}
 	
@@ -254,6 +255,7 @@ public class GriefLog implements LogInterface {
 		else
 			Arrays.sort(entries);
 		
+		reader.close();
 		return entries;
 	}
 
