@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.morganm</groupId>
   <artifactId>Heimdall</artifactId>
-  <version>0.7.1</version>
+  <version>0.7.2</version>
   <name>Heimdall</name>
   <description>Heimdall - a watcher for those damned griefers!</description>
   <url>https://dev.bukkit.org/server-mods/Heimdall/</url>
@@ -60,7 +60,7 @@
     <dependency>
       <groupId>org.bukkit</groupId>
       <artifactId>bukkit</artifactId>
-      <version>1.4.5-R0.1</version>
+      <version>1.5.1-R0.1</version>
     </dependency>
 
     <!-- LWC -->
