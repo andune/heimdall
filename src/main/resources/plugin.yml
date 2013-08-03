@@ -2,8 +2,8 @@ name: ${project.name}
 main: org.morganm.heimdall.Heimdall
 version: ${project.version}
 url: ${project.url}
-author: morganm
-softdepend: [LogBlock, LWC]
+author: andune
+softdepend: [LogBlock, LWC, Prism]
 commands:
   heimdall:
     aliases: [heim]

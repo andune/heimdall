@@ -11,15 +11,15 @@
   <url>https://dev.bukkit.org/server-mods/Heimdall/</url>
 
   <scm>
-    <connection>scm:git:git://github.com/morganm/Heimdall.git</connection>
-    <url>https://github.com/morganm/Heimdall</url>
-    <developerConnection>scm:git:git@github.com:morganm/Heimdall.git</developerConnection>
+    <connection>scm:git:git://github.com/andune/Heimdall.git</connection>
+    <url>https://github.com/andune/Heimdall</url>
+    <developerConnection>scm:git:git@github.com:andune/Heimdall.git</developerConnection>
   </scm>
 
   <repositories>
     <repository>
-      <id>morganm-repo</id>
-      <url>http://morganmc.dyndns.org/nexus/content/groups/public/</url>
+      <id>andune-repo</id>
+      <url>http://andune.com/nexus/content/groups/public/</url>
     </repository>
     <repository>
       <id>bukkit-repo</id>
@@ -42,7 +42,7 @@
     <dependency>
       <groupId>com.sk89q</groupId>
       <artifactId>worldedit</artifactId>
-      <version>5.3</version>
+      <version>5.5.1</version>
       <exclusions>
         <exclusion>
           <groupId>org.spout</groupId>
@@ -60,7 +60,7 @@
     <dependency>
       <groupId>org.bukkit</groupId>
       <artifactId>bukkit</artifactId>
-      <version>1.5.1-R0.1</version>
+      <version>1.6.2-R0.1-SNAPSHOT</version>
     </dependency>
 
     <!-- LWC -->
@@ -74,7 +74,14 @@
     <dependency>
       <groupId>de.diddiz</groupId>
       <artifactId>logblock</artifactId>
-      <version>dev-SNAPSHOT</version>
+      <version>1.7.0</version>
+    </dependency>
+
+    <!-- Prism -->
+    <dependency>
+      <groupId>me.botsko</groupId>
+      <artifactId>prism</artifactId>
+      <version>1.6.4</version>
     </dependency>
   </dependencies>
 

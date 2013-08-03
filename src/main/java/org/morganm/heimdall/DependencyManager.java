@@ -3,6 +3,7 @@
  */
 package org.morganm.heimdall;
 
+import me.botsko.prism.Prism;
 import net.milkbowl.vault.Vault;
 
 import org.bukkit.event.EventHandler;
@@ -10,8 +11,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.Plugin;
-
-import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 import com.griefcraft.lwc.LWCPlugin;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -53,6 +52,12 @@ public class DependencyManager implements Listener {
 			return;
 		}
 
+        if( plugin.getDescription().getName().equals("Prism") && plugin instanceof Prism ) {
+            heimdall.verbose("detected Prism plugin load, updating plugin reference");
+            heimdall.getBlockHistoryManager().pluginLoaded((Prism) plugin);
+            return;
+        }
+
 		// detect if the permission system we use just got reloaded
 		switch(heimdall.getPermissionSystem().getSystemInUse()) {
 		case VAULT:
@@ -65,13 +70,6 @@ public class DependencyManager implements Listener {
 		case WEPIF:
 			if( plugin.getDescription().getName().equals("WorldEdit") && plugin instanceof WorldEditPlugin ) {
 				heimdall.verbose("detected WorldEdit plugin load, updating plugin reference");
-				heimdall.getPermissionSystem().setupPermissions(heimdall.isVerboseEnabled());
-			}
-			break;
-			
-		case PEX:
-			if( plugin.getDescription().getName().equals("PermissionsEx") && plugin instanceof PermissionsEx ) {
-				heimdall.verbose("detected PEX plugin load, updating plugin reference");
 				heimdall.getPermissionSystem().setupPermissions(heimdall.isVerboseEnabled());
 			}
 			break;

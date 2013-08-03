@@ -18,6 +18,10 @@ public class BlockHistoryFactory {
 		if( p != null )
 			return new BlockHistoryLogBlock(plugin, cache);
 		
+        p = plugin.getServer().getPluginManager().getPlugin("Prism");
+        if( p != null )
+            return new BlockHistoryPrism(plugin, cache);
+        
 		if( plugin.getConfig().getBoolean("blockHistoryTest", false) )
 			return new BlockHistoryTest(plugin, cache);
 		
