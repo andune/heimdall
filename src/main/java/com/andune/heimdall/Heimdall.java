@@ -69,7 +69,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
     public static final String logPrefix = "[Heimdall] ";
 
     private String version;
-    private int buildNumber = -1;
+    private String buildNumber = "unknown";
     private boolean configLoaded = false;
 
     private PermissionSystem perm;
@@ -88,7 +88,7 @@ public class Heimdall extends JavaPlugin implements JavaPluginExtensions {
     public void onEnable() {
         version = getDescription().getVersion();
         jarUtil = new JarUtils(this, getFile(), log, logPrefix);
-        buildNumber = jarUtil.getBuildNumber();
+        buildNumber = jarUtil.getBuild();
 
         loadConfig();
         Debug.getInstance().debug("onEnable() starting, config loaded");
