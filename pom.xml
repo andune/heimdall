@@ -156,6 +156,24 @@
                     <tagNameFormat>@{project.version}</tagNameFormat>
                 </configuration>
             </plugin>
+
+            <!-- License check; run 'mvn license:check' or 'mvn license:format' -->
+            <plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>1.9.0</version>
+                <configuration>
+                    <header>src/main/license/header.txt</header>
+                    <strictCheck>true</strictCheck>
+                    <excludes>
+                        <exclude>**/src/main/resources/**</exclude>
+                        <exclude>**/src/main/license/**</exclude>
+                        <exclude>**/.idea/**</exclude>
+                        <exclude>**/*.md</exclude>
+                        <exclude>*.txt</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
