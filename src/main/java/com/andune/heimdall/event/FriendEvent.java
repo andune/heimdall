@@ -1,69 +1,70 @@
 /**
- * 
+ *
  */
 package com.andune.heimdall.event;
 
+import com.andune.heimdall.event.handlers.EventHandler;
 import org.bukkit.Location;
 
-import com.andune.heimdall.event.handlers.EventHandler;
-
-/** Event used when a friend relationship has been created from a player
+/**
+ * Event used when a friend relationship has been created from a player
  * to a new friend.
- * 
- * @author andune
  *
+ * @author andune
  */
 public class FriendEvent implements Event {
 
-	private String player;
-	private String friend;
-	private long time;
-	
-	public FriendEvent(String player, String friend) {
-		this.player = player;
-		this.friend = friend;
-		this.time = System.currentTimeMillis();
-	}
-	
-	public String getFriend() { return friend; }
+    private String player;
+    private String friend;
+    private long time;
 
-	@Override
-	public Type getType() {
-		return Type.HEIMDALL_FRIEND_EVENT;
-	}
+    public FriendEvent(String player, String friend) {
+        this.player = player;
+        this.friend = friend;
+        this.time = System.currentTimeMillis();
+    }
 
-	@Override
-	public String getEventTypeString() {
-		return Type.HEIMDALL_FRIEND_EVENT.toString();
-	}
+    public String getFriend() {
+        return friend;
+    }
 
-	@Override
-	public String getPlayerName() {
-		return player;
-	}
+    @Override
+    public Type getType() {
+        return Type.HEIMDALL_FRIEND_EVENT;
+    }
 
-	@Override
-	public long getTime() {
-		return time;
-	}
+    @Override
+    public String getEventTypeString() {
+        return Type.HEIMDALL_FRIEND_EVENT.toString();
+    }
 
-	@Override
-	public Location getLocation() {
-		return null;
-	}
+    @Override
+    public String getPlayerName() {
+        return player;
+    }
 
-	@Override
-	public void accept(EventHandler visitor) {
-		visitor.processEvent(this);
-	}
+    @Override
+    public long getTime() {
+        return time;
+    }
 
-	// we don't re-use these events, so do nothing on clear
-	@Override
-	public void clear() {
-	}
+    @Override
+    public Location getLocation() {
+        return null;
+    }
 
-	@Override
-	public boolean isCleared() {
-		return true;
-	}
+    @Override
+    public void accept(EventHandler visitor) {
+        visitor.processEvent(this);
+    }
+
+    // we don't re-use these events, so do nothing on clear
+    @Override
+    public void clear() {
+    }
+
+    @Override
+    public boolean isCleared() {
+        return true;
+    }
 }

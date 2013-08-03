@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.andune.heimdall.engine;
 
@@ -12,11 +12,10 @@ import com.andune.heimdall.event.PlayerEvent;
 
 /**
  * @author andune
- *
  */
 public interface Engine {
-	/* Additional interface contract; the Engine MUST implement a constructor of the form:
-	 * 
+    /* Additional interface contract; the Engine MUST implement a constructor of the form:
+     *
 	 *   Engine(Heimdall plugin);
 	 * 
 	 * This will be called to instantiate the engine, passing in the Heimdall plugin as
@@ -29,14 +28,20 @@ public interface Engine {
 	 *   Engine(Heimdall plugin, String configFile);
 	 */
 
-	/** Return all Heimdall event types that this engine wants to process.
-	 */
-	public Event.Type[] getRegisteredEventTypes();
-	
-	public void processBlockChange(BlockChangeEvent event);
-	public void processInventoryChange(InventoryChangeEvent event);
-	public void processChatMessage(String message);
-	public void processPlayerEvent(PlayerEvent event);
-	public void processHeimdallFriendEvent(FriendEvent event);
-	public void processHeimdallFriendInvite(FriendInviteEvent event);
+    /**
+     * Return all Heimdall event types that this engine wants to process.
+     */
+    public Event.Type[] getRegisteredEventTypes();
+
+    public void processBlockChange(BlockChangeEvent event);
+
+    public void processInventoryChange(InventoryChangeEvent event);
+
+    public void processChatMessage(String message);
+
+    public void processPlayerEvent(PlayerEvent event);
+
+    public void processHeimdallFriendEvent(FriendEvent event);
+
+    public void processHeimdallFriendInvite(FriendInviteEvent event);
 }

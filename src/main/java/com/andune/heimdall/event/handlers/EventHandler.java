@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.andune.heimdall.event.handlers;
 
@@ -13,20 +13,26 @@ import com.andune.heimdall.event.PlayerEvent;
 
 /**
  * @author andune
- *
  */
 public abstract class EventHandler {
-	private static final Event.Type[] noTypes = new Event.Type[] {};
-	public Event.Type[] getRegisteredEventTypes() {
-		return noTypes;
-	}
-	
-	public void processEvent(BlockChangeEvent event) {}
-	
-	public void processEvent(InventoryChangeEvent event) {}
-	
-	public void processEvent(PlayerEvent event) {}
+    private static final Event.Type[] noTypes = new Event.Type[]{};
 
-	public void processEvent(FriendEvent event) {}
-	public void processEvent(FriendInviteEvent event) {}
+    public Event.Type[] getRegisteredEventTypes() {
+        return noTypes;
+    }
+
+    public void processEvent(BlockChangeEvent event) {
+    }
+
+    public void processEvent(InventoryChangeEvent event) {
+    }
+
+    public void processEvent(PlayerEvent event) {
+    }
+
+    public void processEvent(FriendEvent event) {
+    }
+
+    public void processEvent(FriendInviteEvent event) {
+    }
 }

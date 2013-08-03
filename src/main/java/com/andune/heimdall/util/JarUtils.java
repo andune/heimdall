@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.andune.heimdall.util;
 
@@ -13,38 +13,38 @@ import java.util.logging.Logger;
 
 /**
  * @author andune
- *
  */
 public class JarUtils {
-	// version: 10
-	private final Logger log;
-	private final String logPrefix;
-	private JavaPluginExtensions plugin;
-	private File jarFile;
-	
-	public JarUtils(JavaPluginExtensions plugin, File jarFile, Logger log, String logPrefix) {
-		this.plugin = plugin;
-		this.jarFile = this.plugin.getFile();
-		this.log = this.plugin.getLogger();
-		this.logPrefix = this.plugin.getLogPrefix();
-	}
+    // version: 10
+    private final Logger log;
+    private final String logPrefix;
+    private JavaPluginExtensions plugin;
+    private File jarFile;
+
+    public JarUtils(JavaPluginExtensions plugin, File jarFile, Logger log, String logPrefix) {
+        this.plugin = plugin;
+        this.jarFile = this.plugin.getFile();
+        this.log = this.plugin.getLogger();
+        this.logPrefix = this.plugin.getLogPrefix();
+    }
 //	public JarUtils(JavaPlugin plugin, File jarFile) {
 //		this(plugin,jarFile, null, null);
 //	}
-	
-	/** Code adapted from Puckerpluck's MultiInv plugin. Used to copy a config file
-	 * from the plugin JAR to the plugin's data directory.
-	 * 
-	 * @param fileName the name of the file. example: "config.yml"
-	 * @param outfile the File to copy to. example: "plugins/MyPlugin/config.yml"
-	 */
+
+    /**
+     * Code adapted from Puckerpluck's MultiInv plugin. Used to copy a config file
+     * from the plugin JAR to the plugin's data directory.
+     *
+     * @param fileName the name of the file. example: "config.yml"
+     * @param outfile  the File to copy to. example: "plugins/MyPlugin/config.yml"
+     */
     public void copyConfigFromJar(String fileName, File outfile) {
         File file = new File(plugin.getDataFolder(), fileName);
-        
+
         if (!outfile.canRead()) {
             try {
-            	JarFile jar = new JarFile(jarFile);
-            	
+                JarFile jar = new JarFile(jarFile);
+
                 file.getParentFile().mkdirs();
                 JarEntry entry = jar.getJarEntry(fileName);
                 InputStream is = jar.getInputStream(entry);
@@ -54,31 +54,31 @@ public class JarUtils {
                 os.write(buf);
                 os.close();
             } catch (Exception e) {
-                log.warning(logPrefix + " Could not copy config file "+fileName+" to default location");
+                log.warning(logPrefix + " Could not copy config file " + fileName + " to default location");
             }
         }
     }
-    
+
     public int getBuildNumber() {
-    	int buildNum = -1;
-    	
+        int buildNum = -1;
+
         try {
-        	JarFile jar = new JarFile(jarFile);
-        	
+            JarFile jar = new JarFile(jarFile);
+
             JarEntry entry = jar.getJarEntry("build.number");
             InputStream is = jar.getInputStream(entry);
-        	Properties props = new Properties();
-        	props.load(is);
-        	is.close();
-        	Object o = props.get("build.number");
-        	if( o instanceof Integer )
-        		buildNum = ((Integer) o).intValue();
-        	else if( o instanceof String )
-        		buildNum = Integer.parseInt((String) o);
+            Properties props = new Properties();
+            props.load(is);
+            is.close();
+            Object o = props.get("build.number");
+            if (o instanceof Integer)
+                buildNum = ((Integer) o).intValue();
+            else if (o instanceof String)
+                buildNum = Integer.parseInt((String) o);
         } catch (Exception e) {
             log.warning(logPrefix + " Could not load build number from JAR");
         }
-        
+
         return buildNum;
     }
 }
