@@ -1,5 +1,5 @@
 name: ${project.name}
-main: org.morganm.heimdall.Heimdall
+main:  ${groupId}.${project.name}
 version: ${project.version}
 url: ${project.url}
 author: andune
@@ -10,17 +10,17 @@ commands:
     description: Admin control functions for Heimdall
     permission: heimdall.admin.reload
     usage: /<command> reload - reload the config file
-    executor: org.morganm.heimdall.commands.Heimdall
+    executor: com.andune.heimdall.commands.Heimdall
   hdi:
     description: Ignore Heimdall alerts for a given player
     permission: heimdall.admin.ignore
     usage: /<command> player - ignore all alerts related to player
-    executor: org.morganm.heimdall.commands.AdminNotifyIgnore
+    executor: com.andune.heimdall.commands.AdminNotifyIgnore
   hdgl:
     description: Show last 5 grief log entries for a given player
     permission: heimdall.admin.list
     usage: /<command> player - show grief log for player
-    executor: org.morganm.heimdall.commands.GriefLog
+    executor: com.andune.heimdall.commands.GriefLog
   hdgt:
     aliases: [griefteleport]
     description: Teleport to last grief action
@@ -28,12 +28,12 @@ commands:
     usage: |
            /<command> - send to most recent grief action
            /<command> player - send to most recent grief action by player
-    executor: org.morganm.heimdall.commands.GriefTeleport
+    executor: com.andune.heimdall.commands.GriefTeleport
   friend:
     description: Add a player as your friend
     permission: heimdall.command.friend
     usage: /<command> player - add player as your friend
-    executor: org.morganm.heimdall.commands.Friend
+    executor: com.andune.heimdall.commands.Friend
 permissions:
     heimdall.admin.*:
         description: Gives access to all Heimdall admin commands
