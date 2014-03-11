@@ -60,8 +60,10 @@ public class BlockHistoryPrism implements BlockHistoryManager {
         this.bhCache = bhCache;
 
         Plugin p = this.plugin.getServer().getPluginManager().getPlugin("Prism");
-        if (p instanceof Prism)
+        if (p instanceof Prism) {
             this.prism = (Prism) p;
+            plugin.getLogger().info("Prism BlockHistory manager started");
+        }
         else
             this.prism = null;
     }

@@ -68,8 +68,10 @@ public class BlockHistoryLogBlock implements BlockHistoryManager {
         this.bhCache = bhCache;
 
         Plugin p = this.plugin.getServer().getPluginManager().getPlugin("LogBlock");
-        if (p instanceof LogBlock)
+        if (p instanceof LogBlock) {
             this.logBlock = (LogBlock) p;
+            plugin.getLogger().info("LogBlock BlockHistory manager started");
+        }
         else
             this.logBlock = null;
     }
