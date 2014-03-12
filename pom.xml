@@ -31,6 +31,10 @@
             <id>bukkit-repo</id>
             <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>dhmc-repo</id>
+            <url>http://dhmc.us:8081/nexus/content/repositories/public/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -77,7 +81,7 @@
         <dependency>
             <groupId>me.botsko</groupId>
             <artifactId>prism</artifactId>
-            <version>1.6.4</version>
+            <version>2.0-Beta6-31-g4fb0b67-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
